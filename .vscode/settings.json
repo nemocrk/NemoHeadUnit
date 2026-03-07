@@ -1,23 +1,46 @@
 {
-    "cmake.configureOnOpen": true,
-    "cmake.buildDirectory": "${workspaceFolder}/build",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "python.testing.unittestEnabled": true,
-    "python.testing.pytestEnabled": false,
-    "python.testing.cwd": "${workspaceFolder}",
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "python",
-        "-p",
-        "test_*.py",
-        "-t",
-        "."
-    ],
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/build"
-    ],
-    "python.envFile": "${workspaceFolder}/.env",
-    "python-envs.defaultEnvManager": "ms-python.python:conda",
-    "python-envs.defaultPackageManager": "ms-python.python:conda"
+  "cmake.configureOnOpen": true,
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "python.testing.unittestEnabled": true,
+  "python.testing.pytestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}",
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "python",
+    "-p",
+    "test_*.py",
+    "-t",
+    "."
+  ],
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/build"
+  ],
+  "python.envFile": "${workspaceFolder}/.env",
+  "python-envs.defaultEnvManager": "ms-python.python:conda",
+  "python-envs.defaultPackageManager": "ms-python.python:conda",
+  // Editor
+  "editor.formatOnSave": true,
+  "editor.rulers": [
+    88,
+    120
+  ],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  // Git
+  "git.ignoreLimitWarning": true,
+  "git.autofetch": true,
+  "git.autoStash": true,
+  "git.branchProtection": [
+    "main"
+  ],
+  "git.fetchOnPull": true,
+  "git.postCommitCommand": "push",
+  "git.pruneOnFetch": true,
+  "git.pullBeforeCheckout": true,
+  "git.showPushSuccessNotification": true,
+  "git.timeline.showUncommitted": true,
+  "git.useCommitInputAsStashMessage": true,
 }
