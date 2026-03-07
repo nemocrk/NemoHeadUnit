@@ -48,11 +48,16 @@ void UsbHubManager::startDiscovery() {
         }
     );
     
+    // L'USBHub in aasdk gestisce la logica di fallback.
+    // Quando vede un VID Google (0x18D1) e NON in modalità AOAP,
+    // esegue le Query (AccessoryModeQueryChain) con Vendor, Model, ecc.
+    // e innesca il reboot del telefono in AOAP.
+    // Noi ci mettiamo solo in attesa.
     usb_hub_->start(std::move(promise));
 }
 
 void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
-    std::cout << "[UsbHubManager] Device compatibile rilevato. Costruzione Transport..." << std::endl;
+    std::cout << "[UsbHubManager] Device compatibile rilevato (MODO AOAP ATTIVO). Costruzione Transport..." << std::endl;
     
     // Creazione astrazione device AOAP
     aoap_device_ = aasdk::usb::AOAPDevice::create(*usb_wrapper_, runner_.get_io_context(), std::move(handle));
