@@ -15,8 +15,10 @@ class SessionManager : public std::enable_shared_from_this<SessionManager> {
 public:
     using Pointer = std::shared_ptr<SessionManager>;
 
-    SessionManager(boost::asio::io_context& io_ctx, aasdk::messenger::IMessenger::Pointer messenger)
-        : strand_(io_ctx), messenger_(std::move(messenger)) {}
+    SessionManager(boost::asio::io_context& io_ctx, 
+                   aasdk::messenger::IMessenger::Pointer messenger,
+                   aasdk::messenger::ICryptor::Pointer cryptor)
+        : strand_(io_ctx), messenger_(std::move(messenger)), cryptor_(std::move(cryptor)) {}
 
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
@@ -37,7 +39,7 @@ public:
             control_channel_ = std::make_shared<aasdk::channel::control::ControlServiceChannel>(
                 strand_, messenger_
             );
-            control_handler_ = std::make_shared<ControlEventHandler>(strand_, control_channel_);
+            control_handler_ = std::make_shared<ControlEventHandler>(strand_, control_channel_, cryptor_);
             control_channel_->receive(control_handler_);
             control_channel_->sendVersionRequest(makePromise("Control/VersionRequest"));
 
@@ -64,6 +66,7 @@ public:
 private:
     boost::asio::io_service::strand strand_;
     aasdk::messenger::IMessenger::Pointer messenger_;
+    aasdk::messenger::ICryptor::Pointer cryptor_;
 
     aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;
     ControlEventHandler::Pointer control_handler_;
