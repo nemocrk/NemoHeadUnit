@@ -31,8 +31,9 @@ public:
 
             // Start Video Sink Service (Channel 1 - Usually it's channel 2 or dynamically assigned by discovery)
             // For the mock, we assign it ID 2.
+            const auto videoChannelId = static_cast<aasdk::messenger::ChannelId>(2);
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
-                strand_, messenger_, 2
+                strand_, messenger_, videoChannelId
             );
             video_handler_ = std::make_shared<VideoEventHandler>(video_channel_);
             video_channel_->receive(video_handler_);
