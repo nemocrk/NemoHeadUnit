@@ -36,10 +36,12 @@ FetchContent_MakeAvailable(aasdk)
 # Modulo Python C++ (nemo_head_unit)
 pybind11_add_module(nemo_head_unit
     src/binding.cpp
+    src/crypto/crypto_manager.cpp
 )
 
 target_include_directories(nemo_head_unit PRIVATE 
     ${LIBUSB_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(nemo_head_unit PRIVATE
