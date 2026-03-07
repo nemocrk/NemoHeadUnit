@@ -30,19 +30,39 @@ FetchContent_Declare(
 set(SKIP_BUILD_PROTOBUF ON)
 FetchContent_MakeAvailable(aasdk)
 
+# --- Python Bindings ---
 pybind11_add_module(nemo_head_unit
     src/binding.cpp
     src/crypto/crypto_manager.cpp
     src/usb/libusb_context.cpp
     src/usb/usb_hub_manager.cpp
 )
-
 target_include_directories(nemo_head_unit PRIVATE 
     ${LIBUSB_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-
 target_link_libraries(nemo_head_unit PRIVATE
+    aasdk
+    Boost::system
+    protobuf::libprotobuf
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    ${LIBUSB_LIBRARIES}
+    Threads::Threads
+)
+
+# --- Headless Test Executable (Fase 4) ---
+add_executable(nemo_head_unit_headless
+    src/test_headless.cpp
+    src/crypto/crypto_manager.cpp
+    src/usb/libusb_context.cpp
+    src/usb/usb_hub_manager.cpp
+)
+target_include_directories(nemo_head_unit_headless PRIVATE 
+    ${LIBUSB_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_link_libraries(nemo_head_unit_headless PRIVATE
     aasdk
     Boost::system
     protobuf::libprotobuf

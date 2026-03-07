@@ -27,7 +27,6 @@ bool UsbHubManager::start(ConnectCallback callback) {
     
     usb_hub_ = std::make_shared<aasdk::usb::USBHub>(*usb_wrapper_, io_ctx, *query_chain_factory_);
     
-    // Avviamo la scansione asincronamente tramite strand o dispatch se necessario
     boost::asio::post(io_ctx, [this, self = shared_from_this()]() {
         this->startDiscovery();
     });
@@ -48,18 +47,12 @@ void UsbHubManager::startDiscovery() {
         }
     );
     
-    // L'USBHub in aasdk gestisce la logica di fallback.
-    // Quando vede un VID Google (0x18D1) e NON in modalità AOAP,
-    // esegue le Query (AccessoryModeQueryChain) con Vendor, Model, ecc.
-    // e innesca il reboot del telefono in AOAP.
-    // Noi ci mettiamo solo in attesa.
     usb_hub_->start(std::move(promise));
 }
 
 void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     std::cout << "[UsbHubManager] Device compatibile rilevato (MODO AOAP ATTIVO). Costruzione Transport..." << std::endl;
     
-    // Creazione astrazione device AOAP
     aoap_device_ = aasdk::usb::AOAPDevice::create(*usb_wrapper_, runner_.get_io_context(), std::move(handle));
     
     if (!aoap_device_) {
@@ -67,17 +60,14 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         return;
     }
 
-    // Creazione del trasporto USB IN/OUT BULK
     usb_transport_ = std::make_shared<aasdk::transport::USBTransport>(
         runner_.get_io_context(), aoap_device_
     );
 
-    // Creazione del Cryptor (vuoto/inizializzato)
     ssl_wrapper_ = std::make_shared<aasdk::transport::SSLWrapper>();
     cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
     cryptor_->init();
 
-    // Creazione In/Out Streams
     message_in_stream_ = std::make_shared<aasdk::messenger::MessageInStream>(
         runner_.get_io_context(), usb_transport_, cryptor_
     );
@@ -85,14 +75,17 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), usb_transport_, cryptor_
     );
 
-    // Creazione del core Messenger che gestirà l'handshake e i canali Protobuf
     messenger_ = std::make_shared<aasdk::messenger::Messenger>(
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    std::cout << "[UsbHubManager] Transport e Messenger operativi." << std::endl;
+    // Fase 4: Avvio del SessionManager per la negoziazione
+    session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_);
+    session_manager_->start();
+
+    std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;
     if (python_callback_) {
-        python_callback_(true, "Connessione AOAP stabilita e Messenger pronto");
+        python_callback_(true, "Connessione AOAP stabilita e Sessione AA avviata");
     }
 }
 
@@ -104,6 +97,10 @@ void UsbHubManager::onDiscoveryFailed(const aasdk::error::Error& e) {
 }
 
 void UsbHubManager::stop() {
+    if (session_manager_) {
+        session_manager_->stop();
+        session_manager_.reset();
+    }
     if (usb_hub_) {
         usb_hub_->cancel();
     }
