@@ -79,8 +79,13 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    // Fase 4: Avvio del SessionManager per la negoziazione
-    session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_);
+    // Fase 4: Avvio del SessionManager per la negoziazione, ora passiamo il cryptor per fare handshake
+    session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_);
+    
+    // IMPORTANTE: il messenger e transport vanno avviati ALTRIMENTI l'handshake in entrata non arriva
+    usb_transport_->start();
+    messenger_->start();
+    
     session_manager_->start();
 
     std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;
