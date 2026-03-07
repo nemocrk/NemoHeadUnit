@@ -5,6 +5,7 @@
 #include <aasdk/Messenger/IMessenger.hpp>
 #include <aasdk/Channel/Control/ControlServiceChannel.hpp>
 #include <aasdk/Channel/MediaSink/Video/VideoMediaSinkService.hpp>
+#include <aasdk/Channel/Promise.hpp>
 #include "control_event_handler.hpp"
 #include "video_event_handler.hpp"
 
@@ -17,6 +18,17 @@ public:
     SessionManager(boost::asio::io_context& io_ctx, aasdk::messenger::IMessenger::Pointer messenger)
         : strand_(io_ctx), messenger_(std::move(messenger)) {}
 
+    aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
+        auto p = aasdk::channel::SendPromise::defer(strand_);
+        p->then(
+            []() {},
+            [tag](const aasdk::error::Error& e) {
+                std::cerr << "[" << tag << "] send failed: " << e.what() << std::endl;
+            }
+        );
+        return p;
+    }
+
     void start() {
         strand_.dispatch([this, self = shared_from_this()]() {
             std::cout << "[SessionManager] Starting Mock Channels..." << std::endl;
@@ -25,9 +37,9 @@ public:
             control_channel_ = std::make_shared<aasdk::channel::control::ControlServiceChannel>(
                 strand_, messenger_
             );
-            control_handler_ = std::make_shared<ControlEventHandler>(control_channel_);
+            control_handler_ = std::make_shared<ControlEventHandler>(strand_, control_channel_);
             control_channel_->receive(control_handler_);
-            control_channel_->sendVersionRequest(nullptr);
+            control_channel_->sendVersionRequest(makePromise("Control/VersionRequest"));
 
             // Start Video Sink Service (Channel 1 - Usually it's channel 2 or dynamically assigned by discovery)
             // For the mock, we assign it ID 2.
@@ -35,7 +47,7 @@ public:
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
                 strand_, messenger_, videoChannelId
             );
-            video_handler_ = std::make_shared<VideoEventHandler>(video_channel_);
+            video_handler_ = std::make_shared<VideoEventHandler>(strand_, video_channel_);
             video_channel_->receive(video_handler_);
         });
     }
