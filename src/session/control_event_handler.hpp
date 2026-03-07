@@ -20,7 +20,7 @@ public:
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
         std::cout << "[Control] Handshake received. Sending AuthComplete..." << std::endl;
         aap_protobuf::service::control::message::AuthResponse response;
-        response.set_status(aap_protobuf::service::control::message::AuthResponse::OK);
+        response.set_status(static_cast<decltype(response.status())>(0));
         channel_->sendAuthComplete(response, nullptr);
     }
 
@@ -28,13 +28,9 @@ public:
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         aap_protobuf::service::control::message::ServiceDiscoveryResponse response;
         
-        response.set_head_unit_name("NemoHeadUnit");
-        response.set_car_model("MVP");
-        response.set_car_year("2026");
-        response.set_car_serial("00000001");
-        
-        // In the real impl we will add the discovered services (Audio, Video, Input) here.
-        // For now, an empty list tells the phone we support nothing, which is fine for Phase 4 step 1.
+        response.set_head_unit_make("NemoHeadUnit");
+        response.set_model("MVP");
+        response.set_year("2026");
         
         channel_->sendServiceDiscoveryResponse(response, nullptr);
     }
@@ -42,8 +38,7 @@ public:
     void onAudioFocusRequest(const aap_protobuf::service::control::message::AudioFocusRequest &request) override {
         std::cout << "[Control] AudioFocusRequest received." << std::endl;
         aap_protobuf::service::control::message::AudioFocusNotification response;
-        response.set_focus_type(request.focus_type());
-        response.set_focus_state(aap_protobuf::service::control::message::AudioFocusNotification::GAIN);
+        response.set_focus_state(static_cast<decltype(response.focus_state())>(1));
         channel_->sendAudioFocusResponse(response, nullptr);
     }
 
