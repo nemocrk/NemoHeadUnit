@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Dipendenze di sistema richieste
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -16,7 +15,6 @@ pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
 
 include(FetchContent)
 
-# Pybind11 per il bridge C++ -> Python
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11.git
@@ -24,7 +22,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pybind11)
 
-# Aasdk come dipendenza diretta
 FetchContent_Declare(
     aasdk
     GIT_REPOSITORY https://github.com/opencardev/aasdk.git
@@ -33,10 +30,11 @@ FetchContent_Declare(
 set(SKIP_BUILD_PROTOBUF ON)
 FetchContent_MakeAvailable(aasdk)
 
-# Modulo Python C++ (nemo_head_unit)
 pybind11_add_module(nemo_head_unit
     src/binding.cpp
     src/crypto/crypto_manager.cpp
+    src/usb/libusb_context.cpp
+    src/usb/usb_hub_manager.cpp
 )
 
 target_include_directories(nemo_head_unit PRIVATE 
