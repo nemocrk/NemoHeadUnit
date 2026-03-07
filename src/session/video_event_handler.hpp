@@ -13,6 +13,13 @@ public:
     explicit VideoEventHandler(aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel)
         : channel_(std::move(channel)) {}
 
+    void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest& request) override {
+        std::cout << "[Video] ChannelOpenRequest received." << std::endl;
+        aap_protobuf::service::control::message::ChannelOpenResponse response;
+        response.set_status(static_cast<decltype(response.status())>(0));
+        channel_->sendChannelOpenResponse(response, nullptr);
+    }
+
     void onMediaChannelSetupRequest(const aap_protobuf::service::media::shared::message::Setup& request) override {
         std::cout << "[Video] Setup received (mock)." << std::endl;
         // In Fase 4 possiamo non rispondere o rispondere con default se API lo prevede lato channel_.
