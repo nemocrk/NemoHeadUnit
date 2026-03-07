@@ -10,45 +10,36 @@ class VideoEventHandler : public aasdk::channel::mediasink::video::IVideoMediaSi
 public:
     using Pointer = std::shared_ptr<VideoEventHandler>;
 
-    VideoEventHandler(aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel)
+    explicit VideoEventHandler(aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel)
         : channel_(std::move(channel)) {}
 
-    void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest& request) override {
-        std::cout << "[Video] ChannelOpenRequest received." << std::endl;
-        aap_protobuf::service::control::message::ChannelOpenResponse response;
-        response.set_status(aap_protobuf::service::control::message::ChannelOpenResponse::OK);
-        channel_->sendChannelOpenResponse(response, nullptr);
+    void onMediaChannelSetupRequest(const aap_protobuf::service::media::shared::message::Setup& request) override {
+        std::cout << "[Video] Setup received (mock)." << std::endl;
+        // In Fase 4 possiamo non rispondere o rispondere con default se API lo prevede lato channel_.
     }
 
-    void onChannelSetupRequest(const aap_protobuf::service::media::video::message::VideoSetupRequest& request) override {
-        std::cout << "[Video] ChannelSetupRequest received." << std::endl;
-        
-        // Accept config (mock phase 4)
-        aap_protobuf::service::media::shared::message::Config response;
-        channel_->sendChannelSetupResponse(response, nullptr);
+    void onMediaChannelStartIndication(const aap_protobuf::service::media::shared::message::Start& indication) override {
+        std::cout << "[Video] Start received." << std::endl;
     }
 
-    void onStartIndication(const aap_protobuf::service::media::shared::message::StartIndication& request) override {
-        std::cout << "[Video] StartIndication received. We should start decoding! (Fase 5)" << std::endl;
+    void onMediaChannelStopIndication(const aap_protobuf::service::media::shared::message::Stop& indication) override {
+        std::cout << "[Video] Stop received." << std::endl;
     }
 
-    void onStopIndication(const aap_protobuf::service::media::shared::message::StopIndication& request) override {
-        std::cout << "[Video] StopIndication received." << std::endl;
+    void onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType ts,
+                                        const aasdk::common::DataConstBuffer& buffer) override {
+        (void)ts; (void)buffer;
+        // Fase 4: drop frame. Fase 5: NAL -> pipeline C++ (GStreamer/libavcodec).
     }
 
-    void onMediaWithTimestampIndication(
-        std::chrono::microseconds timestamp,
-        const aasdk::common::DataConstBuffer& payload) override {
-        // Fase 4: dropping video frames. Fase 5: will extract NAL and feed to GStreamer
+    void onMediaIndication(const aasdk::common::DataConstBuffer& buffer) override {
+        (void)buffer;
     }
 
     void onVideoFocusRequest(
-        const aap_protobuf::service::media::video::message::VideoFocusRequest& request) override {
-        std::cout << "[Video] VideoFocusRequest received." << std::endl;
-        aap_protobuf::service::media::video::message::VideoFocusNotification response;
-        response.set_focus_state(aap_protobuf::service::media::video::message::VideoFocusNotification::GAINED);
-        response.set_reason(aap_protobuf::service::media::video::message::VideoFocusNotification::USER_REQUEST);
-        channel_->sendVideoFocusIndication(response, nullptr);
+        const aap_protobuf::service::media::video::message::VideoFocusRequestNotification& request) override {
+        std::cout << "[Video] Focus request." << std::endl;
+        (void)request;
     }
 
     void onChannelError(const aasdk::error::Error& e) override {
