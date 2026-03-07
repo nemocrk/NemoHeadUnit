@@ -16,5 +16,6 @@
     ],
     "python.analysis.extraPaths": [
         "${workspaceFolder}/build"
-    ]
+    ],
+    "python.envFile": "${workspaceFolder}/.env"
 }

@@ -2,24 +2,26 @@ import sys
 import os
 import unittest
 
-# Aggiunge i path di build comuni (build, cmake-build-debug, etc.) al sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# Inserisce i path di build in CIMA al sys.path (insert 0 invece di append)
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 possible_build_dirs = [
-    os.path.join(current_dir, '..', 'build'),
-    os.path.join(current_dir, '..', 'cmake-build-debug'),
-    os.path.join(current_dir, '..', 'cmake-build-release')
+    os.path.join(root_dir, 'build'),
+    os.path.join(root_dir, 'cmake-build-debug'),
+    os.path.join(root_dir, 'cmake-build-release')
 ]
 
 for d in possible_build_dirs:
     if os.path.isdir(d):
-        sys.path.append(d)
+        sys.path.insert(0, d)
 
 class TestCoreBinding(unittest.TestCase):
     def test_import_and_hello_world(self):
         try:
             import nemo_head_unit
         except ImportError as e:
-            self.fail(f"Impossibile importare nemo_head_unit. Compilazione mancante? Dettagli: {e}")
+            # Stampa sys.path in caso di errore per debug
+            paths = "\n".join(sys.path)
+            self.fail(f"Impossibile importare nemo_head_unit.\nCompilazione CMake effettuata?\nSys Path attuali:\n{paths}\nDettagli: {e}")
         
         try:
             # Testiamo l'invocazione della funzione C++
