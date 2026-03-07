@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <aasdk/Channel/Control/IControlServiceChannelEventHandler.hpp>
 #include <aasdk/Channel/Control/IControlServiceChannel.hpp>
 
@@ -28,9 +29,9 @@ public:
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         aap_protobuf::service::control::message::ServiceDiscoveryResponse response;
         
-        response.set_head_unit_make("NemoHeadUnit");
-        response.set_model("MVP");
-        response.set_year("2026");
+        response.set_head_unit_make(std::string("NemoHeadUnit"));
+        response.set_model(std::string("MVP"));
+        response.set_year(std::string("2026"));
         
         channel_->sendServiceDiscoveryResponse(response, nullptr);
     }
