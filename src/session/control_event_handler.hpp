@@ -4,6 +4,7 @@
 #include <string>
 #include <aasdk/Channel/Control/IControlServiceChannelEventHandler.hpp>
 #include <aasdk/Channel/Control/IControlServiceChannel.hpp>
+#include <aasdk/Channel/Promise.hpp>
 
 namespace nemo {
 
@@ -11,8 +12,19 @@ class ControlEventHandler : public aasdk::channel::control::IControlServiceChann
 public:
     using Pointer = std::shared_ptr<ControlEventHandler>;
 
-    ControlEventHandler(aasdk::channel::control::IControlServiceChannel::Pointer channel)
-        : channel_(std::move(channel)) {}
+    ControlEventHandler(boost::asio::io_service::strand& strand, aasdk::channel::control::IControlServiceChannel::Pointer channel)
+        : strand_(strand), channel_(std::move(channel)) {}
+
+    aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
+        auto p = aasdk::channel::SendPromise::defer(strand_);
+        p->then(
+            []() {},
+            [tag](const aasdk::error::Error& e) {
+                std::cerr << "[" << tag << "] send failed: " << e.what() << std::endl;
+            }
+        );
+        return p;
+    }
 
     void onVersionResponse(uint16_t majorCode, uint16_t minorCode, aap_protobuf::shared::MessageStatus status) override {
         std::cout << "[Control] VersionResponse: " << majorCode << "." << minorCode << " Status: " << status << std::endl;
@@ -22,7 +34,7 @@ public:
         std::cout << "[Control] Handshake received. Sending AuthComplete..." << std::endl;
         aap_protobuf::service::control::message::AuthResponse response;
         response.set_status(static_cast<decltype(response.status())>(0));
-        channel_->sendAuthComplete(response, nullptr);
+        channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
     }
 
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
@@ -33,14 +45,14 @@ public:
         response.set_model(std::string("MVP"));
         response.set_year(std::string("2026"));
         
-        channel_->sendServiceDiscoveryResponse(response, nullptr);
+        channel_->sendServiceDiscoveryResponse(response, makePromise("Control/ServiceDiscoveryResponse"));
     }
 
     void onAudioFocusRequest(const aap_protobuf::service::control::message::AudioFocusRequest &request) override {
         std::cout << "[Control] AudioFocusRequest received." << std::endl;
         aap_protobuf::service::control::message::AudioFocusNotification response;
         response.set_focus_state(static_cast<decltype(response.focus_state())>(1));
-        channel_->sendAudioFocusResponse(response, nullptr);
+        channel_->sendAudioFocusResponse(response, makePromise("Control/AudioFocusResponse"));
     }
 
     void onByeByeRequest(const aap_protobuf::service::control::message::ByeByeRequest &request) override {
@@ -66,7 +78,7 @@ public:
     void onPingRequest(const aap_protobuf::service::control::message::PingRequest &request) override {
         aap_protobuf::service::control::message::PingResponse response;
         response.set_timestamp(request.timestamp());
-        channel_->sendPingResponse(response, nullptr);
+        channel_->sendPingResponse(response, makePromise("Control/PingResponse"));
     }
 
     void onPingResponse(const aap_protobuf::service::control::message::PingResponse &response) override {
@@ -78,6 +90,7 @@ public:
     }
 
 private:
+    boost::asio::io_service::strand& strand_;
     aasdk::channel::control::IControlServiceChannel::Pointer channel_;
 };
 
