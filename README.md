@@ -8,8 +8,30 @@ L'obiettivo è creare una piattaforma flessibile ed estensibile per emulare l'in
 ## Stack Tecnologico
 - **Core Library:** `aasdk` (C++, Boost, Protocol Buffers, OpenSSL, libusb)
 - **Linguaggio (Core):** C++ per l'interazione diretta con aasdk.
-- **Interfaccia Grafica:** Python (tramite binding o wrapper) o framework UI moderni (da definire in base agli sviluppi).
+- **Interfaccia Grafica:** Python (tramite binding pybind11). *Nessun flusso media transita sul GIL di Python.*
 - **Comunicazione USB/TCP:** AOAP (Android Open Accessory Protocol), TCP/IP per la connessione wireless.
+
+## Requisiti di Sistema e Compilazione (Fase 1)
+Per compilare la parte C++ e il binding Python, assicurati di avere installati:
+- CMake (>= 3.14) e un compilatore C++17
+- Python 3 e `pybind11`
+- `Boost` (Asio, System)
+- `protobuf-compiler` e `libprotobuf-dev`
+- `libssl-dev`
+- `libusb-1.0-0-dev`
+
+### Compilazione:
+```bash
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+```
+
+### Test Modulo:
+Dopo la compilazione, esegui lo script di test Python per verificare il modulo:
+```bash
+python3 python/test.py
+```
 
 ## Qualità del Codice e Test
 Per garantire l'affidabilità del sistema:

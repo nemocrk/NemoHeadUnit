@@ -1,0 +1,28 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "python.testing.unittestEnabled": true,
+    "python.testing.pytestEnabled": false,
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "python",
+        "-p",
+        "test_*.py",
+        "-t",
+        "."
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/build"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "cmake.configureArgs": [
+        "-DPYTHON_EXECUTABLE=${command:python.interpreterPath}",
+        "-DPython3_EXECUTABLE=${command:python.interpreterPath}"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
+}
