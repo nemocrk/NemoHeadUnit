@@ -11,6 +11,10 @@
 #include <aasdk/USB/AccessoryModeQueryChainFactory.hpp>
 #include <aasdk/USB/AOAPDevice.hpp>
 #include <aasdk/Transport/USBTransport.hpp>
+#include <aasdk/Transport/SSLWrapper.hpp>
+#include <aasdk/Messenger/Cryptor.hpp>
+#include <aasdk/Messenger/MessageInStream.hpp>
+#include <aasdk/Messenger/MessageOutStream.hpp>
 #include <aasdk/Messenger/Messenger.hpp>
 
 namespace nemo {
@@ -44,6 +48,10 @@ namespace nemo {
 
         aasdk::usb::IAOAPDevice::Pointer aoap_device_;
         aasdk::transport::ITransport::Pointer usb_transport_;
+        aasdk::transport::ISSLWrapper::Pointer ssl_wrapper_;
+        aasdk::messenger::ICryptor::Pointer cryptor_;
+        aasdk::messenger::IMessageInStream::Pointer message_in_stream_;
+        aasdk::messenger::IMessageOutStream::Pointer message_out_stream_;
         aasdk::messenger::IMessenger::Pointer messenger_;
     };
 

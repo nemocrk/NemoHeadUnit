@@ -67,9 +67,22 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), aoap_device_
     );
 
+    // Creazione del Cryptor (vuoto/inizializzato)
+    ssl_wrapper_ = std::make_shared<aasdk::transport::SSLWrapper>();
+    cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
+    cryptor_->init();
+
+    // Creazione In/Out Streams
+    message_in_stream_ = std::make_shared<aasdk::messenger::MessageInStream>(
+        runner_.get_io_context(), usb_transport_, cryptor_
+    );
+    message_out_stream_ = std::make_shared<aasdk::messenger::MessageOutStream>(
+        runner_.get_io_context(), usb_transport_, cryptor_
+    );
+
     // Creazione del core Messenger che gestirà l'handshake e i canali Protobuf
     messenger_ = std::make_shared<aasdk::messenger::Messenger>(
-        runner_.get_io_context(), usb_transport_, usb_transport_
+        runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
     std::cout << "[UsbHubManager] Transport e Messenger operativi." << std::endl;
@@ -93,6 +106,13 @@ void UsbHubManager::stop() {
         messenger_->stop();
         messenger_.reset();
     }
+    message_in_stream_.reset();
+    message_out_stream_.reset();
+    if (cryptor_) {
+        cryptor_->deinit();
+        cryptor_.reset();
+    }
+    ssl_wrapper_.reset();
     if (usb_transport_) {
         usb_transport_->stop();
         usb_transport_.reset();
