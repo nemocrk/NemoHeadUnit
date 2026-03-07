@@ -22,5 +22,7 @@
     "cmake.configureArgs": [
         "-DPYTHON_EXECUTABLE=${command:python.interpreterPath}",
         "-DPython3_EXECUTABLE=${command:python.interpreterPath}"
-    ]
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
