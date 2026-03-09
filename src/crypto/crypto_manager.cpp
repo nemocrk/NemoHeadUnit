@@ -35,16 +35,19 @@ bool CryptoManager::generateKeysAndCertificate() {
     }
     EVP_PKEY_CTX_free(ctx);
 
-    // Generazione del Certificato self-signed
+    // Generazione del Certificato self-signed compatibile con AASDK e Android Auto
     X509* x509 = X509_new();
     ASN1_INTEGER_set(X509_get_serialNumber(x509), 1);
     X509_gmtime_adj(X509_get_notBefore(x509), 0);
     X509_gmtime_adj(X509_get_notAfter(x509), 31536000L); // 1 anno di validità
     X509_set_pubkey(x509, pkey);
 
+    // IMPORTANTE: Android Auto rifiuta i certificati TLS se non rispettano dei campi CN specifici.
+    // Deve contenere i dati comuni di OpenAuto / f1xpl per passare il controllo.
     X509_NAME* name = X509_get_subject_name(x509);
-    X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC, (unsigned char*)"NemoHeadUnit", -1, -1, 0);
-    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"NemoEmulator", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "C",  MBSTRING_ASC, (unsigned char*)"PL", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC, (unsigned char*)"f1x", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"OpenAuto", -1, -1, 0);
     X509_set_issuer_name(x509, name);
 
     if (!X509_sign(x509, pkey, EVP_sha256())) {
