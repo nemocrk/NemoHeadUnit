@@ -43,10 +43,14 @@ pybind11_add_module(nemo_head_unit
     src/usb/libusb_context.cpp
     src/usb/usb_hub_manager.cpp
 )
+
+# Fix: Added ${aasdk_BINARY_DIR}/protobuf to include directories to fix protobuf header not found errors
 target_include_directories(nemo_head_unit PRIVATE 
     ${LIBUSB_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${aasdk_BINARY_DIR}/protobuf
 )
+
 target_link_libraries(nemo_head_unit PRIVATE
     aasdk
     Boost::system
