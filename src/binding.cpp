@@ -53,5 +53,6 @@ PYBIND11_MODULE(nemo_head_unit, m) {
         .def("set_orchestrator", 
             [](std::shared_ptr<nemo::UsbHubManager> self, py::object orch) {
                 self->setOrchestrator(std::make_shared<nemo::PyOrchestrator>(std::move(orch)));
-            }, "Registra la classe Python che gestisce il protocollo AA.");
+            }, "Registra la classe Python che gestisce il protocollo AA.")
+        .def("set_crypto_manager", &nemo::UsbHubManager::setCryptoManager);
 }
