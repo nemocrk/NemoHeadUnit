@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <filesystem>
+#include <vector>
 
 namespace nemo
 {
