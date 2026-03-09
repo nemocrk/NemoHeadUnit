@@ -24,10 +24,8 @@ public:
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
         p->then(
-            [tag, self = shared_from_this()]() {
-                std::cout << "[" << tag << "] send promise fulfilled (SUCCESS). Innesco nuova receive()..." << std::endl;
-                // Re-innesca la ricezione asincrona
-                self->channel_->receive(self);
+            [tag]() {
+                std::cout << "[" << tag << "] send promise fulfilled (SUCCESS)." << std::endl;
             },
             [tag](const aasdk::error::Error& e) {
                 std::cerr << "[" << tag << "] send failed: " << e.what() << std::endl;
@@ -54,7 +52,9 @@ public:
         aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
         std::cout << "[Control] Invio primo Handshake Chunk via AASDK..." << std::endl;
         channel_->sendHandshake(data, makePromise("Control/SendHandshake1"));
-        std::cout << "[Control] Chiamata sendHandshake1 completata (asincrona)." << std::endl;
+        
+        // COME IN OPENAUTO: Innesca immediatamente la receive, indipendentemente dalla fine della promise di invio.
+        channel_->receive(this->shared_from_this());
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
@@ -71,22 +71,25 @@ public:
             aasdk::common::Data data(out.begin(), out.end());
             std::cout << "[Control] Invio successivo Handshake Chunk via AASDK..." << std::endl;
             channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
-            return;
+            // RIMOSSO IL RETURN PERMETTENDO ALLA RECEIVE() SOTTO DI SCATTARE
+        } else {
+            // out è vuoto => Python ha dichiarato handshake finito.
+            // Python DEVE fornire l'AuthCompleteRequest Protobuf.
+            std::cout << "[Control] Handshake TLS completato da Python. Richiesta AuthResponse..." << std::endl;
+            std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
+            if (auth_bytes.empty()) {
+                throw std::runtime_error("Python MUST return AuthComplete/AuthResponse bytes");
+            }
+
+            aap_protobuf::service::control::message::AuthResponse response;
+            if (!response.ParseFromString(auth_bytes)) {
+                throw std::runtime_error("AuthResponse ParseFromString failed");
+            }
+            channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
         }
 
-        // out è vuoto => Python ha dichiarato handshake finito.
-        // Python DEVE fornire l'AuthCompleteRequest Protobuf.
-        std::cout << "[Control] Handshake TLS completato da Python. Richiesta AuthResponse..." << std::endl;
-        std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
-        if (auth_bytes.empty()) {
-            throw std::runtime_error("Python MUST return AuthComplete/AuthResponse bytes");
-        }
-
-        aap_protobuf::service::control::message::AuthResponse response;
-        if (!response.ParseFromString(auth_bytes)) {
-            throw std::runtime_error("AuthResponse ParseFromString failed");
-        }
-        channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
+        // COME IN OPENAUTO: Innesca la receive incondizionatamente alla fine del ciclo di lettura/scrittura.
+        channel_->receive(this->shared_from_this());
     }
 
     // NOTA: Android Auto 2026/AASDK ha la ServiceDiscovery *Invertita* rispetto ai vecchi docs.
@@ -104,6 +107,9 @@ public:
         }
         
         channel_->sendServiceDiscoveryResponse(response, makePromise("Control/ServiceDiscoveryResponse"));
+        
+        // Mettiti in ascolto per le prossime request (es. AudioFocus)
+        channel_->receive(this->shared_from_this());
     }
 
     void onAudioFocusRequest(const aap_protobuf::service::control::message::AudioFocusRequest &request) override {
@@ -119,6 +125,7 @@ public:
         }
         
         channel_->sendAudioFocusResponse(response, makePromise("Control/AudioFocusResponse"));
+        channel_->receive(this->shared_from_this());
     }
 
     void onByeByeRequest(const aap_protobuf::service::control::message::ByeByeRequest &request) override {
@@ -130,15 +137,17 @@ public:
     }
 
     void onBatteryStatusNotification(const aap_protobuf::service::control::message::BatteryStatusNotification &notification) override {
-        // Ignore
+        channel_->receive(this->shared_from_this());
     }
 
     void onNavigationFocusRequest(const aap_protobuf::service::control::message::NavFocusRequestNotification &request) override {
         std::cout << "[Control] NavFocusRequest received." << std::endl;
+        channel_->receive(this->shared_from_this());
     }
 
     void onVoiceSessionRequest(const aap_protobuf::service::control::message::VoiceSessionNotification &request) override {
         std::cout << "[Control] VoiceSessionRequest received." << std::endl;
+        channel_->receive(this->shared_from_this());
     }
 
     void onPingRequest(const aap_protobuf::service::control::message::PingRequest &request) override {
@@ -152,10 +161,11 @@ public:
              throw std::runtime_error("PingResponse ParseFromString failed");
         }
         channel_->sendPingResponse(response, makePromise("Control/PingResponse"));
+        channel_->receive(this->shared_from_this());
     }
 
     void onPingResponse(const aap_protobuf::service::control::message::PingResponse &response) override {
-        // Ignore
+        channel_->receive(this->shared_from_this());
     }
 
     void onChannelError(const aasdk::error::Error &e) override {
