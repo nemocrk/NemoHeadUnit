@@ -3,10 +3,14 @@
 #include <pybind11/pybind11.h>
 #include <fstream>
 #include <sys/stat.h>
+#include <aasdk/common/Logger.hpp>
 
 namespace nemo {
 
-UsbHubManager::UsbHubManager(IoContextRunner& runner) : runner_(runner) {}
+UsbHubManager::UsbHubManager(IoContextRunner& runner) : runner_(runner) {
+    logger_ = std::make_shared<AasdkLogger>();
+    aasdk::common::Logger::instance().setLogger(logger_);
+}
 
 UsbHubManager::~UsbHubManager() {
     stop();
@@ -99,9 +103,6 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     cryptor_->init();
 
     if (orchestrator_) {
-        // Adesso che non passiamo più il traffico crittografico da Python,
-        // potremmo persino omettere di passare il cryptor_ al Python orchestrator,
-        // ma lo manteniamo per compatibilità con il pybind esistente.
         orchestrator_->setCryptor(cryptor_);
     }
 
