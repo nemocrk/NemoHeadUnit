@@ -14,16 +14,17 @@ except ImportError as e:
     sys.exit(1)
 
 try:
-    from aasdk_proto import AuthCompleteIndicationMessage_pb2
-    from aasdk_proto import StatusEnum_pb2
-    from aasdk_proto import ServiceDiscoveryResponseMessage_pb2
-    from aasdk_proto import PingResponseMessage_pb2
-    from aasdk_proto import AudioFocusResponseMessage_pb2
-    from aasdk_proto import ChannelOpenResponseMessage_pb2
+    # Correggiamo gli import in base alla reale struttura dei Protobuf generata
+    from aasdk_proto.aap_protobuf.service.control.message import AuthResponse_pb2
+    from aasdk_proto.aap_protobuf.service.control.message import ServiceDiscoveryResponse_pb2
+    from aasdk_proto.aap_protobuf.service.control.message import PingResponse_pb2
+    from aasdk_proto.aap_protobuf.service.control.message import AudioFocusNotification_pb2
+    from aasdk_proto.aap_protobuf.service.control.message import ChannelOpenResponse_pb2
+    from aasdk_proto.aap_protobuf.shared import MessageStatus_pb2
     PROTOBUF_AVAILABLE = True
 except ImportError as e:
     print(f"[ATTENZIONE] Impossibile importare moduli Protobuf: {e}")
-    print("[ATTENZIONE] Eseguire prima: ./scripts/generate_protos.sh")
+    print("[ATTENZIONE] Assicurati di aver eseguito ./scripts/generate_protos.sh")
     PROTOBUF_AVAILABLE = False
 
 
@@ -79,26 +80,26 @@ class InteractiveOrchestrator:
         return b""
 
     def get_auth_complete_response(self) -> bytes:
-        print("\n[InteractiveOrchestrator] Costruzione AuthComplete...")
+        print("\n[InteractiveOrchestrator] Costruzione AuthResponse...")
         if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
         
-        msg = AuthCompleteIndicationMessage_pb2.AuthCompleteIndication()
-        msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
+        msg = AuthResponse_pb2.AuthResponse()
+        msg.status = 0 # status_success
         return self._prompt_send("Invia AuthCompleteResponse", msg.SerializeToString())
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
         print(f"\n[InteractiveOrchestrator] Service Discovery Request ricevuta!")
         if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
             
-        msg = ServiceDiscoveryResponseMessage_pb2.ServiceDiscoveryResponse()
-        msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
+        msg = ServiceDiscoveryResponse_pb2.ServiceDiscoveryResponse()
+        # Ritorna vuota per ora (verranno aggiunti i display info più avanti)
         return self._prompt_send("Invia ServiceDiscoveryResponse (vuota)", msg.SerializeToString())
 
     def on_ping_request(self, payload: bytes) -> bytes:
         print("\n[InteractiveOrchestrator] Ricevuto Ping. Rispondo con Pong.")
         if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
             
-        msg = PingResponseMessage_pb2.PingResponse()
+        msg = PingResponse_pb2.PingResponse()
         msg.timestamp = int(time.time() * 1000)
         return msg.SerializeToString()
 
@@ -106,17 +107,17 @@ class InteractiveOrchestrator:
         print("\n[InteractiveOrchestrator] AudioFocusRequest ricevuta.")
         if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
         
-        msg = AudioFocusResponseMessage_pb2.AudioFocusResponse()
+        msg = AudioFocusNotification_pb2.AudioFocusNotification()
         # 1 = AUDIO_FOCUS_STATE_GAIN
         msg.audio_focus_state = 1 
-        return self._prompt_send("Invia AudioFocusResponse", msg.SerializeToString())
+        return self._prompt_send("Invia AudioFocusNotification", msg.SerializeToString())
 
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
         print("\n[InteractiveOrchestrator] VideoChannelOpenRequest ricevuta.")
         if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
         
-        msg = ChannelOpenResponseMessage_pb2.ChannelOpenResponse()
-        msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
+        msg = ChannelOpenResponse_pb2.ChannelOpenResponse()
+        msg.status = 0 # status success
         return self._prompt_send("Invia ChannelOpenResponse", msg.SerializeToString())
 
 
