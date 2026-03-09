@@ -17,6 +17,17 @@ public:
         }
     }
 
+    void setCryptor(std::shared_ptr<aasdk::messenger::ICryptor> cryptor) override {
+        pybind11::gil_scoped_acquire acquire;
+        if (!obj_.is_none() && pybind11::hasattr(obj_, "set_cryptor")) {
+            try {
+                obj_.attr("set_cryptor")(cryptor);
+            } catch (const std::exception& e) {
+                std::cerr << "[PyOrchestrator] Errore esecuzione set_cryptor: " << e.what() << std::endl;
+            }
+        }
+    }
+
     void onVersionStatus(int major, int minor, int status) override {
         pybind11::gil_scoped_acquire acquire;
         if (!obj_.is_none() && pybind11::hasattr(obj_, "on_version_status")) {
