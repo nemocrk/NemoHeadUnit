@@ -12,9 +12,10 @@ public:
     
     virtual void setCryptor(std::shared_ptr<aasdk::messenger::ICryptor> cryptor) = 0;
 
-    // I messaggi Protobuf da Python a C++ NON devono usare fallback.
+    // Messaggio Protobuf da Python a C++.
     // Ritorna la risposta serializzata; se c'e' errore l'eccezione ferma il thread.
     virtual std::string onServiceDiscoveryRequest(const std::string& request_bytes) = 0;
+    virtual std::string onChannelOpenRequest(const std::string& request_bytes) = 0;
     virtual std::string onPingRequest(const std::string& request_bytes) = 0;
     virtual std::string onAudioFocusRequest(const std::string& request_bytes) = 0;
     virtual std::string onVideoChannelOpenRequest(const std::string& request_bytes) = 0;
