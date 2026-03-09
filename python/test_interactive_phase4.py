@@ -17,19 +17,16 @@ try:
     import google.protobuf
     from aasdk_proto.aap_protobuf.service.control.message import AuthResponse_pb2
     from aasdk_proto.aap_protobuf.service.control.message import ServiceDiscoveryResponse_pb2
-    from aasdk_proto.aap_protobuf.service.control.message import ChannelOpenResponse_pb2
-    from aasdk_proto.aap_protobuf.service.control.message import ChannelOpenRequest_pb2
     from aasdk_proto.aap_protobuf.service.control.message import PingResponse_pb2
     from aasdk_proto.aap_protobuf.service.control.message import AudioFocusNotification_pb2
     from aasdk_proto.aap_protobuf.shared import MessageStatus_pb2
-    # Protobuf per la descrizione dei servizi nella ServiceDiscoveryResponse
-    from aasdk_proto.aap_protobuf.service.Service_pb2 import Service
+    # Service schema reale: ServiceConfiguration (non "Service")
+    from aasdk_proto.aap_protobuf.service.Service_pb2 import ServiceConfiguration
     from aasdk_proto.aap_protobuf.service.media.sink.MediaSinkService_pb2 import MediaSinkService
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoConfiguration_pb2 import VideoConfiguration
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoCodecResolutionType_pb2 import VideoCodecResolutionType
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoFrameRateType_pb2 import VideoFrameRateType
     from aasdk_proto.aap_protobuf.service.media.sink.message.DisplayType_pb2 import DisplayType
-    from aasdk_proto.aap_protobuf.service.media.shared.message.UiConfig_pb2 import UiConfig
     PROTOBUF_AVAILABLE = True
 except ImportError as e:
     print(f"\n[ERRORE CRITICO] Moduli Protobuf non trovati: {e}")
@@ -105,60 +102,49 @@ class InteractiveOrchestrator:
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
         """
-        Costruisce una ServiceDiscoveryResponse che dichiara:
-        - MediaSinkService con VideoConfiguration 800x480@30fps H264 (canale video)
-        Senza questa dichiarazione Android Auto non sa quali canali aprire
-        e non invia nessun ChannelOpenRequest => la sessione si blocca.
+        Struttura reale da proto:
+          ServiceDiscoveryResponse.channels = repeated ServiceConfiguration
+          ServiceConfiguration.id           = int32 (channel id)
+          ServiceConfiguration.media_sink_service = MediaSinkService (optional)
+          MediaSinkService.video_configs    = repeated VideoConfiguration
+          MediaSinkService.display_type     = DisplayType enum
+          VideoConfiguration.codec_resolution, .frame_rate, .density,
+                             .width_margin, .height_margin
+          DisplayType: DISPLAY_TYPE_MAIN / DISPLAY_TYPE_CLUSTER / DISPLAY_TYPE_AUXILIARY
         """
-        print(f"\n[Orchestrator] Service Discovery Request ricevuta!")
+        print("\n[Orchestrator] Service Discovery Request ricevuta!")
 
         msg = ServiceDiscoveryResponse_pb2.ServiceDiscoveryResponse()
-        msg.head_unit_name = "NemoHeadUnit"
-        msg.car_model = "NemoCar"
-        msg.car_year = "2024"
-        msg.car_serial = "NEMO00001"
-        msg.left_hand_drive_vehicle = True
-        msg.headunit_manufacturer = "NemoDev"
-        msg.headunit_model = "NemoHU v0.1"
-        msg.sw_build = "phase4"
-        msg.sw_version = "0.1.0"
+        # Campi HU (nomi reali da DESCRIPTOR)
+        msg.make = "NemoDev"
+        msg.model = "NemoHU v0.1"
+        msg.year = "2024"
+        msg.head_unit_make = "NemoDev"
+        msg.head_unit_model = "NemoHU"
+        msg.head_unit_software_build = "phase4"
+        msg.head_unit_software_version = "0.1.0"
         msg.can_play_native_media_during_vr = False
-        msg.hide_clock = False
 
-        # --- Canale Video (MediaSinkService) ---
-        video_svc = msg.services.add()
-        video_svc.media_sink.CopyFrom(MediaSinkService())
+        # --- Canale 1: MediaSinkService (video) ---
+        # id=1 e' il channel id che Android Auto usera' per aprire questo canale
+        ch = msg.channels.add()
+        ch.id = 1
 
-        vid_cfg = video_svc.media_sink.video_configs.add()
-        vid_cfg.codec_resolution = VideoCodecResolutionType.Value("VIDEO_800x480")  # 800x480
-        vid_cfg.frame_rate = VideoFrameRateType.Value("VIDEO_FPS_30")              # 30 fps
-        vid_cfg.display_type = DisplayType.Value("DISPLAY_MAIN")                   # display principale
+        sink = MediaSinkService()
+        sink.display_type = DisplayType.Value("DISPLAY_TYPE_MAIN")
+        sink.available_while_in_call = True
+
+        vid_cfg = sink.video_configs.add()
+        vid_cfg.codec_resolution = VideoCodecResolutionType.Value("VIDEO_800x480")
+        vid_cfg.frame_rate = VideoFrameRateType.Value("VIDEO_FPS_30")
         vid_cfg.density = 140
-        vid_cfg.margin_width = 0
-        vid_cfg.margin_height = 0
+        vid_cfg.width_margin = 0
+        vid_cfg.height_margin = 0
+
+        ch.media_sink_service.CopyFrom(sink)
 
         serialized = msg.SerializeToString()
-        return self._log_and_send("Invia ServiceDiscoveryResponse (con VideoService)", serialized)
-
-    def on_channel_open_request(self, payload: bytes) -> bytes:
-        """
-        ChannelOpenRequest proto reale (da ChannelOpenRequest.proto):
-          field 1: priority (sint32)
-          field 2: service_id (int32)
-        NON esiste channel_id - il canale è identificato da service_id.
-        """
-        req = ChannelOpenRequest_pb2.ChannelOpenRequest()
-        req.ParseFromString(payload)
-        service_id = req.service_id
-        priority = req.priority
-        print(f"\n[Orchestrator] ChannelOpenRequest: service_id={service_id} priority={priority}")
-
-        resp = ChannelOpenResponse_pb2.ChannelOpenResponse()
-        resp.status = 0  # STATUS_SUCCESS
-        return self._log_and_send(
-            f"Invia ChannelOpenResponse (service_id={service_id})",
-            resp.SerializeToString()
-        )
+        return self._log_and_send("Invia ServiceDiscoveryResponse (ch1=VideoSink)", serialized)
 
     def on_ping_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] Ricevuto Ping. Rispondo con Pong.")
@@ -173,16 +159,15 @@ class InteractiveOrchestrator:
         return self._log_and_send("Invia AudioFocusNotification", msg.SerializeToString())
 
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
-        print("\n[Orchestrator] VideoChannelOpenRequest ricevuta (via VideoService).")
-        msg = ChannelOpenResponse_pb2.ChannelOpenResponse()
-        msg.status = 0
-        return self._log_and_send("Invia ChannelOpenResponse (VideoService)", msg.SerializeToString())
+        # Placeholder: in Phase 5 verra' gestito dal VideoEventHandler C++
+        print("\n[Orchestrator] on_video_channel_open_request chiamato (Phase 5).")
+        return b""
 
 
 def main():
     print("\n" + "*"*60)
-    print("* TEST HEADLESS PHASE 4 - ChannelOpen + ServiceDiscovery   *")
-    print("* Collega un dispositivo Android via USB                   *")
+    print("* TEST HEADLESS PHASE 4 - ServiceDiscovery reale          *")
+    print("* Collega un dispositivo Android via USB                  *")
     print("*"*60 + "\n")
 
     if hasattr(core, "enable_aasdk_logging"):
