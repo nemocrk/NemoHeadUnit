@@ -15,7 +15,7 @@
 #include <aasdk/Transport/SSLWrapper.hpp>
 
 #include "libusb_context.hpp"
-#include "io_context_runner.hpp"
+#include "../io_context_runner.hpp"
 #include "../session/session_manager.hpp"
 #include "../crypto/crypto_manager.hpp"
 #include "aasdk_logger.hpp"
