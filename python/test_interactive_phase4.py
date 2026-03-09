@@ -35,6 +35,14 @@ except ImportError as e:
     sys.exit(1)
 
 
+# Mappa ChannelId enum aasdk (posizionale, da ChannelId.hpp):
+#   0=CONTROL, 1=SENSOR, 2=MEDIA_SINK, 3=MEDIA_SINK_VIDEO,
+#   4=MEDIA_SINK_MEDIA_AUDIO, 5=MEDIA_SINK_GUIDANCE_AUDIO,
+#   6=MEDIA_SINK_SYSTEM_AUDIO, 7=MEDIA_SINK_TELEPHONY_AUDIO,
+#   8=INPUT_SOURCE, 9=MEDIA_SOURCE_MICROPHONE, 10=BLUETOOTH, ...
+CH_MEDIA_SINK_VIDEO = 3
+
+
 class InteractiveOrchestrator:
     def __init__(self):
         self.cryptor = None
@@ -102,20 +110,13 @@ class InteractiveOrchestrator:
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
         """
-        Struttura reale da proto:
-          ServiceDiscoveryResponse.channels = repeated ServiceConfiguration
-          ServiceConfiguration.id           = int32 (channel id)
-          ServiceConfiguration.media_sink_service = MediaSinkService (optional)
-          MediaSinkService.video_configs    = repeated VideoConfiguration
-          MediaSinkService.display_type     = DisplayType enum
-          VideoConfiguration.codec_resolution, .frame_rate, .density,
-                             .width_margin, .height_margin
-          DisplayType: DISPLAY_TYPE_MAIN / DISPLAY_TYPE_CLUSTER / DISPLAY_TYPE_AUXILIARY
+        ServiceConfiguration.id deve corrispondere all'enum ChannelId di aasdk:
+          MEDIA_SINK_VIDEO = 3  (posizione nell'enum ChannelId.hpp)
+        Il Messenger di aasdk smista i frame in base a questo id numerico.
         """
         print("\n[Orchestrator] Service Discovery Request ricevuta!")
 
         msg = ServiceDiscoveryResponse_pb2.ServiceDiscoveryResponse()
-        # Campi HU (nomi reali da DESCRIPTOR)
         msg.make = "NemoDev"
         msg.model = "NemoHU v0.1"
         msg.year = "2024"
@@ -125,10 +126,9 @@ class InteractiveOrchestrator:
         msg.head_unit_software_version = "0.1.0"
         msg.can_play_native_media_during_vr = False
 
-        # --- Canale 1: MediaSinkService (video) ---
-        # id=1 e' il channel id che Android Auto usera' per aprire questo canale
+        # Canale video: id=3 = MEDIA_SINK_VIDEO nell'enum aasdk
         ch = msg.channels.add()
-        ch.id = 1
+        ch.id = CH_MEDIA_SINK_VIDEO  # 3
 
         sink = MediaSinkService()
         sink.display_type = DisplayType.Value("DISPLAY_TYPE_MAIN")
@@ -144,7 +144,10 @@ class InteractiveOrchestrator:
         ch.media_sink_service.CopyFrom(sink)
 
         serialized = msg.SerializeToString()
-        return self._log_and_send("Invia ServiceDiscoveryResponse (ch1=VideoSink)", serialized)
+        return self._log_and_send(
+            f"Invia ServiceDiscoveryResponse (ch={CH_MEDIA_SINK_VIDEO}=MEDIA_SINK_VIDEO)",
+            serialized
+        )
 
     def on_ping_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] Ricevuto Ping. Rispondo con Pong.")
@@ -159,7 +162,7 @@ class InteractiveOrchestrator:
         return self._log_and_send("Invia AudioFocusNotification", msg.SerializeToString())
 
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
-        # Placeholder: in Phase 5 verra' gestito dal VideoEventHandler C++
+        # Placeholder: in Phase 5 gestito da VideoMediaSinkService C++
         print("\n[Orchestrator] on_video_channel_open_request chiamato (Phase 5).")
         return b""
 
