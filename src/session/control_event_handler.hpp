@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <aasdk/Channel/Control/IControlServiceChannelEventHandler.hpp>
 #include <aasdk/Channel/Control/IControlServiceChannel.hpp>
 #include <aasdk/Channel/Promise.hpp>
@@ -33,35 +34,33 @@ public:
 
     void onVersionResponse(uint16_t majorCode, uint16_t minorCode, aap_protobuf::shared::MessageStatus status) override {
         std::cout << "[Control] VersionResponse: " << majorCode << "." << minorCode << " Status: " << status << std::endl;
-        if (status == 0) {
-            std::cout << "[Control] Inizio SSL Handshake..." << std::endl;
-            try {
-                cryptor_->doHandshake();
-                channel_->sendHandshake(cryptor_->readHandshakeBuffer(), makePromise("Control/SendHandshake1"));
-            } catch (const std::exception& e) {
-                std::cerr << "[Control] Errore inzializzazione handshake: " << e.what() << std::endl;
-            }
+        if (orchestrator_) {
+            orchestrator_->onVersionStatus(majorCode, minorCode, status);
         }
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
         std::cout << "[Control] Handshake chunk ricevuto, size: " << payload.size << std::endl;
-        try {
-            cryptor_->writeHandshakeBuffer(payload);
-            if (!cryptor_->doHandshake()) {
-                std::cout << "[Control] Handshake incompleto, invio prossimo blocco..." << std::endl;
-                channel_->sendHandshake(cryptor_->readHandshakeBuffer(), makePromise("Control/SendHandshake2"));
+        if (orchestrator_) {
+            // Convert buffer to string payload per inviarlo a Python
+            std::string payload_bytes(reinterpret_cast<const char*>(payload.data), payload.size);
+            std::string response_chunk = orchestrator_->onHandshake(payload_bytes);
+            
+            if (!response_chunk.empty()) {
+                // Il python ci ha restituito il prossimo chunk da mandare per procedere
+                aasdk::common::Data chunk_data(response_chunk.begin(), response_chunk.end());
+                channel_->sendHandshake(aasdk::common::DataConstBuffer(chunk_data), makePromise("Control/SendHandshakeX"));
             } else {
-                std::cout << "[Control] SSL Handshake COMPLETATO. Invio AuthComplete..." << std::endl;
+                // Risposta vuota da python = Handshake terminato, mando io l'AuthComplete
+                std::cout << "[Control] Handshake Python completato. Invio AuthComplete..." << std::endl;
                 aap_protobuf::service::control::message::AuthResponse response;
                 response.set_status(static_cast<decltype(response.status())>(0));
                 channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
             }
-        } catch (const std::exception& e) {
-            std::cerr << "[Control] Errore durante l'handshake: " << e.what() << std::endl;
         }
     }
 
+    // ... il resto resta uguale ...
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         
