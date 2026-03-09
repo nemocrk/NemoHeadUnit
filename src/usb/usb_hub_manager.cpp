@@ -75,6 +75,10 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
     cryptor_->init();
 
+    if (orchestrator_) {
+        orchestrator_->setCryptor(cryptor_);
+    }
+
     message_in_stream_ = std::make_shared<aasdk::messenger::MessageInStream>(
         runner_.get_io_context(), usb_transport_, cryptor_
     );
@@ -86,9 +90,7 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    // Fase 4: Avvio del SessionManager passando anche l'orchestrator per le logiche in Python
     session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_, orchestrator_);
-    
     session_manager_->start();
 
     std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;
