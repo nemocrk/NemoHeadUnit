@@ -48,12 +48,9 @@ public:
             throw std::runtime_error("Python MUST return first handshake chunk");
         }
 
-        // Invia primo flight TLS deciso da Python
         aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
         std::cout << "[Control] Invio primo Handshake Chunk via AASDK..." << std::endl;
         channel_->sendHandshake(data, makePromise("Control/SendHandshake1"));
-        
-        // COME IN OPENAUTO: Innesca immediatamente la receive, indipendentemente dalla fine della promise di invio.
         channel_->receive(this->shared_from_this());
     }
 
@@ -67,14 +64,10 @@ public:
         std::string out = orchestrator_->onHandshake(in);
         
         if (!out.empty()) {
-            // C'è ancora handshake da fare
             aasdk::common::Data data(out.begin(), out.end());
             std::cout << "[Control] Invio successivo Handshake Chunk via AASDK..." << std::endl;
             channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
-            // RIMOSSO IL RETURN PERMETTENDO ALLA RECEIVE() SOTTO DI SCATTARE
         } else {
-            // out è vuoto => Python ha dichiarato handshake finito.
-            // Python DEVE fornire l'AuthCompleteRequest Protobuf.
             std::cout << "[Control] Handshake TLS completato da Python. Richiesta AuthResponse..." << std::endl;
             std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
             if (auth_bytes.empty()) {
@@ -88,12 +81,11 @@ public:
             channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
         }
 
-        // COME IN OPENAUTO: Innesca la receive incondizionatamente alla fine del ciclo di lettura/scrittura.
         channel_->receive(this->shared_from_this());
     }
 
-    // NOTA: Android Auto 2026/AASDK ha la ServiceDiscovery *Invertita* rispetto ai vecchi docs.
-    // Lo smartphone agisce come Master/Client e manda lui la Request. La HU riceve Request e manda Response.
+    // NOTA: Android Auto ha la ServiceDiscovery *Invertita* rispetto ai vecchi docs.
+    // Lo smartphone manda la Request; la HU risponde con la Response popolata.
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
@@ -107,8 +99,27 @@ public:
         }
         
         channel_->sendServiceDiscoveryResponse(response, makePromise("Control/ServiceDiscoveryResponse"));
-        
-        // Mettiti in ascolto per le prossime request (es. AudioFocus)
+        channel_->receive(this->shared_from_this());
+    }
+
+    // Dopo la ServiceDiscoveryResponse, Android Auto apre ogni canale con una ChannelOpenRequest
+    // sul canale CONTROL. La HU deve rispondere con ChannelOpenResponse status=OK e mettere
+    // in ascolto il canale specifico (qui delegato all'orchestrator via Python).
+    void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) override {
+        const auto channelId = request.channel_id();
+        std::cout << "[Control] ChannelOpenRequest per ChannelId=" << channelId << std::endl;
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
+
+        // Delega a Python la costruzione della risposta (status=0 = OK)
+        std::string req_str = request.SerializeAsString();
+        std::string res_str = orchestrator_->onChannelOpenRequest(req_str);
+
+        aap_protobuf::service::control::message::ChannelOpenResponse response;
+        if (!response.ParseFromString(res_str)) {
+            throw std::runtime_error("ChannelOpenResponse ParseFromString failed");
+        }
+
+        channel_->sendChannelOpenResponse(response, makePromise("Control/ChannelOpenResponse"));
         channel_->receive(this->shared_from_this());
     }
 
