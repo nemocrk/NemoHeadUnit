@@ -44,9 +44,8 @@ public:
         
         // IL FONDAMENTALE INNESCO: AASDK ha bisogno di questo trigger crittografico interno
         // per iniziare a spingere fuori il primo byte (ClientHello) e iniziare il tunneling SSL.
-        // Passiamo i dati vuoti o fittizi per fare innescare il Cryptor C++.
         if (cryptor_) {
-            cryptor_->doHandshake(aasdk::common::Data());
+            cryptor_->doHandshake();
         } else {
             std::cerr << "[Control] Nessun Cryptor associato!" << std::endl;
         }
