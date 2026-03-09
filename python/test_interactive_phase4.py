@@ -3,7 +3,6 @@ import os
 import binascii
 import time
 
-# Aggiungi il percorso corrente e la cartella parent per trovare i moduli generati
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(current_dir))
 sys.path.append(current_dir)
@@ -14,12 +13,13 @@ except ImportError as e:
     print(f"Errore import: {e}. Assicurati di aver compilato con cmake -B build && cmake --build build")
     sys.exit(1)
 
-# Importa i moduli protobuf (devono essere stati generati con scripts/generate_protos.sh)
 try:
     from aasdk_proto import AuthCompleteIndicationMessage_pb2
     from aasdk_proto import StatusEnum_pb2
     from aasdk_proto import ServiceDiscoveryResponseMessage_pb2
     from aasdk_proto import PingResponseMessage_pb2
+    from aasdk_proto import AudioFocusResponseMessage_pb2
+    from aasdk_proto import ChannelOpenResponseMessage_pb2
     PROTOBUF_AVAILABLE = True
 except ImportError as e:
     print(f"[ATTENZIONE] Impossibile importare moduli Protobuf: {e}")
@@ -39,13 +39,13 @@ class InteractiveOrchestrator:
     def _prompt_send(self, label: str, data: bytes) -> bytes:
         print(f"\n{'='*50}")
         print(f"[Azione Richiesta: {label}]")
-        print(f"Dimensione chunk in uscita: {len(data)} bytes")
+        print(f"Dimensione: {len(data)} bytes")
         if len(data) > 0:
             print(f"Preview Hex: {binascii.hexlify(data[:32]).decode()}...")
         print(f"{'='*50}")
         
         while True:
-            cmd = input("Inviare questo chunk? [Invio]=Si, 'q'=Quit, 'd'=Dump Hex completo: ").strip().lower()
+            cmd = input("Inviare questo chunk? [Invio]=Si, 'q'=Quit, 'd'=Dump Hex: ").strip().lower()
             if cmd == "q":
                 print("Chiusura su richiesta dell'utente.")
                 sys.exit(0)
@@ -58,104 +58,81 @@ class InteractiveOrchestrator:
         print(f"\n[InteractiveOrchestrator] on_version_status: {major}.{minor} (status={status})")
         if status != 0:
             raise RuntimeError(f"Version negotiation fallita (status={status})")
-        if self.cryptor is None:
-            raise RuntimeError("Cryptor non disponibile")
-
-        # Avvia l'handshake e produce il flight 1
+        
         self.cryptor.do_handshake()
         out_chunk = self.cryptor.read_handshake_buffer()
-        if not out_chunk:
-            raise RuntimeError("Errore: start handshake ha prodotto un chunk vuoto.")
-            
         return self._prompt_send("Invia Primo Chunk TLS (Flight 1)", out_chunk)
 
     def on_handshake(self, payload: bytes) -> bytes:
         print(f"\n[InteractiveOrchestrator] Ricevuto Handshake payload ({len(payload)} bytes)")
-        if self.cryptor is None:
-            raise RuntimeError("Cryptor non disponibile")
-
         if payload:
             self.cryptor.write_handshake_buffer(payload)
 
-        # Avanza la state machine OpenSSL
         done = self.cryptor.do_handshake()
         out_chunk = self.cryptor.read_handshake_buffer()
 
         if not done:
-            if not out_chunk:
-                raise RuntimeError("Errore: handshake non terminato ma OpenSSL non ha prodotto output.")
             return self._prompt_send("Invia Chunk TLS Intermedio", out_chunk)
 
         print("\n[InteractiveOrchestrator] *** HANDSHAKE TLS COMPLETATO ***")
         self.handshake_done = True
-        return b""  # Segnala al C++ che l'handshake è terminato
+        return b""
 
     def get_auth_complete_response(self) -> bytes:
-        print("\n[InteractiveOrchestrator] Costruzione AuthCompleteRequest Protobuf...")
-        if not self.handshake_done:
-            raise RuntimeError("Richiesto AuthComplete ma handshake non è terminato!")
-            
-        if not PROTOBUF_AVAILABLE:
-            raise RuntimeError("Impossibile creare AuthComplete: moduli protobuf mancanti.")
-
-        # Secondo aasdk AuthComplete in control channel può essere AuthCompleteIndication 
-        # (nota: controlla il payload esatto richiesto da aap_protobuf::...::AuthResponse nel tuo repo)
-        try:
-            # Assumiamo che il C++ si aspetti un message simile a AuthCompleteIndication
-            # o quello che hai mappato per AuthResponse.
-            msg = AuthCompleteIndicationMessage_pb2.AuthCompleteIndication()
-            msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
-            payload = msg.SerializeToString()
-            return self._prompt_send("Invia AuthCompleteResponse (Protobuf)", payload)
-        except Exception as e:
-            print(f"Errore nella serializzazione AuthComplete: {e}")
-            raise
+        print("\n[InteractiveOrchestrator] Costruzione AuthComplete...")
+        if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
+        
+        msg = AuthCompleteIndicationMessage_pb2.AuthCompleteIndication()
+        msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
+        return self._prompt_send("Invia AuthCompleteResponse", msg.SerializeToString())
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
         print(f"\n[InteractiveOrchestrator] Service Discovery Request ricevuta!")
-        if not PROTOBUF_AVAILABLE:
-            raise RuntimeError("Protobuf mancanti")
+        if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
             
         msg = ServiceDiscoveryResponseMessage_pb2.ServiceDiscoveryResponse()
         msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
-        # TODO: Aggiungere Services reali
         return self._prompt_send("Invia ServiceDiscoveryResponse (vuota)", msg.SerializeToString())
 
     def on_ping_request(self, payload: bytes) -> bytes:
         print("\n[InteractiveOrchestrator] Ricevuto Ping. Rispondo con Pong.")
-        if not PROTOBUF_AVAILABLE:
-            raise RuntimeError("Protobuf mancanti")
+        if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
             
         msg = PingResponseMessage_pb2.PingResponse()
         msg.timestamp = int(time.time() * 1000)
         return msg.SerializeToString()
 
     def on_audio_focus_request(self, payload: bytes) -> bytes:
-        print("\n[InteractiveOrchestrator] AudioFocusRequest. Generazione mock in corso...")
-        raise NotImplementedError("Costruisci AudioFocusNotification protobuf")
+        print("\n[InteractiveOrchestrator] AudioFocusRequest ricevuta.")
+        if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
+        
+        msg = AudioFocusResponseMessage_pb2.AudioFocusResponse()
+        # 1 = AUDIO_FOCUS_STATE_GAIN
+        msg.audio_focus_state = 1 
+        return self._prompt_send("Invia AudioFocusResponse", msg.SerializeToString())
 
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
-        print("\n[InteractiveOrchestrator] VideoChannelOpenRequest. Generazione mock in corso...")
-        raise NotImplementedError("Costruisci ChannelOpenResponse protobuf")
+        print("\n[InteractiveOrchestrator] VideoChannelOpenRequest ricevuta.")
+        if not PROTOBUF_AVAILABLE: raise RuntimeError("Protobuf mancanti")
+        
+        msg = ChannelOpenResponseMessage_pb2.ChannelOpenResponse()
+        msg.status = StatusEnum_pb2.Status.STATUS_SUCCESS
+        return self._prompt_send("Invia ChannelOpenResponse", msg.SerializeToString())
 
 
 def main():
     runner = core.IoContextRunner()
-    
-    # Ignoriamo i warning crypto dummy per il test
     crypto = core.CryptoManager()
     crypto.initialize()
-
     usb = core.UsbHubManager(runner)
-    
     orchestrator = InteractiveOrchestrator()
     usb.set_orchestrator(orchestrator)
     
     def on_connect(success, msg):
         if success:
-            print("[Python Callback] AOAP Avviato:", msg)
+            print("\n[Python Callback] AOAP Avviato:", msg)
         else:
-            print("[Python Callback] Errore connessione:", msg)
+            print("\n[Python Callback] Errore connessione:", msg)
             runner.stop()
 
     print("\n" + "*"*60)
