@@ -15,7 +15,7 @@ class ControlEventHandler : public aasdk::channel::control::IControlServiceChann
 public:
     using Pointer = std::shared_ptr<ControlEventHandler>;
 
-    ControlEventHandler(boost::asio::io_service::strand& strand, 
+    ControlEventHandler(boost::asio::io_service::strand& strand,
                         aasdk::channel::control::IControlServiceChannel::Pointer channel,
                         aasdk::messenger::ICryptor::Pointer cryptor,
                         std::shared_ptr<IOrchestrator> orchestrator)
@@ -36,105 +36,66 @@ public:
 
     void onVersionResponse(uint16_t majorCode, uint16_t minorCode, aap_protobuf::shared::MessageStatus status) override {
         std::cout << "[Control] VersionResponse: " << majorCode << "." << minorCode << " Status: " << status << std::endl;
-        if (!orchestrator_) {
-            throw std::runtime_error("Orchestrator non impostato");
-        }
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
 
-        std::cout << "[Control] Chiamo Python onVersionStatus..." << std::endl;
         std::string first_chunk = orchestrator_->onVersionStatus(majorCode, minorCode, status);
-        std::cout << "[Control] Python ha ritornato chunk TLS di size: " << first_chunk.size() << std::endl;
-
-        if (first_chunk.empty()) {
-            throw std::runtime_error("Python MUST return first handshake chunk");
-        }
+        std::cout << "[Control] Python TLS chunk size: " << first_chunk.size() << std::endl;
+        if (first_chunk.empty()) throw std::runtime_error("Python MUST return first handshake chunk");
 
         aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
-        std::cout << "[Control] Invio primo Handshake Chunk via AASDK..." << std::endl;
         channel_->sendHandshake(data, makePromise("Control/SendHandshake1"));
         channel_->receive(this->shared_from_this());
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
         std::cout << "[Control] Handshake chunk ricevuto, size: " << payload.size << std::endl;
-        if (!orchestrator_) {
-            throw std::runtime_error("Orchestrator non impostato");
-        }
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
 
         std::string in(reinterpret_cast<const char*>(payload.cdata), payload.size);
         std::string out = orchestrator_->onHandshake(in);
-        
+
         if (!out.empty()) {
             aasdk::common::Data data(out.begin(), out.end());
-            std::cout << "[Control] Invio successivo Handshake Chunk via AASDK..." << std::endl;
             channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
         } else {
-            std::cout << "[Control] Handshake TLS completato da Python. Richiesta AuthResponse..." << std::endl;
+            // Handshake completato: invia AuthComplete
             std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
-            if (auth_bytes.empty()) {
-                throw std::runtime_error("Python MUST return AuthComplete/AuthResponse bytes");
-            }
-
+            if (auth_bytes.empty()) throw std::runtime_error("Python MUST return AuthComplete bytes");
             aap_protobuf::service::control::message::AuthResponse response;
-            if (!response.ParseFromString(auth_bytes)) {
-                throw std::runtime_error("AuthResponse ParseFromString failed");
-            }
+            if (!response.ParseFromString(auth_bytes)) throw std::runtime_error("AuthResponse parse failed");
             channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
         }
-
         channel_->receive(this->shared_from_this());
     }
 
-    // NOTA: Android Auto ha la ServiceDiscovery *Invertita* rispetto ai vecchi docs.
-    // Lo smartphone manda la Request; la HU risponde con la Response popolata.
+    // NOTA: In aasdk 2026 il ChannelOpenRequest/Response e' gestito internamente
+    // dal Messenger a livello di framing - NON passa per IControlServiceChannelEventHandler.
+    // La HU deve solo rispondere correttamente alla ServiceDiscoveryRequest con i
+    // servizi popolati: sara' aasdk a gestire il three-way handshake dei canali.
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
-        
+
         std::string req_str = request.SerializeAsString();
         std::string res_str = orchestrator_->onServiceDiscoveryRequest(req_str);
-        
+
         aap_protobuf::service::control::message::ServiceDiscoveryResponse response;
-        if (!response.ParseFromString(res_str)) {
-             throw std::runtime_error("ServiceDiscoveryResponse ParseFromString failed");
-        }
-        
+        if (!response.ParseFromString(res_str)) throw std::runtime_error("ServiceDiscoveryResponse parse failed");
+
         channel_->sendServiceDiscoveryResponse(response, makePromise("Control/ServiceDiscoveryResponse"));
-        channel_->receive(this->shared_from_this());
-    }
-
-    // Dopo la ServiceDiscoveryResponse, Android Auto apre ogni canale con una ChannelOpenRequest
-    // sul canale CONTROL. La HU deve rispondere con ChannelOpenResponse status=OK e mettere
-    // in ascolto il canale specifico (qui delegato all'orchestrator via Python).
-    void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest &request) override {
-        const auto channelId = request.channel_id();
-        std::cout << "[Control] ChannelOpenRequest per ChannelId=" << channelId << std::endl;
-        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
-
-        // Delega a Python la costruzione della risposta (status=0 = OK)
-        std::string req_str = request.SerializeAsString();
-        std::string res_str = orchestrator_->onChannelOpenRequest(req_str);
-
-        aap_protobuf::service::control::message::ChannelOpenResponse response;
-        if (!response.ParseFromString(res_str)) {
-            throw std::runtime_error("ChannelOpenResponse ParseFromString failed");
-        }
-
-        channel_->sendChannelOpenResponse(response, makePromise("Control/ChannelOpenResponse"));
         channel_->receive(this->shared_from_this());
     }
 
     void onAudioFocusRequest(const aap_protobuf::service::control::message::AudioFocusRequest &request) override {
         std::cout << "[Control] AudioFocusRequest received." << std::endl;
         if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
-        
+
         std::string req_str = request.SerializeAsString();
         std::string res_str = orchestrator_->onAudioFocusRequest(req_str);
-        
+
         aap_protobuf::service::control::message::AudioFocusNotification response;
-        if (!response.ParseFromString(res_str)) {
-            throw std::runtime_error("AudioFocusNotification ParseFromString failed");
-        }
-        
+        if (!response.ParseFromString(res_str)) throw std::runtime_error("AudioFocusNotification parse failed");
+
         channel_->sendAudioFocusResponse(response, makePromise("Control/AudioFocusResponse"));
         channel_->receive(this->shared_from_this());
     }
@@ -168,9 +129,8 @@ public:
         std::string res_str = orchestrator_->onPingRequest(req_str);
 
         aap_protobuf::service::control::message::PingResponse response;
-        if (!response.ParseFromString(res_str)) {
-             throw std::runtime_error("PingResponse ParseFromString failed");
-        }
+        if (!response.ParseFromString(res_str)) throw std::runtime_error("PingResponse parse failed");
+
         channel_->sendPingResponse(response, makePromise("Control/PingResponse"));
         channel_->receive(this->shared_from_this());
     }
