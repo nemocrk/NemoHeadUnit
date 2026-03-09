@@ -24,7 +24,9 @@ public:
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
         p->then(
-            []() {},
+            [tag]() {
+                std::cout << "[" << tag << "] send promise fulfilled (SUCCESS)" << std::endl;
+            },
             [tag](const aasdk::error::Error& e) {
                 std::cerr << "[" << tag << "] send failed: " << e.what() << std::endl;
             }
@@ -38,14 +40,19 @@ public:
             throw std::runtime_error("Orchestrator non impostato");
         }
 
+        std::cout << "[Control] Chiamo Python onVersionStatus..." << std::endl;
         std::string first_chunk = orchestrator_->onVersionStatus(majorCode, minorCode, status);
+        std::cout << "[Control] Python ha ritornato chunk TLS di size: " << first_chunk.size() << std::endl;
+
         if (first_chunk.empty()) {
             throw std::runtime_error("Python MUST return first handshake chunk");
         }
 
         // Invia primo flight TLS deciso da Python
         aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
+        std::cout << "[Control] Invio primo Handshake Chunk via AASDK..." << std::endl;
         channel_->sendHandshake(data, makePromise("Control/SendHandshake1"));
+        std::cout << "[Control] Chiamata sendHandshake1 completata (asincrona)." << std::endl;
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
@@ -60,6 +67,7 @@ public:
         if (!out.empty()) {
             // C'è ancora handshake da fare
             aasdk::common::Data data(out.begin(), out.end());
+            std::cout << "[Control] Invio successivo Handshake Chunk via AASDK..." << std::endl;
             channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
             return;
         }
