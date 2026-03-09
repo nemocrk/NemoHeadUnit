@@ -34,47 +34,61 @@ public:
 
     void onVersionResponse(uint16_t majorCode, uint16_t minorCode, aap_protobuf::shared::MessageStatus status) override {
         std::cout << "[Control] VersionResponse: " << majorCode << "." << minorCode << " Status: " << status << std::endl;
-        if (orchestrator_) {
-            orchestrator_->onVersionStatus(majorCode, minorCode, status);
+        if (!orchestrator_) {
+            throw std::runtime_error("Orchestrator non impostato");
         }
+
+        std::string first_chunk = orchestrator_->onVersionStatus(majorCode, minorCode, status);
+        if (first_chunk.empty()) {
+            throw std::runtime_error("Python MUST return first handshake chunk");
+        }
+
+        // Invia primo flight TLS deciso da Python
+        aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
+        channel_->sendHandshake(aasdk::common::DataConstBuffer(data), makePromise("Control/SendHandshake1"));
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
         std::cout << "[Control] Handshake chunk ricevuto, size: " << payload.size << std::endl;
-        if (orchestrator_) {
-            // Convert buffer to string payload per inviarlo a Python
-            std::string payload_bytes(reinterpret_cast<const char*>(payload.data), payload.size);
-            std::string response_chunk = orchestrator_->onHandshake(payload_bytes);
-            
-            if (!response_chunk.empty()) {
-                // Il python ci ha restituito il prossimo chunk da mandare per procedere
-                aasdk::common::Data chunk_data(response_chunk.begin(), response_chunk.end());
-                channel_->sendHandshake(aasdk::common::DataConstBuffer(chunk_data), makePromise("Control/SendHandshakeX"));
-            } else {
-                // Risposta vuota da python = Handshake terminato, mando io l'AuthComplete
-                std::cout << "[Control] Handshake Python completato. Invio AuthComplete..." << std::endl;
-                aap_protobuf::service::control::message::AuthResponse response;
-                response.set_status(static_cast<decltype(response.status())>(0));
-                channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
-            }
+        if (!orchestrator_) {
+            throw std::runtime_error("Orchestrator non impostato");
         }
+
+        std::string in(reinterpret_cast<const char*>(payload.data), payload.size);
+        std::string out = orchestrator_->onHandshake(in);
+        
+        if (!out.empty()) {
+            // C'è ancora handshake da fare
+            aasdk::common::Data data(out.begin(), out.end());
+            channel_->sendHandshake(aasdk::common::DataConstBuffer(data), makePromise("Control/SendHandshakeX"));
+            return;
+        }
+
+        // out è vuoto => Python ha dichiarato handshake finito.
+        // Python DEVE fornire l'AuthCompleteRequest Protobuf.
+        std::cout << "[Control] Handshake TLS completato da Python. Richiesta AuthResponse..." << std::endl;
+        std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
+        if (auth_bytes.empty()) {
+            throw std::runtime_error("Python MUST return AuthComplete/AuthResponse bytes");
+        }
+
+        aap_protobuf::service::control::message::AuthResponse response;
+        if (!response.ParseFromString(auth_bytes)) {
+            throw std::runtime_error("AuthResponse ParseFromString failed");
+        }
+        channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
     }
 
-    // ... il resto resta uguale ...
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
         
         std::string req_str = request.SerializeAsString();
-        std::string res_str = orchestrator_ ? orchestrator_->onServiceDiscoveryRequest(req_str) : "";
+        std::string res_str = orchestrator_->onServiceDiscoveryRequest(req_str);
         
         aap_protobuf::service::control::message::ServiceDiscoveryResponse response;
-        if (!res_str.empty()) {
-            response.ParseFromString(res_str);
-        } else {
-            // Fallback mock C++
-            response.set_head_unit_make(std::string("NemoHeadUnit"));
-            response.set_model(std::string("MVP"));
-            response.set_year(std::string("2026"));
+        if (!response.ParseFromString(res_str)) {
+             throw std::runtime_error("ServiceDiscoveryResponse ParseFromString failed");
         }
         
         channel_->sendServiceDiscoveryResponse(response, makePromise("Control/ServiceDiscoveryResponse"));
@@ -82,15 +96,14 @@ public:
 
     void onAudioFocusRequest(const aap_protobuf::service::control::message::AudioFocusRequest &request) override {
         std::cout << "[Control] AudioFocusRequest received." << std::endl;
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
         
         std::string req_str = request.SerializeAsString();
-        std::string res_str = orchestrator_ ? orchestrator_->onAudioFocusRequest(req_str) : "";
+        std::string res_str = orchestrator_->onAudioFocusRequest(req_str);
         
         aap_protobuf::service::control::message::AudioFocusNotification response;
-        if (!res_str.empty()) {
-            response.ParseFromString(res_str);
-        } else {
-            response.set_focus_state(static_cast<decltype(response.focus_state())>(1));
+        if (!response.ParseFromString(res_str)) {
+            throw std::runtime_error("AudioFocusNotification ParseFromString failed");
         }
         
         channel_->sendAudioFocusResponse(response, makePromise("Control/AudioFocusResponse"));
@@ -117,14 +130,14 @@ public:
     }
 
     void onPingRequest(const aap_protobuf::service::control::message::PingRequest &request) override {
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
+
         std::string req_str = request.SerializeAsString();
-        std::string res_str = orchestrator_ ? orchestrator_->onPingRequest(req_str) : "";
+        std::string res_str = orchestrator_->onPingRequest(req_str);
 
         aap_protobuf::service::control::message::PingResponse response;
-        if (!res_str.empty()) {
-            response.ParseFromString(res_str);
-        } else {
-            response.set_timestamp(request.timestamp());
+        if (!response.ParseFromString(res_str)) {
+             throw std::runtime_error("PingResponse ParseFromString failed");
         }
         channel_->sendPingResponse(response, makePromise("Control/PingResponse"));
     }
