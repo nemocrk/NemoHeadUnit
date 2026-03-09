@@ -142,17 +142,23 @@ class InteractiveOrchestrator:
 
     def on_channel_open_request(self, payload: bytes) -> bytes:
         """
-        Android Auto invia un ChannelOpenRequest per ogni canale dichiarato
-        nella ServiceDiscoveryResponse. La HU deve rispondere con status=0 (OK).
+        ChannelOpenRequest proto reale (da ChannelOpenRequest.proto):
+          field 1: priority (sint32)
+          field 2: service_id (int32)
+        NON esiste channel_id - il canale è identificato da service_id.
         """
         req = ChannelOpenRequest_pb2.ChannelOpenRequest()
         req.ParseFromString(payload)
-        channel_id = req.channel_id if req.HasField('channel_id') else '?'
-        print(f"\n[Orchestrator] ChannelOpenRequest per canale id={channel_id}")
+        service_id = req.service_id
+        priority = req.priority
+        print(f"\n[Orchestrator] ChannelOpenRequest: service_id={service_id} priority={priority}")
 
         resp = ChannelOpenResponse_pb2.ChannelOpenResponse()
         resp.status = 0  # STATUS_SUCCESS
-        return self._log_and_send(f"Invia ChannelOpenResponse (ch={channel_id})", resp.SerializeToString())
+        return self._log_and_send(
+            f"Invia ChannelOpenResponse (service_id={service_id})",
+            resp.SerializeToString()
+        )
 
     def on_ping_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] Ricevuto Ping. Rispondo con Pong.")
