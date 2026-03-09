@@ -41,7 +41,8 @@ PYBIND11_MODULE(nemo_head_unit, m) {
         })
         .def("read_handshake_buffer", [](aasdk::messenger::ICryptor& self) {
             auto buf = self.readHandshakeBuffer();
-            return py::bytes(reinterpret_cast<const char*>(buf.data), buf.size);
+            // std::vector<uint8_t> in C++ usa .data() per ottenere il puntatore raw
+            return py::bytes(reinterpret_cast<const char*>(buf.data()), buf.size());
         });
 
     // Phase 3: Usb Hub Manager
