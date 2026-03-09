@@ -6,6 +6,7 @@
 #include "usb/libusb_context.hpp"
 #include "core/io_context_runner.hpp"
 #include "session/session_manager.hpp"
+#include "session/iorchestrator.hpp"
 #include <aasdk/USB/USBWrapper.hpp>
 #include <aasdk/USB/USBHub.hpp>
 #include <aasdk/USB/AccessoryModeQueryFactory.hpp>
@@ -32,6 +33,10 @@ namespace nemo {
         bool start(ConnectCallback callback);
         void stop();
 
+        void setOrchestrator(std::shared_ptr<IOrchestrator> orchestrator) {
+            orchestrator_ = std::move(orchestrator);
+        }
+
     private:
         void startDiscovery();
         void onDeviceDiscovered(aasdk::usb::DeviceHandle handle);
@@ -39,6 +44,7 @@ namespace nemo {
 
         IoContextRunner& runner_;
         ConnectCallback python_callback_;
+        std::shared_ptr<IOrchestrator> orchestrator_;
 
         std::unique_ptr<LibusbContext> libusb_context_;
         std::unique_ptr<aasdk::usb::USBWrapper> usb_wrapper_;
