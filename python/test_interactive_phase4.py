@@ -107,9 +107,13 @@ class InteractiveOrchestrator:
 
 def main():
     runner = core.IoContextRunner()
+    
     crypto = core.CryptoManager()
     crypto.initialize()
+    
     usb = core.UsbHubManager(runner)
+    usb.set_crypto_manager(crypto) # Serve per scrivere i certificati che AASDK si aspetta hardcoded
+    
     orchestrator = InteractiveOrchestrator()
     usb.set_orchestrator(orchestrator)
     
