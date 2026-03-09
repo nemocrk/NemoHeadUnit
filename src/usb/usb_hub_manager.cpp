@@ -113,10 +113,6 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    // AVVIO FONDAMENTALE DELLA RICEZIONE CONTINUA
-    usb_transport_->start();
-    messenger_->start();
-
     session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_, orchestrator_);
     session_manager_->start();
 
