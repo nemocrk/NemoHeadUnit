@@ -4,6 +4,7 @@
 #include "core/io_context_runner.hpp"
 #include "crypto/crypto_manager.hpp"
 #include "usb/usb_hub_manager.hpp"
+#include "python/py_orchestrator.hpp"
 
 namespace py = pybind11;
 
@@ -33,5 +34,9 @@ PYBIND11_MODULE(nemo_head_unit, m) {
     py::class_<nemo::UsbHubManager, std::shared_ptr<nemo::UsbHubManager>>(m, "UsbHubManager")
         .def(py::init<nemo::IoContextRunner&>())
         .def("start", &nemo::UsbHubManager::start, py::call_guard<py::gil_scoped_release>())
-        .def("stop", &nemo::UsbHubManager::stop, py::call_guard<py::gil_scoped_release>());
+        .def("stop", &nemo::UsbHubManager::stop, py::call_guard<py::gil_scoped_release>())
+        .def("set_orchestrator", 
+            [](std::shared_ptr<nemo::UsbHubManager> self, py::object orch) {
+                self->setOrchestrator(std::make_shared<nemo::PyOrchestrator>(std::move(orch)));
+            }, "Registra la classe Python che gestisce il protocollo AA.");
 }
