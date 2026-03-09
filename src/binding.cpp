@@ -6,6 +6,7 @@
 #include "usb/usb_hub_manager.hpp"
 #include "python/py_orchestrator.hpp"
 #include <aasdk/Messenger/ICryptor.hpp>
+#include <aasdk/common/ModernLogger.hpp>
 
 namespace py = pybind11;
 
@@ -13,10 +14,20 @@ void hello_world() {
     std::cout << "[NemoHeadUnit Core C++] Binding inizializzato con successo!" << std::endl;
 }
 
+void enable_aasdk_logging() {
+    std::cout << "[NemoHeadUnit] Abilitazione aasdk ModernLogger (TRACE/DEBUG)..." << std::endl;
+    aasdk::common::ModernLogger::initialize();
+    aasdk::common::ModernLogger::setLevel(aasdk::common::LogLevel::TRACE);
+    aasdk::common::ModernLogger::setLevel(aasdk::common::LogCategory::TRANSPORT, aasdk::common::LogLevel::DEBUG);
+    aasdk::common::ModernLogger::setLevel(aasdk::common::LogCategory::USB, aasdk::common::LogLevel::DEBUG);
+    aasdk::common::ModernLogger::setLevel(aasdk::common::LogCategory::TCP, aasdk::common::LogLevel::DEBUG);
+}
+
 PYBIND11_MODULE(nemo_head_unit, m) {
     m.doc() = "NemoHeadUnit C++ Core extension module";
     
     m.def("hello_world", &hello_world, "Stampa un messaggio di test");
+    m.def("enable_aasdk_logging", &enable_aasdk_logging, "Abilita i log nativi di aasdk per il debug");
 
     // Phase 2: Event Loop Runner
     py::class_<nemo::IoContextRunner, std::shared_ptr<nemo::IoContextRunner>>(m, "IoContextRunner")
