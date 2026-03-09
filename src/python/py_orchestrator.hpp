@@ -17,6 +17,21 @@ public:
         }
     }
 
+    void onVersionStatus(int major, int minor, int status) override {
+        pybind11::gil_scoped_acquire acquire;
+        if (!obj_.is_none() && pybind11::hasattr(obj_, "on_version_status")) {
+            try {
+                obj_.attr("on_version_status")(major, minor, status);
+            } catch (const std::exception& e) {
+                std::cerr << "[PyOrchestrator] Errore esecuzione on_version_status: " << e.what() << std::endl;
+            }
+        }
+    }
+
+    std::string onHandshake(const std::string& payload_bytes) override {
+        return callPythonMethod("on_handshake", payload_bytes);
+    }
+
     std::string onServiceDiscoveryRequest(const std::string& request_bytes) override {
         return callPythonMethod("on_service_discovery_request", request_bytes);
     }
