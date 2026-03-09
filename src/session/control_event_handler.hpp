@@ -85,19 +85,10 @@ public:
             throw std::runtime_error("AuthResponse ParseFromString failed");
         }
         channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
-        
-        // AL TERMINE dell'AuthComplete, la documentazione specifica che la HeadUnit DEVE 
-        // innescare subito il ServiceDiscoveryRequest, altrimenti lo smartphone rimane in stallo aspettandolo.
-        std::cout << "[Control] Innesco invio ServiceDiscoveryRequest..." << std::endl;
-        channel_->sendServiceDiscoveryRequest(makePromise("Control/SendServiceDiscoveryRequest"));
     }
 
-    void onServiceDiscoveryResponse(const aap_protobuf::service::control::message::ServiceDiscoveryResponse &response) override {
-        // La chiamata da smartphone verso HU (in risposta al nostro request)
-        std::cout << "[Control] Ricevuta ServiceDiscoveryResponse dallo smartphone. Canali negoziati: " << response.channels_size() << std::endl;
-        // Non facciamo nulla finché Python non deciderà cosa estrarre.
-    }
-
+    // NOTA: Android Auto 2026/AASDK ha la ServiceDiscovery *Invertita* rispetto ai vecchi docs.
+    // Lo smartphone agisce come Master/Client e manda lui la Request. La HU riceve Request e manda Response.
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
