@@ -86,8 +86,8 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    // Fase 4: Avvio del SessionManager per la negoziazione, ora passiamo il cryptor per fare handshake
-    session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_);
+    // Fase 4: Avvio del SessionManager passando anche l'orchestrator per le logiche in Python
+    session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_, orchestrator_);
     
     session_manager_->start();
 
