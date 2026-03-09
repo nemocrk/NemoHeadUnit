@@ -4,6 +4,7 @@
 #include <aasdk/Channel/MediaSink/Video/IVideoMediaSinkServiceEventHandler.hpp>
 #include <aasdk/Channel/MediaSink/Video/IVideoMediaSinkService.hpp>
 #include <aasdk/Channel/Promise.hpp>
+#include "iorchestrator.hpp"
 
 namespace nemo {
 
@@ -11,8 +12,10 @@ class VideoEventHandler : public aasdk::channel::mediasink::video::IVideoMediaSi
 public:
     using Pointer = std::shared_ptr<VideoEventHandler>;
 
-    explicit VideoEventHandler(boost::asio::io_service::strand& strand, aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel)
-        : strand_(strand), channel_(std::move(channel)) {}
+    explicit VideoEventHandler(boost::asio::io_service::strand& strand, 
+                               aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel,
+                               std::shared_ptr<IOrchestrator> orchestrator)
+        : strand_(strand), channel_(std::move(channel)), orchestrator_(std::move(orchestrator)) {}
 
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
@@ -27,8 +30,16 @@ public:
 
     void onChannelOpenRequest(const aap_protobuf::service::control::message::ChannelOpenRequest& request) override {
         std::cout << "[Video] ChannelOpenRequest received." << std::endl;
+        
+        std::string req_str = request.SerializeAsString();
+        std::string res_str = orchestrator_ ? orchestrator_->onVideoChannelOpenRequest(req_str) : "";
+
         aap_protobuf::service::control::message::ChannelOpenResponse response;
-        response.set_status(static_cast<decltype(response.status())>(0));
+        if (!res_str.empty()) {
+            response.ParseFromString(res_str);
+        } else {
+            response.set_status(static_cast<decltype(response.status())>(0));
+        }
         channel_->sendChannelOpenResponse(response, makePromise("Video/ChannelOpenResponse"));
     }
 
@@ -68,6 +79,7 @@ public:
 private:
     boost::asio::io_service::strand& strand_;
     aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel_;
+    std::shared_ptr<IOrchestrator> orchestrator_;
 };
 
 } // namespace nemo
