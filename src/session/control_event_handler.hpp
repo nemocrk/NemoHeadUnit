@@ -11,7 +11,7 @@
 
 namespace nemo {
 
-class ControlEventHandler : public aasdk::channel::control::IControlServiceChannelEventHandler {
+class ControlEventHandler : public aasdk::channel::control::IControlServiceChannelEventHandler, public std::enable_shared_from_this<ControlEventHandler> {
 public:
     using Pointer = std::shared_ptr<ControlEventHandler>;
 
@@ -24,8 +24,10 @@ public:
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
         p->then(
-            [tag]() {
-                std::cout << "[" << tag << "] send promise fulfilled (SUCCESS)" << std::endl;
+            [tag, self = shared_from_this()]() {
+                std::cout << "[" << tag << "] send promise fulfilled (SUCCESS). Innesco nuova receive()..." << std::endl;
+                // Re-innesca la ricezione asincrona
+                self->channel_->receive(self);
             },
             [tag](const aasdk::error::Error& e) {
                 std::cerr << "[" << tag << "] send failed: " << e.what() << std::endl;
