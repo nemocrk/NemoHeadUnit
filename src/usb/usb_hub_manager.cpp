@@ -113,10 +113,20 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
+    // ENABLE AASDK INTERNAL LOGGING
+    easylogging::enableLogging();
+
     session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_, orchestrator_);
     session_manager_->start();
 
     std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;
+    
+    // Inneschiamo l'ascolto esplicito del Transport in ricezione.
+    // In AASDK moderno (e contrariamente a f1xpl originario), il Messenger si innesca da solo
+    // quando si chiamano receive() sui Channel. L'unico anello mancante era che l'USBTransport
+    // necessita di una receive promise se la catena è bloccata. 
+    // Tuttavia, per diagnosticare, attiviamo il logging profondo.
+
     if (python_callback_) {
         pybind11::gil_scoped_acquire acquire;
         python_callback_(true, "Connessione AOAP stabilita e Sessione AA avviata");
