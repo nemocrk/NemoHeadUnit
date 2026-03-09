@@ -40,6 +40,29 @@ class InteractiveOrchestrator:
         print("[Orchestrator] Cryptor inizializzato dal C++.")
         self.cryptor = cryptor
 
+    def _drain_tls_out(self, max_iters: int = 32) -> bytes:
+        out = b""
+        for _ in range(max_iters):
+            chunk = self.cryptor.read_handshake_buffer()
+            if not chunk:
+                break
+            out += chunk
+        return out
+
+    def _step_handshake_and_collect(self, max_steps: int = 32):
+        done = False
+        out = b""
+        for _ in range(max_steps):
+            done = bool(self.cryptor.do_handshake())
+            drained = self._drain_tls_out()
+            if drained:
+                out += drained
+                # continua: potrebbe esserci altro output subito disponibile
+                continue
+            # se non ho output nuovo, mi fermo e attendo input dal telefono
+            break
+        return done, out
+
     def _log_and_send(self, label: str, data: bytes) -> bytes:
         print(f"\n{'='*50}")
         print(f"[Azione: {label}]")
@@ -54,24 +77,27 @@ class InteractiveOrchestrator:
         print(f"\n[Orchestrator] on_version_status: {major}.{minor} (status={status})")
         if status != 0:
             raise RuntimeError(f"Version negotiation fallita (status={status})")
-        
-        self.cryptor.do_handshake()
-        out_chunk = self.cryptor.read_handshake_buffer()
-        return self._log_and_send("Invia Primo Chunk TLS (Flight 1)", out_chunk)
+
+        done, out = self._step_handshake_and_collect()
+        # in questa fase tipicamente done è False, ma out non deve essere parziale
+        return self._log_and_send("Invia TLS Flight 1 (drain)", out)
 
     def on_handshake(self, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] Ricevuto Handshake payload ({len(payload)} bytes)")
         if payload:
             self.cryptor.write_handshake_buffer(payload)
 
-        done = self.cryptor.do_handshake()
-        out_chunk = self.cryptor.read_handshake_buffer()
+        done, out = self._step_handshake_and_collect()
 
         if not done:
-            return self._log_and_send("Invia Chunk TLS Intermedio", out_chunk)
+            return self._log_and_send("Invia TLS chunk (drain)", out)
 
         print("\n[Orchestrator] *** HANDSHAKE TLS COMPLETATO ***")
         self.handshake_done = True
+
+        # se c'è output finale, invialo; altrimenti vuoto
+        if out:
+            return self._log_and_send("Invia TLS finale (drain)", out)
         return b""
 
     def get_auth_complete_response(self) -> bytes:
