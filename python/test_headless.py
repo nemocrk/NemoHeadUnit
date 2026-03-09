@@ -16,6 +16,40 @@ except ImportError as e:
     print(f"Assicurati di aver compilato il progetto e che il modulo nemo_head_unit.so esista in {build_dir}.")
     sys.exit(1)
 
+
+class HeadUnitOrchestrator:
+    """
+    Questa classe gestisce da Python l'handshake e l'orchestrazione dei messaggi Protobuf C++.
+    Al momento restituiamo stringhe vuote per attivare il fallback C++ interno, 
+    ma la pipeline di passaggio dei byte avanti/indietro e le chiamate di metodo sono fully-working.
+    """
+    def on_version_status(self, major: int, minor: int, status: int):
+        print(f"[Python Orchestrator] Versione negoziata! ({major}.{minor} status: {status})")
+        # Dopo questo, il C++ avviera' da solo la richiesta del primo chunk di Handshake.
+
+    def on_handshake(self, payload: bytes) -> bytes:
+        print(f"[Python Orchestrator] Handshake chunk in transito, delegando cryptor C++ (size: {len(payload)})")
+        # Restituendo vuoto, diamo via libera al ControlEventHandler C++ di usare il Cryptor e 
+        # autogestire il loop dei chunk. Quando i Protobuf Python saranno pronti, potremo decriptare 
+        # da qua.
+        return b""
+
+    def on_service_discovery_request(self, payload: bytes) -> bytes:
+        print(f"[Python Orchestrator] Ricevuta ServiceDiscoveryRequest! size: {len(payload)}")
+        return b""
+
+    def on_ping_request(self, payload: bytes) -> bytes:
+        return b""
+
+    def on_audio_focus_request(self, payload: bytes) -> bytes:
+        print(f"[Python Orchestrator] Ricevuta AudioFocusRequest! size: {len(payload)}")
+        return b""
+
+    def on_video_channel_open_request(self, payload: bytes) -> bytes:
+        print(f"[Python Orchestrator] Ricevuta Video ChannelOpenRequest! size: {len(payload)}")
+        return b""
+
+
 def generate_certificates():
     cert_dir = os.path.join(project_root, 'cert')
     crt_file = os.path.join(cert_dir, 'headunit.crt')
@@ -64,13 +98,17 @@ def main():
     runner = nemo_head_unit.IoContextRunner()
     runner.start()
     
-    # 4. Avvia manager USB
+    # 4. Inizializza Orchestrator
+    orchestrator = HeadUnitOrchestrator()
+    
+    # 5. Avvia manager USB agganciando Python Orchestrator
     hub = nemo_head_unit.UsbHubManager(runner)
+    hub.set_orchestrator(orchestrator)
     hub.start(usb_callback)
     
-    # 5. Loop di attesa
+    # 6. Loop di attesa (la UI prenderà il posto di questo in futuro)
     try:
-        timeout = 60
+        timeout = 600
         while timeout > 0:
             time.sleep(1)
             timeout -= 1
