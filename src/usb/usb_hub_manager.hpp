@@ -7,6 +7,7 @@
 #include "core/io_context_runner.hpp"
 #include "session/session_manager.hpp"
 #include "session/iorchestrator.hpp"
+#include "crypto/crypto_manager.hpp"
 #include <aasdk/USB/USBWrapper.hpp>
 #include <aasdk/USB/USBHub.hpp>
 #include <aasdk/USB/AccessoryModeQueryFactory.hpp>
@@ -37,14 +38,20 @@ namespace nemo {
             orchestrator_ = std::move(orchestrator);
         }
 
+        void setCryptoManager(std::shared_ptr<CryptoManager> crypto) {
+            crypto_manager_ = std::move(crypto);
+        }
+
     private:
         void startDiscovery();
         void onDeviceDiscovered(aasdk::usb::DeviceHandle handle);
         void onDiscoveryFailed(const aasdk::error::Error& e);
+        void ensureCertificatesExist(const std::string& cert_str, const std::string& key_str);
 
         IoContextRunner& runner_;
         ConnectCallback python_callback_;
         std::shared_ptr<IOrchestrator> orchestrator_;
+        std::shared_ptr<CryptoManager> crypto_manager_;
 
         std::unique_ptr<LibusbContext> libusb_context_;
         std::unique_ptr<aasdk::usb::USBWrapper> usb_wrapper_;
