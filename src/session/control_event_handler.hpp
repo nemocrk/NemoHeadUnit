@@ -45,7 +45,7 @@ public:
 
         // Invia primo flight TLS deciso da Python
         aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
-        channel_->sendHandshake(aasdk::common::DataConstBuffer(data), makePromise("Control/SendHandshake1"));
+        channel_->sendHandshake(data, makePromise("Control/SendHandshake1"));
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
@@ -54,13 +54,13 @@ public:
             throw std::runtime_error("Orchestrator non impostato");
         }
 
-        std::string in(reinterpret_cast<const char*>(payload.data), payload.size);
+        std::string in(reinterpret_cast<const char*>(payload.cdata), payload.size);
         std::string out = orchestrator_->onHandshake(in);
         
         if (!out.empty()) {
             // C'è ancora handshake da fare
             aasdk::common::Data data(out.begin(), out.end());
-            channel_->sendHandshake(aasdk::common::DataConstBuffer(data), makePromise("Control/SendHandshakeX"));
+            channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
             return;
         }
 
