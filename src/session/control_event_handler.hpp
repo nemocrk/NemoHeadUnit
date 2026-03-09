@@ -36,45 +36,24 @@ public:
 
     void onVersionResponse(uint16_t majorCode, uint16_t minorCode, aap_protobuf::shared::MessageStatus status) override {
         std::cout << "[Control] VersionResponse: " << majorCode << "." << minorCode << " Status: " << status << std::endl;
-        if (!orchestrator_) {
-            throw std::runtime_error("Orchestrator non impostato");
-        }
-
-        std::cout << "[Control] Chiamo Python onVersionStatus..." << std::endl;
-        std::string first_chunk = orchestrator_->onVersionStatus(majorCode, minorCode, status);
-        std::cout << "[Control] Python ha ritornato chunk TLS di size: " << first_chunk.size() << std::endl;
-
-        if (first_chunk.empty()) {
-            throw std::runtime_error("Python MUST return first handshake chunk");
-        }
-
-        // Invia primo flight TLS deciso da Python
-        aasdk::common::Data data(first_chunk.begin(), first_chunk.end());
-        std::cout << "[Control] Invio primo Handshake Chunk via AASDK..." << std::endl;
-        channel_->sendHandshake(data, makePromise("Control/SendHandshake1"));
-        std::cout << "[Control] Chiamata sendHandshake1 completata (asincrona)." << std::endl;
+        
+        // In AASDK, una volta ricevuta la Version Response, il protocollo passa alla negoziazione TLS.
+        // La libreria fa il grosso del lavoro. L'unica cosa che dobbiamo fare 
+        // è dire all'InStream di iniziare ad accettare l'Handshake.
+        // Poichè Cryptor e Messenger lo fanno in automatico, non facciamo nulla. 
+        // Aspettiamo che scatti onHandshake vuoto (che segnala la fine di TLS).
     }
 
     void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
-        std::cout << "[Control] Handshake chunk ricevuto, size: " << payload.size << std::endl;
+        // Quando aasdk chiama questa funzione con payload.size == 0, significa che l'handshake SSL
+        // interno è stato concluso con successo, ed è ora di mandare AuthComplete.
+        std::cout << "[Control] onHandshake (interno C++) scattato. Size = " << payload.size << std::endl;
+        
         if (!orchestrator_) {
             throw std::runtime_error("Orchestrator non impostato");
         }
 
-        std::string in(reinterpret_cast<const char*>(payload.cdata), payload.size);
-        std::string out = orchestrator_->onHandshake(in);
-        
-        if (!out.empty()) {
-            // C'è ancora handshake da fare
-            aasdk::common::Data data(out.begin(), out.end());
-            std::cout << "[Control] Invio successivo Handshake Chunk via AASDK..." << std::endl;
-            channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
-            return;
-        }
-
-        // out è vuoto => Python ha dichiarato handshake finito.
-        // Python DEVE fornire l'AuthCompleteRequest Protobuf.
-        std::cout << "[Control] Handshake TLS completato da Python. Richiesta AuthResponse..." << std::endl;
+        std::cout << "[Control] Handshake TLS completato da AASDK. Richiesta AuthResponse a Python..." << std::endl;
         std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
         if (auth_bytes.empty()) {
             throw std::runtime_error("Python MUST return AuthComplete/AuthResponse bytes");
@@ -87,8 +66,6 @@ public:
         channel_->sendAuthComplete(response, makePromise("Control/AuthComplete"));
     }
 
-    // NOTA: Android Auto 2026/AASDK ha la ServiceDiscovery *Invertita* rispetto ai vecchi docs.
-    // Lo smartphone agisce come Master/Client e manda lui la Request. La HU riceve Request e manda Response.
     void onServiceDiscoveryRequest(const aap_protobuf::service::control::message::ServiceDiscoveryRequest &request) override {
         std::cout << "[Control] ServiceDiscoveryRequest received." << std::endl;
         if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
