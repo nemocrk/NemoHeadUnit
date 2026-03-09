@@ -106,6 +106,15 @@ class InteractiveOrchestrator:
 
 
 def main():
+    print("\n" + "*"*60)
+    print("* TEST HEADLESS NON-BLOCKING (ZERO FALLBACK)      *")
+    print("* Collega un dispositivo Android via USB          *")
+    print("*"*60 + "\n")
+
+    # Inizializzo logging interno aasdk (richiesto per debug handshake)
+    if hasattr(core, "enable_aasdk_logging"):
+        core.enable_aasdk_logging()
+
     runner = core.IoContextRunner()
     
     crypto = core.CryptoManager()
@@ -123,11 +132,6 @@ def main():
         else:
             print("\n[Python Callback] Errore connessione:", msg)
             runner.stop()
-
-    print("\n" + "*"*60)
-    print("* TEST HEADLESS NON-BLOCKING (ZERO FALLBACK)      *")
-    print("* Collega un dispositivo Android via USB          *")
-    print("*"*60 + "\n")
 
     usb.start(on_connect)
     runner.start()
