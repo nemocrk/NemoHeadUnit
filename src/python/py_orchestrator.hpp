@@ -56,6 +56,11 @@ public:
         return callPythonMethod("on_service_discovery_request", request_bytes);
     }
 
+    // Chiamato da ControlEventHandler per ogni ChannelOpenRequest inviata dallo smartphone
+    std::string onChannelOpenRequest(const std::string& request_bytes) override {
+        return callPythonMethod("on_channel_open_request", request_bytes);
+    }
+
     std::string onPingRequest(const std::string& request_bytes) override {
         return callPythonMethod("on_ping_request", request_bytes);
     }
