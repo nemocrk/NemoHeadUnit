@@ -8,6 +8,7 @@
 #include <aasdk/Channel/Promise.hpp>
 #include "control_event_handler.hpp"
 #include "video_event_handler.hpp"
+#include "iorchestrator.hpp"
 
 namespace nemo {
 
@@ -17,8 +18,9 @@ public:
 
     SessionManager(boost::asio::io_context& io_ctx, 
                    aasdk::messenger::IMessenger::Pointer messenger,
-                   aasdk::messenger::ICryptor::Pointer cryptor)
-        : strand_(io_ctx), messenger_(std::move(messenger)), cryptor_(std::move(cryptor)) {}
+                   aasdk::messenger::ICryptor::Pointer cryptor,
+                   std::shared_ptr<IOrchestrator> orchestrator)
+        : strand_(io_ctx), messenger_(std::move(messenger)), cryptor_(std::move(cryptor)), orchestrator_(std::move(orchestrator)) {}
 
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
@@ -39,7 +41,7 @@ public:
             control_channel_ = std::make_shared<aasdk::channel::control::ControlServiceChannel>(
                 strand_, messenger_
             );
-            control_handler_ = std::make_shared<ControlEventHandler>(strand_, control_channel_, cryptor_);
+            control_handler_ = std::make_shared<ControlEventHandler>(strand_, control_channel_, cryptor_, orchestrator_);
             control_channel_->receive(control_handler_);
             control_channel_->sendVersionRequest(makePromise("Control/VersionRequest"));
 
@@ -49,7 +51,7 @@ public:
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
                 strand_, messenger_, videoChannelId
             );
-            video_handler_ = std::make_shared<VideoEventHandler>(strand_, video_channel_);
+            video_handler_ = std::make_shared<VideoEventHandler>(strand_, video_channel_, orchestrator_);
             video_channel_->receive(video_handler_);
         });
     }
@@ -67,6 +69,7 @@ private:
     boost::asio::io_service::strand strand_;
     aasdk::messenger::IMessenger::Pointer messenger_;
     aasdk::messenger::ICryptor::Pointer cryptor_;
+    std::shared_ptr<IOrchestrator> orchestrator_;
 
     aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;
     ControlEventHandler::Pointer control_handler_;
