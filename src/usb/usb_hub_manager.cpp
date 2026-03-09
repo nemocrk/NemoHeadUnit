@@ -1,5 +1,6 @@
 #include "usb_hub_manager.hpp"
 #include <iostream>
+#include <pybind11/pybind11.h>
 
 namespace nemo {
 
@@ -15,7 +16,10 @@ bool UsbHubManager::start(ConnectCallback callback) {
 
     libusb_context_ = std::make_unique<LibusbContext>(io_ctx);
     if (!libusb_context_->initialize()) {
-        if (python_callback_) python_callback_(false, "Errore init libusb");
+        if (python_callback_) {
+            pybind11::gil_scoped_acquire acquire;
+            python_callback_(false, "Errore init libusb");
+        }
         return false;
     }
 
@@ -56,7 +60,10 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     aoap_device_ = aasdk::usb::AOAPDevice::create(*usb_wrapper_, runner_.get_io_context(), std::move(handle));
     
     if (!aoap_device_) {
-        if (python_callback_) python_callback_(false, "Fallita la creazione di AOAPDevice");
+        if (python_callback_) {
+            pybind11::gil_scoped_acquire acquire;
+            python_callback_(false, "Fallita la creazione di AOAPDevice");
+        }
         return;
     }
 
@@ -86,6 +93,7 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
 
     std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;
     if (python_callback_) {
+        pybind11::gil_scoped_acquire acquire;
         python_callback_(true, "Connessione AOAP stabilita e Sessione AA avviata");
     }
 }
@@ -93,6 +101,7 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
 void UsbHubManager::onDiscoveryFailed(const aasdk::error::Error& e) {
     std::cerr << "[UsbHubManager] Discovery fallita o interrotta. Errore: " << e.what() << std::endl;
     if (python_callback_) {
+        pybind11::gil_scoped_acquire acquire;
         python_callback_(false, std::string("Discovery fail: ") + e.what());
     }
 }
