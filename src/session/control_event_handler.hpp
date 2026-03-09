@@ -36,24 +36,39 @@ public:
 
     void onVersionResponse(uint16_t majorCode, uint16_t minorCode, aap_protobuf::shared::MessageStatus status) override {
         std::cout << "[Control] VersionResponse: " << majorCode << "." << minorCode << " Status: " << status << std::endl;
-        
-        // In AASDK, una volta ricevuta la Version Response, il protocollo passa alla negoziazione TLS.
-        // La libreria fa il grosso del lavoro. L'unica cosa che dobbiamo fare 
-        // è dire all'InStream di iniziare ad accettare l'Handshake.
-        // Poichè Cryptor e Messenger lo fanno in automatico, non facciamo nulla. 
-        // Aspettiamo che scatti onHandshake vuoto (che segnala la fine di TLS).
-    }
-
-    void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
-        // Quando aasdk chiama questa funzione con payload.size == 0, significa che l'handshake SSL
-        // interno è stato concluso con successo, ed è ora di mandare AuthComplete.
-        std::cout << "[Control] onHandshake (interno C++) scattato. Size = " << payload.size << std::endl;
-        
         if (!orchestrator_) {
             throw std::runtime_error("Orchestrator non impostato");
         }
 
+        std::cout << "[Control] Inizializzazione Handshake AASDK..." << std::endl;
+        
+        // IL FONDAMENTALE INNESCO: AASDK ha bisogno di questo trigger crittografico interno
+        // per iniziare a spingere fuori il primo byte (ClientHello) e iniziare il tunneling SSL.
+        // Passiamo i dati vuoti o fittizi per fare innescare il Cryptor C++.
+        if (cryptor_) {
+            cryptor_->doHandshake(aasdk::common::Data());
+        } else {
+            std::cerr << "[Control] Nessun Cryptor associato!" << std::endl;
+        }
+    }
+
+    void onHandshake(const aasdk::common::DataConstBuffer &payload) override {
+        std::cout << "[Control] onHandshake scattato. Size = " << payload.size << std::endl;
+        
+        // In AASDK, se il payload.size > 0, significa che l'SSL interno ha bufferato un pacchetto
+        // e dobbiamo rispedirlo fuori sul cavo. Se payload.size == 0, l'SSL è finito.
+        
+        if (payload.size > 0) {
+            aasdk::common::Data data(payload.cdata, payload.cdata + payload.size);
+            std::cout << "[Control] Inoltro frammento Handshake..." << std::endl;
+            channel_->sendHandshake(data, makePromise("Control/SendHandshakeX"));
+            return;
+        }
+
+        // Se il payload è vuoto o null, l'handshake in C++ è completato!
         std::cout << "[Control] Handshake TLS completato da AASDK. Richiesta AuthResponse a Python..." << std::endl;
+        if (!orchestrator_) throw std::runtime_error("Orchestrator non impostato");
+
         std::string auth_bytes = orchestrator_->getAuthCompleteResponse();
         if (auth_bytes.empty()) {
             throw std::runtime_error("Python MUST return AuthComplete/AuthResponse bytes");
