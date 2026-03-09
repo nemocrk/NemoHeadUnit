@@ -1,6 +1,8 @@
 #include "usb_hub_manager.hpp"
 #include <iostream>
 #include <pybind11/pybind11.h>
+#include <fstream>
+#include <sys/stat.h>
 
 namespace nemo {
 
@@ -54,6 +56,21 @@ void UsbHubManager::startDiscovery() {
     usb_hub_->start(std::move(promise));
 }
 
+void UsbHubManager::ensureCertificatesExist(const std::string& cert_str, const std::string& key_str) {
+    mkdir("cert", 0777);
+    std::ofstream cert_file("cert/headunit.crt");
+    if(cert_file.is_open()) {
+        cert_file << cert_str;
+        cert_file.close();
+    }
+    
+    std::ofstream key_file("cert/headunit.key");
+    if(key_file.is_open()) {
+        key_file << key_str;
+        key_file.close();
+    }
+}
+
 void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     std::cout << "[UsbHubManager] Device compatibile rilevato (MODO AOAP ATTIVO). Costruzione Transport..." << std::endl;
     
@@ -73,6 +90,12 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
 
     ssl_wrapper_ = std::make_shared<aasdk::transport::SSLWrapper>();
     cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
+    
+    // Inizializza i file richiesti da AASDK
+    if(crypto_manager_) {
+        ensureCertificatesExist(crypto_manager_->getCertificate(), crypto_manager_->getPrivateKey());
+    }
+    
     cryptor_->init();
 
     if (orchestrator_) {
