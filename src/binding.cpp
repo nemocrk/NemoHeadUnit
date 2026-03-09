@@ -5,6 +5,7 @@
 #include "crypto/crypto_manager.hpp"
 #include "usb/usb_hub_manager.hpp"
 #include "python/py_orchestrator.hpp"
+#include <aasdk/Messenger/ICryptor.hpp>
 
 namespace py = pybind11;
 
@@ -29,6 +30,19 @@ PYBIND11_MODULE(nemo_head_unit, m) {
         .def("initialize", &nemo::CryptoManager::initialize)
         .def("get_certificate", &nemo::CryptoManager::getCertificate)
         .def("get_private_key", &nemo::CryptoManager::getPrivateKey);
+        
+    // Phase 4: Cryptor per delegare SSL a Python
+    py::class_<aasdk::messenger::ICryptor, std::shared_ptr<aasdk::messenger::ICryptor>>(m, "ICryptor")
+        .def("do_handshake", &aasdk::messenger::ICryptor::doHandshake)
+        .def("write_handshake_buffer", [](aasdk::messenger::ICryptor& self, py::bytes data) {
+            std::string str = data;
+            aasdk::common::DataConstBuffer buf(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+            self.writeHandshakeBuffer(buf);
+        })
+        .def("read_handshake_buffer", [](aasdk::messenger::ICryptor& self) {
+            auto buf = self.readHandshakeBuffer();
+            return py::bytes(reinterpret_cast<const char*>(buf.data), buf.size);
+        });
 
     // Phase 3: Usb Hub Manager
     py::class_<nemo::UsbHubManager, std::shared_ptr<nemo::UsbHubManager>>(m, "UsbHubManager")
