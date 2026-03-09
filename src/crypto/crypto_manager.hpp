@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
 
-namespace nemo {
-    class CryptoManager {
+namespace nemo
+{
+    class CryptoManager
+    {
     public:
         CryptoManager();
         ~CryptoManager();
@@ -14,7 +16,7 @@ namespace nemo {
     private:
         std::string certificate_;
         std::string private_key_;
-        
-        bool generateKeysAndCertificate();
+
+        bool loadKeysAndCertificateFromFile();
     };
 }

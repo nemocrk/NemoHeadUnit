@@ -40,6 +40,8 @@ pybind11_add_module(nemo_head_unit
 target_include_directories(nemo_head_unit PRIVATE 
     ${LIBUSB_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    # Aggiunge la directory dei sorgenti di aasdk per risolvere gli #include
+    ${aasdk_SOURCE_DIR}/include
 )
 target_link_libraries(nemo_head_unit PRIVATE
     aasdk
