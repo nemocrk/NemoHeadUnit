@@ -20,27 +20,36 @@ public:
     void setCryptor(std::shared_ptr<aasdk::messenger::ICryptor> cryptor) override {
         pybind11::gil_scoped_acquire acquire;
         if (!obj_.is_none() && pybind11::hasattr(obj_, "set_cryptor")) {
-            try {
-                obj_.attr("set_cryptor")(cryptor);
-            } catch (const std::exception& e) {
-                std::cerr << "[PyOrchestrator] Errore esecuzione set_cryptor: " << e.what() << std::endl;
-            }
+            obj_.attr("set_cryptor")(cryptor);
+        } else {
+            throw std::runtime_error("Python orchestrator missing method: set_cryptor");
         }
     }
 
-    void onVersionStatus(int major, int minor, int status) override {
+    std::string onVersionStatus(int major, int minor, int status) override {
         pybind11::gil_scoped_acquire acquire;
         if (!obj_.is_none() && pybind11::hasattr(obj_, "on_version_status")) {
-            try {
-                obj_.attr("on_version_status")(major, minor, status);
-            } catch (const std::exception& e) {
-                std::cerr << "[PyOrchestrator] Errore esecuzione on_version_status: " << e.what() << std::endl;
+            pybind11::object res = obj_.attr("on_version_status")(major, minor, status);
+            if (!res.is_none()) {
+                return std::string(pybind11::cast<pybind11::bytes>(res));
             }
         }
+        throw std::runtime_error("Python orchestrator missing method or returned None: on_version_status");
     }
 
     std::string onHandshake(const std::string& payload_bytes) override {
         return callPythonMethod("on_handshake", payload_bytes);
+    }
+
+    std::string getAuthCompleteResponse() override {
+        pybind11::gil_scoped_acquire acquire;
+        if (!obj_.is_none() && pybind11::hasattr(obj_, "get_auth_complete_response")) {
+            pybind11::object res = obj_.attr("get_auth_complete_response")();
+            if (!res.is_none()) {
+                return std::string(pybind11::cast<pybind11::bytes>(res));
+            }
+        }
+        throw std::runtime_error("Python orchestrator missing method or returned None: get_auth_complete_response");
     }
 
     std::string onServiceDiscoveryRequest(const std::string& request_bytes) override {
@@ -63,16 +72,12 @@ private:
     std::string callPythonMethod(const char* method_name, const std::string& payload) {
         pybind11::gil_scoped_acquire acquire;
         if (!obj_.is_none() && pybind11::hasattr(obj_, method_name)) {
-            try {
-                pybind11::object res = obj_.attr(method_name)(pybind11::bytes(payload));
-                if (!res.is_none()) {
-                    return std::string(pybind11::cast<pybind11::bytes>(res));
-                }
-            } catch (const std::exception& e) {
-                std::cerr << "[PyOrchestrator] Errore esecuzione " << method_name << ": " << e.what() << std::endl;
+            pybind11::object res = obj_.attr(method_name)(pybind11::bytes(payload));
+            if (!res.is_none()) {
+                return std::string(pybind11::cast<pybind11::bytes>(res));
             }
         }
-        return "";
+        throw std::runtime_error(std::string("Python orchestrator missing method or returned None: ") + method_name);
     }
 
     pybind11::object obj_;
