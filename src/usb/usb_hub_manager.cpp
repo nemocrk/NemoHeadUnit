@@ -91,7 +91,6 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     ssl_wrapper_ = std::make_shared<aasdk::transport::SSLWrapper>();
     cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
     
-    // Inizializza i file richiesti da AASDK
     if(crypto_manager_) {
         ensureCertificatesExist(crypto_manager_->getCertificate(), crypto_manager_->getPrivateKey());
     }
@@ -113,7 +112,16 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    session_manager_ = std::make_shared<SessionManager>(runner_.get_io_context(), messenger_, cryptor_, orchestrator_);
+    // Phase 5: video_sink_ (se impostato) viene propagato a SessionManager
+    // che lo passa a VideoEventHandler. Se nullptr, comportamento identico
+    // alla Phase 4 (dump/log only, senza GStreamer).
+    session_manager_ = std::make_shared<SessionManager>(
+        runner_.get_io_context(),
+        messenger_,
+        cryptor_,
+        orchestrator_,
+        video_sink_          // Phase 5: nullptr-safe
+    );
     session_manager_->start();
 
     std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;
