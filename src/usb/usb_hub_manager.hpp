@@ -8,6 +8,7 @@
 #include "session/session_manager.hpp"
 #include "session/iorchestrator.hpp"
 #include "crypto/crypto_manager.hpp"
+#include "gst/gst_video_sink.hpp"
 #include <aasdk/USB/USBWrapper.hpp>
 #include <aasdk/USB/USBHub.hpp>
 #include <aasdk/USB/AccessoryModeQueryFactory.hpp>
@@ -42,6 +43,11 @@ namespace nemo {
             crypto_manager_ = std::move(crypto);
         }
 
+        // Phase 5: imposta il GstVideoSink da propagare a SessionManager
+        void setVideoSink(std::shared_ptr<GstVideoSink> sink) {
+            video_sink_ = std::move(sink);
+        }
+
     private:
         void startDiscovery();
         void onDeviceDiscovered(aasdk::usb::DeviceHandle handle);
@@ -52,6 +58,7 @@ namespace nemo {
         ConnectCallback python_callback_;
         std::shared_ptr<IOrchestrator> orchestrator_;
         std::shared_ptr<CryptoManager> crypto_manager_;
+        std::shared_ptr<GstVideoSink>  video_sink_;  // Phase 5
 
         std::unique_ptr<LibusbContext> libusb_context_;
         std::unique_ptr<aasdk::usb::USBWrapper> usb_wrapper_;
