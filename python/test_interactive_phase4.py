@@ -22,32 +22,51 @@ try:
     from aasdk_proto.aap_protobuf.service.control.message import PingResponse_pb2
     from aasdk_proto.aap_protobuf.service.control.message import AudioFocusNotification_pb2
     from aasdk_proto.aap_protobuf.shared import MessageStatus_pb2
-    from aasdk_proto.aap_protobuf.service.Service_pb2 import ServiceConfiguration
-    # Media sink (video + audio output)
-    from aasdk_proto.aap_protobuf.service.media.sink.MediaSinkService_pb2 import MediaSinkService
+
+    # ── Media Sink (video + audio) ────────────────────────────────────────────
+    # Ref: VideoMediaSinkService-14.cpp / AudioMediaSinkService-19.cpp
+    from aasdk_proto.aap_protobuf.service.media.sink.message.MediaSinkService_pb2 import MediaSinkService
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoCodecResolutionType_pb2 import VideoCodecResolutionType
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoFrameRateType_pb2 import VideoFrameRateType
-    from aasdk_proto.aap_protobuf.service.media.sink.message.DisplayType_pb2 import DisplayType
-    from aasdk_proto.aap_protobuf.service.media.sink.message.AudioType_pb2 import AudioType        # [FIX-2]
-    # Sensor source
+    # AudioStreamType corretto: C++ usa aap_protobuf::service::media::sink::message::AudioStreamType
+    from aasdk_proto.aap_protobuf.service.media.sink.message.AudioStreamType_pb2 import AudioStreamType
+    # MediaCodecType per available_type
+    from aasdk_proto.aap_protobuf.service.media.shared.message.MediaCodecType_pb2 import MediaCodecType
+    # AudioConfig per sink audio: campi sampling_rate / number_of_bits / number_of_channels
+    from aasdk_proto.aap_protobuf.service.media.sink.message.AudioConfig_pb2 import AudioConfig as AudioSinkConfig
+
+    # ── Sensor Source ─────────────────────────────────────────────────────────
+    # Ref: SensorService-9.cpp::fillFeatures()
     from aasdk_proto.aap_protobuf.service.sensorsource.SensorSourceService_pb2 import SensorSourceService
     from aasdk_proto.aap_protobuf.service.sensorsource.message.Sensor_pb2 import Sensor
     from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorType_pb2 import SensorType
-    # Input source
+
+    # ── Input Source ──────────────────────────────────────────────────────────
+    # Ref: InputSourceService-23.cpp::fillFeatures()
+    # campo proto: keycodes_supported  (add_keycodes_supported in C++)
     from aasdk_proto.aap_protobuf.service.inputsource.InputSourceService_pb2 import InputSourceService
-    # Media source (audio input / microfono) — av_input_channel                    [FIX-3]
-    from aasdk_proto.aap_protobuf.service.media.source.MediaSourceService_pb2 import MediaSourceService
-    from aasdk_proto.aap_protobuf.service.media.source.message.AVInputChannel_pb2 import AVInputChannel  # [FIX-3]
-    from aasdk_proto.aap_protobuf.service.media.source.message.AudioConfig_pb2 import AudioConfig        # [FIX-3]
-    # Navigation status                                                              [FIX-4]
-    from aasdk_proto.aap_protobuf.service.navigation.NavigationStatusService_pb2 import NavigationStatusService
-    from aasdk_proto.aap_protobuf.service.navigation.message.NavigationTurnType_pb2 import NavigationTurnType
-    from aasdk_proto.aap_protobuf.service.navigation.message.NavigationImageOptions_pb2 import NavigationImageOptions
-    # Media info channel (MediaStatusService)                                        [FIX-5]
-    from aasdk_proto.aap_protobuf.service.mediainfo.MediaInfoChannel_pb2 import MediaInfoChannel
-    # Bluetooth                                                                      [FIX-6]
+
+    # ── Media Source (microfono) ──────────────────────────────────────────────
+    # Ref: MediaSourceService-3.cpp::fillFeatures()
+    # C++: service->mutable_media_source_service()
+    #      avInputChannel->set_available_type(MEDIA_CODEC_AUDIO_PCM)
+    #      avInputChannel->mutable_audio_config()->set_sampling_rate/number_of_bits/number_of_channels
+    from aasdk_proto.aap_protobuf.service.media.source.message.MediaSourceService_pb2 import MediaSourceService
+    from aasdk_proto.aap_protobuf.service.media.source.message.AudioConfig_pb2 import AudioConfig as AudioSourceConfig
+
+    # ── Navigation Status ─────────────────────────────────────────────────────
+    # Ref: NavigationStatusService-5.cpp::fillFeatures()
+    # C++: service->mutable_navigation_status_service()  → canale vuoto (nessun campo impostato)
+    from aasdk_proto.aap_protobuf.service.navigationstatus.NavigationStatusService_pb2 import NavigationStatusService
+
+    # ── Bluetooth ─────────────────────────────────────────────────────────────
+    # Ref: BluetoothService-20.cpp::fillFeatures()
+    # C++: bluetooth->set_car_address(...)
+    #      bluetooth->add_supported_pairing_methods(BLUETOOTH_PAIRING_PIN)
+    #      bluetooth->add_supported_pairing_methods(BLUETOOTH_PAIRING_NUMERIC_COMPARISON)
     from aasdk_proto.aap_protobuf.service.bluetooth.BluetoothService_pb2 import BluetoothService
     from aasdk_proto.aap_protobuf.service.bluetooth.message.BluetoothPairingMethod_pb2 import BluetoothPairingMethod
+
     PROTOBUF_AVAILABLE = True
 except ImportError as e:
     print(f"\n[ERRORE CRITICO] Moduli Protobuf non trovati: {e}")
@@ -56,27 +75,26 @@ except ImportError as e:
     sys.exit(1)
 
 
-# ChannelId enum aasdk (da ChannelId.hpp):
-#   0=CONTROL, 1=SENSOR_SOURCE, 2=MEDIA_SINK,
+# ── ChannelId enum aasdk (da ChannelId.hpp) ───────────────────────────────────
+#   0=CONTROL, 1=SENSOR_SOURCE,
 #   3=MEDIA_SINK_VIDEO, 4=MEDIA_SINK_MEDIA_AUDIO,
 #   5=MEDIA_SINK_GUIDANCE_AUDIO, 6=MEDIA_SINK_SYSTEM_AUDIO,
-#   7=MEDIA_SINK_TELEPHONY_AUDIO, 8=INPUT_SOURCE,
-#   9=MEDIA_SOURCE_MICROPHONE, 10=BLUETOOTH,
-#   13=NAVIGATION, 15=MEDIA_STATUS
-CH_SENSOR        = 1
-CH_VIDEO         = 3
-CH_MEDIA_AUDIO   = 4
-CH_SPEECH_AUDIO  = 5
-CH_SYSTEM_AUDIO  = 6
-CH_INPUT         = 8
-CH_MIC           = 9
-CH_BLUETOOTH     = 10
-CH_NAVIGATION    = 13   # [FIX-4]
-CH_MEDIA_STATUS  = 15   # [FIX-5]
+#   8=INPUT_SOURCE, 9=MEDIA_SOURCE_MICROPHONE,
+#   10=BLUETOOTH, 13=NAVIGATION_STATUS
+CH_SENSOR       = 1
+CH_VIDEO        = 3
+CH_MEDIA_AUDIO  = 4
+CH_SPEECH_AUDIO = 5
+CH_SYSTEM_AUDIO = 6
+CH_INPUT        = 8
+CH_MIC          = 9
+CH_BLUETOOTH    = 10
+CH_NAVIGATION   = 13
 
-# [FIX-9] Keycodes supportati dichiarati esplicitamente (da InputService::getSupportedButtonCodes)
-# Corrispondono a ButtonCode enum aasdk. Il BindingRequest fallisce se si dichiara un code
-# non presente in questa lista.
+# ── Keycodes supportati ───────────────────────────────────────────────────────
+# Ref: InputSourceService-23.cpp → inputDevice_->getSupportedButtonCodes()
+# ATTENZIONE: il KeyBindingRequest fallisce se si dichiara un keycode
+# non presente in questa lista esatta.
 SUPPORTED_KEYCODES = [
     1,   # NONE
     4,   # HOME
@@ -107,10 +125,8 @@ class InteractiveOrchestrator:
                  bt_address: str = ""):
         self.cryptor = None
         self.handshake_done = False
-        # [FIX-8] Geometria schermo parametrica — non hardcoded
         self.screen_width  = screen_width
         self.screen_height = screen_height
-        # [FIX-6] Bluetooth condizionato
         self.bluetooth_available = bluetooth_available
         self.bt_address = bt_address
 
@@ -176,23 +192,48 @@ class InteractiveOrchestrator:
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
         """
-        Costruisce la ServiceDiscoveryResponse allineata al ground truth C++ di openauto.
+        Costruisce la ServiceDiscoveryResponse allineata al ground truth C++ dei file aggiornati.
 
-        Canali registrati (con riferimento al file C++ sorgente):
-          CH 1  = SENSOR_SOURCE       → SensorService-3.cpp:fillFeatures()
-          CH 3  = MEDIA_SINK_VIDEO    → VideoService-7.cpp:fillFeatures()
-          CH 4  = MEDIA_AUDIO         → AudioService-11.cpp (MediaAudioService-14.cpp)
-          CH 5  = SPEECH_AUDIO        → AudioService-11.cpp (SpeechAudioService-5.cpp)
-          CH 6  = SYSTEM_AUDIO        → AudioService-11.cpp (SystemAudioService-6.cpp)
-          CH 8  = INPUT_SOURCE        → InputService-13.cpp:fillFeatures()
-          CH 9  = MIC (av_input_ch.)  → AudioInputService-10.cpp:fillFeatures()
-          CH 13 = NAVIGATION          → NavigationStatusService.cpp:fillFeatures()
-          CH 15 = MEDIA_STATUS        → MediaStatusService-15.cpp:fillFeatures()
-          CH 10 = BLUETOOTH           → BluetoothService-12.cpp (condizionato)
+        Canali registrati (con riferimento al file C++ sorgente aggiornato):
+          CH 1  = SENSOR_SOURCE    → SensorService-9.cpp::fillFeatures()
+                                     3 sensori: DRIVING_STATUS, LOCATION, NIGHT_MODE
+          CH 3  = MEDIA_SINK_VIDEO → VideoMediaSinkService-14.cpp::fillFeatures()
+                                     available_type=MEDIA_CODEC_VIDEO_H264_BP
+                                     available_while_in_call=true
+                                     video_configs[0]: codec_resolution, frame_rate,
+                                                       density, width_margin, height_margin
+          CH 4  = MEDIA_AUDIO      → AudioMediaSinkService-19.cpp::fillFeatures()
+                                     available_type=MEDIA_CODEC_AUDIO_PCM
+                                     audio_type=AUDIO_STREAM_MEDIA
+                                     available_while_in_call=true
+                                     audio_configs[0]: sampling_rate=48000,
+                                                       number_of_bits=16,
+                                                       number_of_channels=2
+          CH 5  = GUIDANCE_AUDIO   → AudioMediaSinkService-19.cpp::fillFeatures()
+                                     audio_type=AUDIO_STREAM_GUIDANCE
+                                     audio_configs[0]: 1ch / 16kHz / 16bit
+          CH 6  = SYSTEM_AUDIO     → AudioMediaSinkService-19.cpp::fillFeatures()
+                                     audio_type=AUDIO_STREAM_SYSTEM_AUDIO
+                                     audio_configs[0]: 1ch / 16kHz / 16bit
+          CH 8  = INPUT_SOURCE     → InputSourceService-23.cpp::fillFeatures()
+                                     keycodes_supported (add_keycodes_supported)
+                                     touchscreen[0]: width, height
+          CH 9  = MIC (source)     → MediaSourceService-3.cpp::fillFeatures()
+                                     media_source_service
+                                     available_type=MEDIA_CODEC_AUDIO_PCM
+                                     audio_config: sampling_rate=16000,
+                                                   number_of_bits=16,
+                                                   number_of_channels=1
+          CH 13 = NAVIGATION       → NavigationStatusService-5.cpp::fillFeatures()
+                                     navigation_status_service (vuoto — nessun campo)
+          CH 10 = BLUETOOTH        → BluetoothService-20.cpp::fillFeatures()
+                                     (condizionato a bluetooth_available)
+                                     car_address, pairing_methods: PIN + NUMERIC_COMPARISON
 
         NOTE architetturali:
-          - max_unacked=1 / configs(0) vengono inviati nell'AVChannelSetupResponse (lato C++),
-            non qui nella ServiceDiscoveryResponse. [FIX-10]
+          - max_unacked=1 / configuration_indices(0) viaggiano nell'AVChannelSetupResponse
+            (lato C++), NON nella ServiceDiscoveryResponse.
+          - CH 15 (MediaInfoChannel) NON è registrato in ServiceFactory-10.cpp → omesso.
           - I flussi media reali (PCM/H.264) NON transitano mai per Python (GIL constraint).
         """
         print("\n[Orchestrator] Service Discovery Request ricevuta!")
@@ -214,27 +255,34 @@ class InteractiveOrchestrator:
         msg.can_play_native_media_during_vr = False
 
         # ── CH 1: SENSOR SOURCE ───────────────────────────────────────────────
-        # Ref: SensorService-3.cpp::fillFeatures()
-        # sensorChannel->add_sensors()->set_type(DRIVING_STATUS)
-        # sensorChannel->add_sensors()->set_type(NIGHT_DATA)
+        # Ref: SensorService-9.cpp::fillFeatures()
+        # sensorChannel->add_sensors()->set_sensor_type(SENSOR_DRIVING_STATUS_DATA)
+        # sensorChannel->add_sensors()->set_sensor_type(SENSOR_LOCATION)
+        # sensorChannel->add_sensors()->set_sensor_type(SENSOR_NIGHT_MODE)
         ch1 = msg.channels.add()
         ch1.id = CH_SENSOR
         svc_sensor = SensorSourceService()
         s1 = svc_sensor.sensors.add()
         s1.sensor_type = SensorType.Value("SENSOR_DRIVING_STATUS_DATA")
         s2 = svc_sensor.sensors.add()
-        s2.sensor_type = SensorType.Value("SENSOR_NIGHT_MODE")
+        s2.sensor_type = SensorType.Value("SENSOR_LOCATION")       # presente nel C++ aggiornato
+        s3 = svc_sensor.sensors.add()
+        s3.sensor_type = SensorType.Value("SENSOR_NIGHT_MODE")
         ch1.sensor_source_service.CopyFrom(svc_sensor)
 
         # ── CH 3: VIDEO (MEDIA_SINK_VIDEO) ────────────────────────────────────
-        # Ref: VideoService-7.cpp::fillFeatures()
-        # videoChannel->set_stream_type(VIDEO)
+        # Ref: VideoMediaSinkService-14.cpp::fillFeatures()
+        # videoChannel->set_available_type(MEDIA_CODEC_VIDEO_H264_BP)
         # videoChannel->set_available_while_in_call(true)
-        # videoConfig1->set_video_resolution(...) / set_video_fps(...) / set_dpi(...)
+        # videoConfig1->set_codec_resolution(...)
+        # videoConfig1->set_frame_rate(...)
+        # videoConfig1->set_height_margin(...) / set_width_margin(...)
+        # videoConfig1->set_density(...)
+        # NOTA: display_type NON è impostato in fillFeatures() → omesso
         ch3 = msg.channels.add()
         ch3.id = CH_VIDEO
         svc_video = MediaSinkService()
-        svc_video.display_type            = DisplayType.Value("DISPLAY_TYPE_MAIN")
+        svc_video.available_type = MediaCodecType.Value("MEDIA_CODEC_VIDEO_H264_BP")
         svc_video.available_while_in_call = True
         vcfg = svc_video.video_configs.add()
         vcfg.codec_resolution = VideoCodecResolutionType.Value("VIDEO_800x480")
@@ -245,124 +293,116 @@ class InteractiveOrchestrator:
         ch3.media_sink_service.CopyFrom(svc_video)
 
         # ── CH 4: MEDIA AUDIO ─────────────────────────────────────────────────
-        # Ref: AudioService-11.cpp::fillFeatures()
-        # audioChannel->set_audio_type(MEDIA)            ← [FIX-2]
-        # audioChannel->set_available_while_in_call(true)← [FIX-7]
-        # audioConfig->set_sample_rate(48000)            ← [FIX-1]
-        # audioConfig->set_bit_depth(16)
-        # audioConfig->set_channel_count(2)
+        # Ref: AudioMediaSinkService-19.cpp::fillFeatures()
+        # audioChannel->set_available_type(MEDIA_CODEC_AUDIO_PCM)
+        # audioChannel->set_audio_type(AUDIO_STREAM_MEDIA)
+        # audioChannel->set_available_while_in_call(true)
+        # audioConfig->set_sampling_rate(48000)
+        # audioConfig->set_number_of_bits(16)
+        # audioConfig->set_number_of_channels(2)
         ch4 = msg.channels.add()
         ch4.id = CH_MEDIA_AUDIO
         svc_media_audio = MediaSinkService()
-        svc_media_audio.display_type            = DisplayType.Value("DISPLAY_TYPE_NONE")
-        svc_media_audio.audio_type              = AudioType.Value("AUDIO_MEDIA")   # [FIX-2]
-        svc_media_audio.available_while_in_call = True                             # [FIX-7]
-        ac_m = svc_media_audio.audio_configs.add()                                 # [FIX-1]
-        ac_m.sample_rate    = 48000
-        ac_m.bit_depth      = 16
-        ac_m.channel_count  = 2
+        svc_media_audio.available_type          = MediaCodecType.Value("MEDIA_CODEC_AUDIO_PCM")
+        svc_media_audio.audio_type              = AudioStreamType.Value("AUDIO_STREAM_MEDIA")
+        svc_media_audio.available_while_in_call = True
+        ac_m = svc_media_audio.audio_configs.add()
+        ac_m.sampling_rate      = 48000
+        ac_m.number_of_bits     = 16
+        ac_m.number_of_channels = 2
         ch4.media_sink_service.CopyFrom(svc_media_audio)
 
-        # ── CH 5: SPEECH AUDIO ────────────────────────────────────────────────
-        # Ref: AudioService-11.cpp::fillFeatures()
-        # audioChannel->set_audio_type(SPEECH)           ← [FIX-2]
-        # audioConfig: 1ch / 16kHz / 16bit               ← [FIX-1]
+        # ── CH 5: GUIDANCE AUDIO ──────────────────────────────────────────────
+        # Ref: AudioMediaSinkService-19.cpp::fillFeatures()
+        # audioChannel->set_audio_type(AUDIO_STREAM_GUIDANCE)
+        # audioConfig: 1ch / 16kHz / 16bit
         ch5 = msg.channels.add()
         ch5.id = CH_SPEECH_AUDIO
-        svc_speech = MediaSinkService()
-        svc_speech.display_type            = DisplayType.Value("DISPLAY_TYPE_NONE")
-        svc_speech.audio_type              = AudioType.Value("AUDIO_SPEECH")       # [FIX-2]
-        svc_speech.available_while_in_call = True                                  # [FIX-7]
-        ac_sp = svc_speech.audio_configs.add()                                     # [FIX-1]
-        ac_sp.sample_rate   = 16000
-        ac_sp.bit_depth     = 16
-        ac_sp.channel_count = 1
-        ch5.media_sink_service.CopyFrom(svc_speech)
+        svc_guidance = MediaSinkService()
+        svc_guidance.available_type          = MediaCodecType.Value("MEDIA_CODEC_AUDIO_PCM")
+        svc_guidance.audio_type              = AudioStreamType.Value("AUDIO_STREAM_GUIDANCE")
+        svc_guidance.available_while_in_call = True
+        ac_g = svc_guidance.audio_configs.add()
+        ac_g.sampling_rate      = 16000
+        ac_g.number_of_bits     = 16
+        ac_g.number_of_channels = 1
+        ch5.media_sink_service.CopyFrom(svc_guidance)
 
         # ── CH 6: SYSTEM AUDIO ────────────────────────────────────────────────
-        # Ref: AudioService-11.cpp::fillFeatures()
-        # audioChannel->set_audio_type(SYSTEM)           ← [FIX-2]
-        # audioConfig: 1ch / 16kHz / 16bit               ← [FIX-1]
+        # Ref: AudioMediaSinkService-19.cpp::fillFeatures()
+        # audioChannel->set_audio_type(AUDIO_STREAM_SYSTEM_AUDIO)
+        # audioConfig: 1ch / 16kHz / 16bit
         ch6 = msg.channels.add()
         ch6.id = CH_SYSTEM_AUDIO
         svc_sys = MediaSinkService()
-        svc_sys.display_type            = DisplayType.Value("DISPLAY_TYPE_NONE")
-        svc_sys.audio_type              = AudioType.Value("AUDIO_SYSTEM")          # [FIX-2]
-        svc_sys.available_while_in_call = True                                     # [FIX-7]
-        ac_sy = svc_sys.audio_configs.add()                                        # [FIX-1]
-        ac_sy.sample_rate   = 16000
-        ac_sy.bit_depth     = 16
-        ac_sy.channel_count = 1
+        svc_sys.available_type          = MediaCodecType.Value("MEDIA_CODEC_AUDIO_PCM")
+        svc_sys.audio_type              = AudioStreamType.Value("AUDIO_STREAM_SYSTEM_AUDIO")
+        svc_sys.available_while_in_call = True
+        ac_sy = svc_sys.audio_configs.add()
+        ac_sy.sampling_rate      = 16000
+        ac_sy.number_of_bits     = 16
+        ac_sy.number_of_channels = 1
         ch6.media_sink_service.CopyFrom(svc_sys)
 
         # ── CH 8: INPUT SOURCE ────────────────────────────────────────────────
-        # Ref: InputService-13.cpp::fillFeatures()
-        # inputChannel->add_supported_keycodes(...)      ← [FIX-9]
-        # touchscreenConfig->set_width/height(...)       ← [FIX-8] parametrico
+        # Ref: InputSourceService-23.cpp::fillFeatures()
+        # inputChannel->add_keycodes_supported(buttonCode)   ← campo: keycodes_supported
+        # touchscreenConfig->set_width(...)
+        # touchscreenConfig->set_height(...)
         ch8 = msg.channels.add()
         ch8.id = CH_INPUT
         svc_input = InputSourceService()
-        for kc in SUPPORTED_KEYCODES:                                              # [FIX-9]
-            svc_input.supported_keycodes.append(kc)
+        for kc in SUPPORTED_KEYCODES:
+            svc_input.keycodes_supported.append(kc)           # add_keycodes_supported
         ts = svc_input.touchscreen.add()
-        ts.width  = self.screen_width                                              # [FIX-8]
+        ts.width  = self.screen_width
         ts.height = self.screen_height
         ch8.input_source_service.CopyFrom(svc_input)
 
-        # ── CH 9: MICROPHONE (av_input_channel, NON media_source_service) ─────
-        # Ref: AudioInputService-10.cpp::fillFeatures()
-        # avInputChannel->set_stream_type(AUDIO)         ← [FIX-3] tipo CORRETTO
-        # audioConfig->set_sample_rate(16000)
-        # audioConfig->set_bit_depth(16) / set_channel_count(1)
+        # ── CH 9: MICROPHONE (media_source_service) ───────────────────────────
+        # Ref: MediaSourceService-3.cpp::fillFeatures()
+        # service->mutable_media_source_service()             ← NON av_input_channel
+        # avInputChannel->set_available_type(MEDIA_CODEC_AUDIO_PCM)
+        # avInputChannel->mutable_audio_config()->set_sampling_rate(16000)
+        # avInputChannel->mutable_audio_config()->set_number_of_bits(16)
+        # avInputChannel->mutable_audio_config()->set_number_of_channels(1)
         ch9 = msg.channels.add()
         ch9.id = CH_MIC
-        av_in = AVInputChannel()                                                   # [FIX-3]
-        av_in.stream_type = 1  # AVStreamType::AUDIO
-        mic_cfg = AudioConfig()
-        mic_cfg.sample_rate   = 16000
-        mic_cfg.bit_depth     = 16
-        mic_cfg.channel_count = 1
-        av_in.audio_config.CopyFrom(mic_cfg)
-        ch9.av_input_channel.CopyFrom(av_in)
+        svc_mic = MediaSourceService()
+        svc_mic.available_type = MediaCodecType.Value("MEDIA_CODEC_AUDIO_PCM")
+        mic_cfg = svc_mic.audio_config  # mutable_audio_config()
+        mic_cfg.sampling_rate      = 16000
+        mic_cfg.number_of_bits     = 16
+        mic_cfg.number_of_channels = 1
+        ch9.media_source_service.CopyFrom(svc_mic)
 
         # ── CH 13: NAVIGATION STATUS ──────────────────────────────────────────
-        # Ref: NavigationStatusService.cpp::fillFeatures()            ← [FIX-4]
-        # navStatusChannel->set_minimum_interval_ms(1000)
-        # navStatusChannel->set_type(NavigationTurnType::IMAGE)
-        # imageOptions: 256x256, 16bit colour depth
-        ch_nav = msg.channels.add()
-        ch_nav.id = CH_NAVIGATION
+        # Ref: NavigationStatusService-5.cpp::fillFeatures()
+        # C++: service->mutable_navigation_status_service()
+        #      nessun campo aggiuntivo impostato → canale vuoto
+        ch13 = msg.channels.add()
+        ch13.id = CH_NAVIGATION
         nav_svc = NavigationStatusService()
-        nav_svc.minimum_interval_ms = 1000
-        nav_svc.type = NavigationTurnType.Value("IMAGE")
-        img_opts = NavigationImageOptions()
-        img_opts.colour_depth_bits = 16
-        img_opts.width             = 256
-        img_opts.height            = 256
-        nav_svc.image_options.CopyFrom(img_opts)
-        ch_nav.navigation_channel.CopyFrom(nav_svc)
-
-        # ── CH 15: MEDIA STATUS (MediaInfoChannel) ────────────────────────────
-        # Ref: MediaStatusService-15.cpp::fillFeatures()              ← [FIX-5]
-        # IMPORTANTE: in C++ mutable_media_infochannel() viene chiamato PRIMA
-        # di set_channel_id() → rispettiamo l'ordine di serializzazione proto.
-        ch_ms = msg.channels.add()
-        _media_info = MediaInfoChannel()                                           # [FIX-5]
-        ch_ms.media_infochannel.CopyFrom(_media_info)                             # prima
-        ch_ms.id = CH_MEDIA_STATUS                                                # poi
+        ch13.navigation_status_service.CopyFrom(nav_svc)
 
         # ── CH 10: BLUETOOTH (condizionato) ───────────────────────────────────
-        # Ref: BluetoothService-12.cpp::fillFeatures()                ← [FIX-6]
+        # Ref: BluetoothService-20.cpp::fillFeatures()
         # Registrato SOLO SE bluetoothDevice_->isAvailable() == true
+        # bluetooth->set_car_address(bluetoothDevice_->getAdapterAddress())
+        # bluetooth->add_supported_pairing_methods(BLUETOOTH_PAIRING_PIN)
+        # bluetooth->add_supported_pairing_methods(BLUETOOTH_PAIRING_NUMERIC_COMPARISON)
         if self.bluetooth_available:
             ch_bt = msg.channels.add()
             ch_bt.id = CH_BLUETOOTH
             bt_svc = BluetoothService()
-            bt_svc.adapter_address = self.bt_address
+            bt_svc.car_address = self.bt_address
             bt_svc.supported_pairing_methods.append(
-                BluetoothPairingMethod.Value("HFP")
+                BluetoothPairingMethod.Value("BLUETOOTH_PAIRING_PIN")
             )
-            ch_bt.bluetooth_channel.CopyFrom(bt_svc)
+            bt_svc.supported_pairing_methods.append(
+                BluetoothPairingMethod.Value("BLUETOOTH_PAIRING_NUMERIC_COMPARISON")
+            )
+            ch_bt.bluetooth_service.CopyFrom(bt_svc)
 
         serialized = msg.SerializeToString()
         return self._log_and_send(
