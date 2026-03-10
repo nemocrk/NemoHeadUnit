@@ -37,12 +37,13 @@ namespace nemo
 
         // -----------------------------------------------------------------------
         // Step 1: AVChannelSetupRequest -> AVChannelSetupResponse (Config proto)
-        // Ref: VideoMediaSinkService-14.cpp::onMediaChannelSetupRequest()
-        // Prima: mock vuoto senza risposta -> Android bloccato.
-        // Ora: chiama orchestrator->onAvChannelSetupRequest(CH_VIDEO, payload)
-        //      e invia Config(READY) + VideoFocusIndication(PROJECTED)
+        //         -> VideoFocusIndication(PROJECTED) nel promise->then
+        // Ref: VideoMediaSinkService.cpp::onMediaChannelSetupRequest()
+        //   promise->then(sendVideoFocusIndication)
+        //   channel_->sendChannelSetupResponse(response, promise)
+        //   channel_->receive()
+        // Python restituisce SOLO il Config serializzato (no concatenazione).
         // -----------------------------------------------------------------------
-
         void onMediaChannelSetupRequest(
             const aap_protobuf::service::media::shared::message::Setup &request) override
         {
@@ -54,14 +55,10 @@ namespace nemo
             }
 
             std::string req_str = request.SerializeAsString();
-            std::string res_str = orchestrator_->onAvChannelSetupRequest(aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO, req_str);
+            // Python restituisce SOLO Config serializzato (nessuna concatenazione).
+            std::string res_str = orchestrator_->onAvChannelSetupRequest(
+                aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO, req_str);
 
-            // res_str puo' contenere [Config][VideoFocusNotification] concatenati.
-            // Separiamo: il primo messaggio e' sempre Config (AVChannelSetupResponse).
-            // Il binding Python restituisce i 2 messaggi serializzati in sequenza;
-            // dobbiamo parsare il primo come Config e il secondo (se presente) come
-            // VideoFocusNotification.
-            // Approccio semplice: prova Config, se rimane payload parsalo come VideoFocus.
             aap_protobuf::service::media::shared::message::Config config_resp;
             if (!config_resp.ParseFromString(res_str))
             {
@@ -69,22 +66,28 @@ namespace nemo
                 channel_->receive(this->shared_from_this());
                 return;
             }
-            channel_->sendChannelSetupResponse(config_resp, makePromise("Video/AVChannelSetupResponse"));
 
-            // Invia VideoFocusIndication(PROJECTED) come fa VideoMediaSinkService-14.cpp
-            // dopo sendChannelSetupResponse.
-            sendVideoFocusIndication();
+            // Ref: VideoMediaSinkService.cpp: promise->then(sendVideoFocusIndication)
+            // Usiamo la strand per garantire che VideoFocusIndication parta
+            // solo dopo il completamento dell'invio di Config.
+            auto setup_promise = aasdk::channel::SendPromise::defer(strand_);
+            auto self = this->shared_from_this();
+            setup_promise->then(
+                [self]() { self->sendVideoFocusIndication(); },
+                [](const aasdk::error::Error &e)
+                {
+                    std::cerr << "[Video] sendChannelSetupResponse FAILED: " << e.what() << std::endl;
+                });
+            channel_->sendChannelSetupResponse(config_resp, std::move(setup_promise));
             channel_->receive(this->shared_from_this());
         }
 
         // -----------------------------------------------------------------------
         // Step 2: ChannelOpenRequest -> ChannelOpenResponse(SUCCESS)
-        // Ref: VideoMediaSinkService-14.cpp::onChannelOpenRequest()
-        // Prima: chiamava solo onVideoChannelOpenRequest senza channel_id.
-        // Ora: chiama onChannelOpenRequest(CH_VIDEO, payload) per la risposta,
-        //      poi onVideoChannelOpenRequest per il Phase 5 hook.
+        // Ref: VideoMediaSinkService.cpp::onChannelOpenRequest()
+        //   sendChannelOpenResponse -> channel_->receive()  [NO VideoFocusIndication qui]
+        //   Il VideoFocus e' gia' stato inviato nello step 1 (promise->then).
         // -----------------------------------------------------------------------
-
         void onChannelOpenRequest(
             const aap_protobuf::service::control::message::ChannelOpenRequest &request) override
         {
@@ -97,8 +100,9 @@ namespace nemo
 
             std::string req_str = request.SerializeAsString();
 
-            // Risposta ChannelOpenResponse(SUCCESS)
-            std::string open_res = orchestrator_->onChannelOpenRequest(aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO, req_str);
+            // Python restituisce solo ChannelOpenResponse serializzato.
+            std::string open_res = orchestrator_->onChannelOpenRequest(
+                aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO, req_str);
             aap_protobuf::service::control::message::ChannelOpenResponse open_resp;
             if (!open_resp.ParseFromString(open_res))
             {
@@ -107,8 +111,9 @@ namespace nemo
             }
             channel_->sendChannelOpenResponse(open_resp, makePromise("Video/ChannelOpenResponse"));
 
-            // Invia VideoFocusIndication(PROJECTED) come fa VideoMediaSinkService-14.cpp
-            sendVideoFocusIndication();
+            // NOTA: nessun sendVideoFocusIndication() qui.
+            // Ref: VideoMediaSinkService.cpp::onChannelOpenRequest() -> solo receive().
+            // Il VideoFocus e' inviato nello step 1 (dopo Config, via promise->then).
 
             // Phase 5 hook: notifica l'orchestrator che il canale video e' aperto
             orchestrator_->onVideoChannelOpenRequest(req_str);
@@ -118,10 +123,9 @@ namespace nemo
 
         // -----------------------------------------------------------------------
         // Step 3: VideoFocusRequestNotification -> VideoFocusNotification(PROJECTED)
-        // Ref: VideoMediaSinkService-14.cpp::onVideoFocusRequest()
-        // Prima: solo log + drop. Ora: chiama orchestrator e invia VideoFocusIndication.
+        // Ref: VideoMediaSinkService.cpp::onVideoFocusRequest()
+        // Questo e' il gate finale che sblocca lo stream H.264.
         // -----------------------------------------------------------------------
-
         void onVideoFocusRequest(
             const aap_protobuf::service::media::video::message::VideoFocusRequestNotification &request) override
         {
@@ -168,7 +172,7 @@ namespace nemo
         {
             (void)ts;
             (void)buffer;
-            // Phase 4: drop frame.
+            // Phase 4: drop frame (no Ack necessario su video, solo receive).
             // Phase 5: NAL unit -> GStreamer appsrc / libavcodec (zero-copy, NO GIL).
             channel_->receive(this->shared_from_this());
         }
@@ -185,11 +189,12 @@ namespace nemo
         }
 
     private:
-        // Invia VideoFocusNotification(focus=PROJECTED, unsolicited=false)
-        // Chiamata sia dopo AVChannelSetupResponse che dopo ChannelOpenResponse.
-        // Ref: VideoMediaSinkService-14.cpp::sendVideoFocusIndication()
+        // Invia VideoFocusNotification(focus=PROJECTED, unsolicited=false).
+        // Chiamata SOLO nel promise->then di sendChannelSetupResponse (step 1).
+        // Ref: VideoMediaSinkService.cpp::sendVideoFocusIndication()
         void sendVideoFocusIndication()
         {
+            std::cout << "[Video] sendVideoFocusIndication() -> PROJECTED" << std::endl;
             aap_protobuf::service::media::video::message::VideoFocusNotification vf;
             vf.set_focus(
                 aap_protobuf::service::media::video::message::VideoFocusMode::VIDEO_FOCUS_PROJECTED);
