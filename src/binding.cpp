@@ -63,38 +63,28 @@ PYBIND11_MODULE(nemo_head_unit, m)
     // -------------------------------------------------------------------------
     // Phase 5: GstVideoSink
     // -------------------------------------------------------------------------
-    // Regola GIL:
-    //   - set_window_id / start_pipeline / stop  -> chiamati dal thread Python
-    //     -> py::call_guard<py::gil_scoped_release>() non necessario (sono veloci)
-    //   - pushBuffer -> chiamato solo da VideoEventHandler (C++ thread Boost.Asio)
-    //     -> NON è esposto a Python; è usato internamente da VideoEventHandler.
-    // -------------------------------------------------------------------------
     py::class_<nemo::GstVideoSink, std::shared_ptr<nemo::GstVideoSink>>(m, "GstVideoSink")
         .def(py::init<int, int>(),
              py::arg("width")  = 800,
-             py::arg("height") = 480,
-             "Crea un GstVideoSink con risoluzione specificata (default 800x480).")
+             py::arg("height") = 480)
         .def("set_window_id",
              [](nemo::GstVideoSink &self, uintptr_t wid) {
                  self.setWindowId(static_cast<guintptr>(wid));
              },
-             py::arg("wid"),
-             "Imposta il WId nativo del VideoWidget PyQt6 prima di start_pipeline().")
+             py::arg("wid"))
         .def("start_pipeline",
              &nemo::GstVideoSink::startPipeline,
-             py::call_guard<py::gil_scoped_release>(),
-             "Avvia la pipeline GStreamer (idempotente). "
-             "Chiamare DOPO widget.show() e set_window_id().")
+             py::call_guard<py::gil_scoped_release>())
         .def("stop",
              &nemo::GstVideoSink::stop,
-             py::call_guard<py::gil_scoped_release>(),
-             "Ferma e distrugge la pipeline GStreamer.")
+             py::call_guard<py::gil_scoped_release>())
         .def("is_running",
-             &nemo::GstVideoSink::isRunning,
-             "Ritorna True se la pipeline è attiva e sta ricevendo frame.");
+             &nemo::GstVideoSink::isRunning);
 
-    // Phase 3: UsbHubManager
-    // set_video_sink aggiunto in Phase 5
+    // -------------------------------------------------------------------------
+    // Phase 3+5: UsbHubManager
+    // enable_video_dump aggiunto in Phase 5b (dump H.264)
+    // -------------------------------------------------------------------------
     py::class_<nemo::UsbHubManager, std::shared_ptr<nemo::UsbHubManager>>(m, "UsbHubManager")
         .def(py::init<nemo::IoContextRunner &>())
         .def("start", &nemo::UsbHubManager::start,
@@ -105,15 +95,29 @@ PYBIND11_MODULE(nemo_head_unit, m)
              [](std::shared_ptr<nemo::UsbHubManager> self, py::object orch) {
                  self->setOrchestrator(
                      std::make_shared<nemo::PyOrchestrator>(std::move(orch)));
-             },
-             "Registra la classe Python che gestisce il protocollo AA.")
+             })
         .def("set_crypto_manager", &nemo::UsbHubManager::setCryptoManager)
         .def("set_video_sink",
              [](std::shared_ptr<nemo::UsbHubManager> self,
                 std::shared_ptr<nemo::GstVideoSink>  sink) {
                  self->setVideoSink(std::move(sink));
              },
-             py::arg("sink"),
-             "Registra il GstVideoSink da propagare a VideoEventHandler. "
-             "Chiamare prima di start().");
+             py::arg("sink"))
+        // ── enable_video_dump ─────────────────────────────────────────────
+        // Abilita la scrittura del dump H.264 grezzo su file.
+        // Chiamare dopo usb.start() ma prima che arrivino NAL units.
+        // Thread-safe: usa lo strand interno di SessionManager.
+        // Il dump si chiude automaticamente dopo 5 MB (DUMP_LIMIT_ in
+        // VideoEventHandler). Verificare output con:
+        //   vlc --demux h264 <path>
+        //   ffprobe -v quiet -show_streams -select_streams v <path>
+        // -----------------------------------------------------------------
+        .def("enable_video_dump",
+             [](std::shared_ptr<nemo::UsbHubManager> self,
+                const std::string& path) {
+                 self->enableVideoDump(path);
+             },
+             py::arg("path"),
+             py::call_guard<py::gil_scoped_release>(),
+             "Abilita il dump H.264 su file. Chiamare dopo start().");
 }

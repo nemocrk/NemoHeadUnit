@@ -30,9 +30,9 @@ bool UsbHubManager::start(ConnectCallback callback) {
     query_chain_factory_ = std::make_unique<aasdk::usb::AccessoryModeQueryChainFactory>(
         *usb_wrapper_, io_ctx, *query_factory_
     );
-    
+
     usb_hub_ = std::make_shared<aasdk::usb::USBHub>(*usb_wrapper_, io_ctx, *query_chain_factory_);
-    
+
     boost::asio::post(io_ctx, [this, self = shared_from_this()]() {
         this->startDiscovery();
     });
@@ -43,7 +43,7 @@ bool UsbHubManager::start(ConnectCallback callback) {
 void UsbHubManager::startDiscovery() {
     std::cout << "[UsbHubManager] Avvio scansione USB (attendere device Google/AOAP)..." << std::endl;
     auto promise = aasdk::usb::IUSBHub::Promise::defer(runner_.get_io_context());
-    
+
     promise->then(
         [this, self = shared_from_this()](aasdk::usb::DeviceHandle handle) {
             this->onDeviceDiscovered(std::move(handle));
@@ -52,20 +52,19 @@ void UsbHubManager::startDiscovery() {
             this->onDiscoveryFailed(e);
         }
     );
-    
+
     usb_hub_->start(std::move(promise));
 }
 
 void UsbHubManager::ensureCertificatesExist(const std::string& cert_str, const std::string& key_str) {
     mkdir("cert", 0777);
     std::ofstream cert_file("cert/headunit.crt");
-    if(cert_file.is_open()) {
+    if (cert_file.is_open()) {
         cert_file << cert_str;
         cert_file.close();
     }
-    
     std::ofstream key_file("cert/headunit.key");
-    if(key_file.is_open()) {
+    if (key_file.is_open()) {
         key_file << key_str;
         key_file.close();
     }
@@ -73,9 +72,8 @@ void UsbHubManager::ensureCertificatesExist(const std::string& cert_str, const s
 
 void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     std::cout << "[UsbHubManager] Device compatibile rilevato (MODO AOAP ATTIVO). Costruzione Transport..." << std::endl;
-    
+
     aoap_device_ = aasdk::usb::AOAPDevice::create(*usb_wrapper_, runner_.get_io_context(), std::move(handle));
-    
     if (!aoap_device_) {
         if (python_callback_) {
             pybind11::gil_scoped_acquire acquire;
@@ -87,14 +85,12 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     usb_transport_ = std::make_shared<aasdk::transport::USBTransport>(
         runner_.get_io_context(), aoap_device_
     );
-
     ssl_wrapper_ = std::make_shared<aasdk::transport::SSLWrapper>();
-    cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
-    
-    if(crypto_manager_) {
+    cryptor_     = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
+
+    if (crypto_manager_) {
         ensureCertificatesExist(crypto_manager_->getCertificate(), crypto_manager_->getPrivateKey());
     }
-    
     cryptor_->init();
 
     if (orchestrator_) {
@@ -107,21 +103,24 @@ void UsbHubManager::onDeviceDiscovered(aasdk::usb::DeviceHandle handle) {
     message_out_stream_ = std::make_shared<aasdk::messenger::MessageOutStream>(
         runner_.get_io_context(), usb_transport_, cryptor_
     );
-
     messenger_ = std::make_shared<aasdk::messenger::Messenger>(
         runner_.get_io_context(), message_in_stream_, message_out_stream_
     );
 
-    // Phase 5: video_sink_ (se impostato) viene propagato a SessionManager
-    // che lo passa a VideoEventHandler. Se nullptr, comportamento identico
-    // alla Phase 4 (dump/log only, senza GStreamer).
     session_manager_ = std::make_shared<SessionManager>(
         runner_.get_io_context(),
         messenger_,
         cryptor_,
         orchestrator_,
-        video_sink_          // Phase 5: nullptr-safe
+        video_sink_
     );
+
+    // Applica dump path pendente (se enableVideoDump() chiamato prima di onDeviceDiscovered)
+    if (!pending_dump_path_.empty()) {
+        session_manager_->enableVideoDump(pending_dump_path_);
+        pending_dump_path_.clear();
+    }
+
     session_manager_->start();
 
     std::cout << "[UsbHubManager] Transport, Messenger e SessionManager operativi." << std::endl;

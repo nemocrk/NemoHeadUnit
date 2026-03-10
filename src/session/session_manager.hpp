@@ -19,13 +19,6 @@
 #include "iorchestrator.hpp"
 #include "gst/gst_video_sink.hpp"
 
-// Channel IDs da aasdk/Messenger/ChannelId.hpp (enum posizionale)
-// CONTROL=0, SENSOR=1, MEDIA_SINK=2, MEDIA_SINK_VIDEO=3,
-// MEDIA_SINK_MEDIA_AUDIO=4, MEDIA_SINK_GUIDANCE_AUDIO=5,
-// MEDIA_SINK_SYSTEM_AUDIO=6, MEDIA_SINK_TELEPHONY_AUDIO=7,
-// INPUT_SOURCE=8, MEDIA_SOURCE_MICROPHONE=9,
-// BLUETOOTH=10, RADIO=11, NAVIGATION_STATUS=12, ...
-
 namespace nemo
 {
 
@@ -38,7 +31,7 @@ namespace nemo
                        aasdk::messenger::IMessenger::Pointer messenger,
                        aasdk::messenger::ICryptor::Pointer cryptor,
                        std::shared_ptr<IOrchestrator> orchestrator,
-                       std::shared_ptr<GstVideoSink>  video_sink = nullptr)  // Phase 5
+                       std::shared_ptr<GstVideoSink>  video_sink = nullptr)
             : strand_(io_ctx),
               messenger_(std::move(messenger)),
               cryptor_(std::move(cryptor)),
@@ -57,15 +50,35 @@ namespace nemo
             return p;
         }
 
+        // ── enableVideoDump ───────────────────────────────────────────────
+        // Apre il file di dump H.264 su VideoEventHandler.
+        // Thread-safe: il dispatch viene eseguito sullo strand interno.
+        // Chiamare prima di start() o subito dopo; sicuro chiamarlo
+        // dal thread Python prima che arrivi il primo NAL unit.
+        // -----------------------------------------------------------------
+        void enableVideoDump(const std::string &path)
+        {
+            strand_.dispatch([this, self = shared_from_this(), path]()
+            {
+                if (video_handler_)
+                {
+                    video_handler_->enableDump(path);
+                }
+                else
+                {
+                    // Salva il path: video_handler_ potrebbe non essere
+                    // ancora costruito se chiamato prima di start().
+                    pending_dump_path_ = path;
+                }
+            });
+        }
+
         void start()
         {
             strand_.dispatch([this, self = shared_from_this()]()
                              {
             std::cout << "[SessionManager] Starting channels..." << std::endl;
 
-            // ---------------------------------------------------------------
-            // CH 0: Control Service
-            // ---------------------------------------------------------------
             control_channel_ = std::make_shared<aasdk::channel::control::ControlServiceChannel>(
                 strand_, messenger_);
             control_handler_ = std::make_shared<ControlEventHandler>(
@@ -73,76 +86,55 @@ namespace nemo
             control_channel_->receive(control_handler_);
             control_channel_->sendVersionRequest(makePromise("Control/VersionRequest"));
 
-            // ---------------------------------------------------------------
-            // CH 1: Sensor Source
-            // GATE CRITICO: Android attende SensorStartResponse(DRIVING_STATUS)
-            // + DrivingStatus UNRESTRICTED prima di avviare lo stream H.264.
-            // ---------------------------------------------------------------
             sensor_channel_ = std::make_shared<aasdk::channel::sensorsource::SensorSourceService>(
                 strand_, messenger_);
             sensor_handler_ = std::make_shared<SensorEventHandler>(
                 strand_, sensor_channel_, orchestrator_);
             sensor_channel_->receive(sensor_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 3: Video Sink
-            // Phase 5: video_sink_ passato a VideoEventHandler per
-            // abilitare pushBuffer() diretto verso GStreamer (no GIL).
-            // ---------------------------------------------------------------
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO);
             video_handler_ = std::make_shared<VideoEventHandler>(
-                strand_, video_channel_, orchestrator_, video_sink_);  // Phase 5
+                strand_, video_channel_, orchestrator_, video_sink_);
             video_channel_->receive(video_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 4: Media Audio Sink
-            // ---------------------------------------------------------------
+            // Applica dump path pendente (se enableVideoDump() chiamato prima di start())
+            if (!pending_dump_path_.empty())
+            {
+                video_handler_->enableDump(pending_dump_path_);
+                pending_dump_path_.clear();
+            }
+
             media_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO);
             media_audio_handler_ = std::make_shared<AudioEventHandler>(
                 strand_, media_audio_channel_, orchestrator_, aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO);
             media_audio_channel_->receive(media_audio_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 5: Speech Audio Sink (Guidance)
-            // ---------------------------------------------------------------
             speech_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO);
             speech_audio_handler_ = std::make_shared<AudioEventHandler>(
                 strand_, speech_audio_channel_, orchestrator_, aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO);
             speech_audio_channel_->receive(speech_audio_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 6: System Audio Sink
-            // ---------------------------------------------------------------
             system_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO);
             system_audio_handler_ = std::make_shared<AudioEventHandler>(
                 strand_, system_audio_channel_, orchestrator_, aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO);
             system_audio_channel_->receive(system_audio_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 8: Input Source
-            // ---------------------------------------------------------------
             input_channel_ = std::make_shared<aasdk::channel::inputsource::InputSourceService>(
                 strand_, messenger_);
             input_handler_ = std::make_shared<InputEventHandler>(
                 strand_, input_channel_, orchestrator_);
             input_channel_->receive(input_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 9: Mic (MediaSource)
-            // ---------------------------------------------------------------
             mic_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE);
             mic_handler_ = std::make_shared<AudioEventHandler>(
                 strand_, mic_channel_, orchestrator_, aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE);
             mic_channel_->receive(mic_handler_);
 
-            // ---------------------------------------------------------------
-            // CH 12: Navigation Status
-            // ---------------------------------------------------------------
             navigation_channel_ = std::make_shared<aasdk::channel::navigationstatus::NavigationStatusService>(
                 strand_, messenger_);
             navigation_handler_ = std::make_shared<NavigationEventHandler>(
@@ -170,7 +162,8 @@ namespace nemo
         aasdk::messenger::IMessenger::Pointer messenger_;
         aasdk::messenger::ICryptor::Pointer cryptor_;
         std::shared_ptr<IOrchestrator> orchestrator_;
-        std::shared_ptr<GstVideoSink>  video_sink_;  // Phase 5
+        std::shared_ptr<GstVideoSink>  video_sink_;
+        std::string pending_dump_path_;  // per enableVideoDump() prima di start()
 
         // CH 0
         aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;
