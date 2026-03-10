@@ -5,11 +5,12 @@ Equivalente Python di src/crypto/crypto_manager.cpp.
 
 Responsabilità:
   - Ricerca del certificato TLS e della chiave privata sui path standard
-  - Validazione PEM (parsing X.509 + verifica corrispondenza chiave pubblica)
-  - Nessun binding C++ richiesto: usa la libreria `cryptography` (PyCA)
+  - Validazione PEM tramite `openssl` CLI di sistema (nessuna dipendenza Python)
+  - La vera verifica TLS è comunque delegata a OpenSSL C++ dentro aasdk
 
 Dipendenze:
-  pip install cryptography
+  - /usr/bin/openssl  (presente su qualsiasi sistema Linux)
+  - NESSUNA dipendenza Python esterna
 
 Path cercati (stesso ordine di aasdk::Cryptor):
   Certificato : /etc/openauto/headunit.crt
@@ -30,34 +31,13 @@ from __future__ import annotations
 
 import os
 import sys
+import shutil
 import logging
+import subprocess
+import tempfile
 from typing import Optional
 
 log = logging.getLogger(__name__)
-
-# ── Import top-level: fallisce subito con traceback completo se mancante ─────
-# Questo permette di diagnosticare immediatamente problemi di venv/sys.path
-# invece di ricevere il silenzioso "validazione saltata" a runtime.
-try:
-    from cryptography import x509
-    from cryptography.hazmat.primitives.serialization import (
-        load_pem_private_key,
-        Encoding,
-        PublicFormat,
-    )
-    from cryptography.hazmat.backends import default_backend as _default_backend
-    _CRYPTO_AVAILABLE = True
-except ImportError as _crypto_import_err:
-    _CRYPTO_AVAILABLE = False
-    # Stampa su stderr subito così non passa inosservato
-    print(
-        f"[CryptoManager] WARN: libreria 'cryptography' non importabile: {_crypto_import_err}\n"
-        f"  sys.prefix  = {sys.prefix}\n"
-        f"  sys.version = {sys.version}\n"
-        f"  Prova: {sys.executable} -m pip install cryptography\n"
-        "  Validazione PEM del certificato disabilitata (solo warning).",
-        file=sys.stderr,
-    )
 
 # Percorsi standard (allineati a aasdk::Cryptor e crypto_manager.cpp)
 _CERT_PATHS: list[str] = [
@@ -71,6 +51,19 @@ _KEY_PATHS: list[str] = [
     "/usr/share/aasdk/cert/headunit.key",
     "./cert/headunit.key",
 ]
+
+# Individua openssl al momento dell'import: preferisce il sistema (/usr/bin)
+# così non dipende dall'environment conda/venv attivo.
+_OPENSSL_BIN: Optional[str] = (
+    "/usr/bin/openssl"
+    if os.path.isfile("/usr/bin/openssl")
+    else shutil.which("openssl")
+)
+
+if _OPENSSL_BIN:
+    log.debug("[CryptoManager] openssl trovato: %s", _OPENSSL_BIN)
+else:
+    log.warning("[CryptoManager] openssl CLI non trovato: validazione PEM disabilitata.")
 
 
 def _find_file(paths: list[str]) -> Optional[str]:
@@ -87,42 +80,89 @@ def _find_file(paths: list[str]) -> Optional[str]:
     return None
 
 
+def _get_pubkey_from_cert(cert_pem: str) -> Optional[str]:
+    """
+    Estrae la chiave pubblica dal certificato X.509 tramite openssl CLI.
+    Equivalente di: openssl x509 -pubkey -noout
+    """
+    if not _OPENSSL_BIN:
+        return None
+    try:
+        result = subprocess.run(
+            [_OPENSSL_BIN, "x509", "-pubkey", "-noout"],
+            input=cert_pem.encode(),
+            capture_output=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.decode()
+        log.error("[CryptoManager] x509 pubkey extract failed: %s", result.stderr.decode())
+        return None
+    except Exception as e:
+        log.error("[CryptoManager] Errore subprocess x509: %s", e)
+        return None
+
+
+def _get_pubkey_from_privkey(key_pem: str) -> Optional[str]:
+    """
+    Estrae la chiave pubblica dalla chiave privata tramite openssl CLI.
+    Supporta RSA, EC, ed25519 (openssl pkey è universale).
+    Equivalente di: openssl pkey -pubout
+    """
+    if not _OPENSSL_BIN:
+        return None
+    try:
+        result = subprocess.run(
+            [_OPENSSL_BIN, "pkey", "-pubout"],
+            input=key_pem.encode(),
+            capture_output=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.decode()
+        log.error("[CryptoManager] pkey pubout failed: %s", result.stderr.decode())
+        return None
+    except Exception as e:
+        log.error("[CryptoManager] Errore subprocess pkey: %s", e)
+        return None
+
+
 def _validate_cert_key_pair(cert_pem: str, key_pem: str) -> bool:
     """
     Verifica che la chiave privata corrisponda al certificato X.509.
-    Equivalente di X509_check_private_key() usato in crypto_manager.cpp.
+    Strategia: estrae la chiave pubblica da entrambi e le confronta.
+    Equivalente di X509_check_private_key() in crypto_manager.cpp.
 
-    Se `cryptography` non è disponibile, skip con warning (non blocca il boot).
+    Usa esclusivamente `openssl` CLI di sistema — nessuna dipendenza Python.
+    Se openssl non è disponibile, skip con warning (la vera verifica la fa C++).
     """
-    if not _CRYPTO_AVAILABLE:
+    if not _OPENSSL_BIN:
         log.warning(
-            "[CryptoManager] validazione PEM saltata: 'cryptography' non disponibile."
+            "[CryptoManager] openssl CLI non disponibile: validazione PEM saltata."
         )
-        return True  # fallback permissivo: OpenSSL in C++ farà la vera verifica
+        return True  # fallback permissivo: aasdk C++ verifica comunque
 
-    try:
-        backend = _default_backend()
-
-        cert = x509.load_pem_x509_certificate(cert_pem.encode(), backend)
-        key  = load_pem_private_key(key_pem.encode(), password=None, backend=backend)
-
-        cert_pub_bytes = cert.public_key().public_bytes(
-            Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
-        )
-        key_pub_bytes = key.public_key().public_bytes(
-            Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
-        )
-
-        if cert_pub_bytes != key_pub_bytes:
-            log.error("[CryptoManager] ERRORE: chiave e certificato NON corrispondono!")
-            return False
-
-        log.info("[CryptoManager] Certificato e chiave validati con successo.")
-        return True
-
-    except Exception as e:
-        log.error("[CryptoManager] ERRORE parsing PEM: %s", e)
+    cert_pub = _get_pubkey_from_cert(cert_pem)
+    if cert_pub is None:
+        log.error("[CryptoManager] Impossibile estrarre pubkey dal certificato.")
         return False
+
+    key_pub = _get_pubkey_from_privkey(key_pem)
+    if key_pub is None:
+        log.error("[CryptoManager] Impossibile estrarre pubkey dalla chiave privata.")
+        return False
+
+    # Normalizza (strip whitespace) prima del confronto
+    if cert_pub.strip() != key_pub.strip():
+        log.error("[CryptoManager] ERRORE: chiave e certificato NON corrispondono!")
+        print(
+            "[CryptoManager] ERRORE CRITICO: cert e key non formano una coppia valida!",
+            file=sys.stderr,
+        )
+        return False
+
+    log.info("[CryptoManager] Certificato e chiave validati con successo (openssl CLI).")
+    return True
 
 
 class CryptoManager:
@@ -130,7 +170,7 @@ class CryptoManager:
     Carica e valida il certificato TLS e la chiave privata per aasdk.
 
     Equivalente Python completo di src/crypto/crypto_manager.cpp.
-    Non richiede compilazione C++.
+    Non richiede compilazione C++ ne' librerie Python esterne.
 
     Esempio d'uso:
         crypto = CryptoManager()
@@ -164,10 +204,6 @@ class CryptoManager:
         """Carica e valida cert + key. Ritorna True se tutto ok."""
         cert_pem = _find_file(self._cert_paths)
         if not cert_pem:
-            log.error(
-                "[CryptoManager] ERRORE: nessun certificato trovato nei path: %s",
-                self._cert_paths,
-            )
             print(
                 f"[CryptoManager] ERRORE: nessun certificato trovato.\n"
                 f"  Path cercati: {self._cert_paths}",
@@ -177,10 +213,6 @@ class CryptoManager:
 
         key_pem = _find_file(self._key_paths)
         if not key_pem:
-            log.error(
-                "[CryptoManager] ERRORE: nessuna chiave privata trovata nei path: %s",
-                self._key_paths,
-            )
             print(
                 f"[CryptoManager] ERRORE: nessuna chiave privata trovata.\n"
                 f"  Path cercati: {self._key_paths}",
