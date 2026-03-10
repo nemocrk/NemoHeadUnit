@@ -5,10 +5,20 @@
 #include <aasdk/Messenger/IMessenger.hpp>
 #include <aasdk/Channel/Control/ControlServiceChannel.hpp>
 #include <aasdk/Channel/MediaSink/Video/VideoMediaSinkService.hpp>
+#include <aasdk/Channel/MediaSink/Audio/AudioMediaSinkService.hpp>
 #include <aasdk/Channel/Promise.hpp>
 #include "control_event_handler.hpp"
 #include "video_event_handler.hpp"
+#include "audio_event_handler.hpp"
 #include "iorchestrator.hpp"
+
+// Channel IDs da aasdk/Messenger/ChannelId.hpp
+static constexpr aasdk::messenger::ChannelId kChControl     = static_cast<aasdk::messenger::ChannelId>(0);
+static constexpr aasdk::messenger::ChannelId kChVideo       = static_cast<aasdk::messenger::ChannelId>(3);
+static constexpr aasdk::messenger::ChannelId kChMediaAudio  = static_cast<aasdk::messenger::ChannelId>(4);
+static constexpr aasdk::messenger::ChannelId kChSpeechAudio = static_cast<aasdk::messenger::ChannelId>(5);
+static constexpr aasdk::messenger::ChannelId kChSystemAudio = static_cast<aasdk::messenger::ChannelId>(6);
+static constexpr aasdk::messenger::ChannelId kChMic         = static_cast<aasdk::messenger::ChannelId>(9);
 
 namespace nemo {
 
@@ -16,18 +26,21 @@ class SessionManager : public std::enable_shared_from_this<SessionManager> {
 public:
     using Pointer = std::shared_ptr<SessionManager>;
 
-    SessionManager(boost::asio::io_context& io_ctx, 
+    SessionManager(boost::asio::io_context& io_ctx,
                    aasdk::messenger::IMessenger::Pointer messenger,
                    aasdk::messenger::ICryptor::Pointer cryptor,
                    std::shared_ptr<IOrchestrator> orchestrator)
-        : strand_(io_ctx), messenger_(std::move(messenger)), cryptor_(std::move(cryptor)), orchestrator_(std::move(orchestrator)) {}
+        : strand_(io_ctx),
+          messenger_(std::move(messenger)),
+          cryptor_(std::move(cryptor)),
+          orchestrator_(std::move(orchestrator)) {}
 
     aasdk::channel::SendPromise::Pointer makePromise(const char* tag) {
         auto p = aasdk::channel::SendPromise::defer(strand_);
         p->then(
             []() {},
             [tag](const aasdk::error::Error& e) {
-                std::cerr << "[" << tag << "] send failed: " << e.what() << std::endl;
+                std::cerr << "[" << tag << "] send FAILED: " << e.what() << std::endl;
             }
         );
         return p;
@@ -35,33 +48,77 @@ public:
 
     void start() {
         strand_.dispatch([this, self = shared_from_this()]() {
-            std::cout << "[SessionManager] Starting Mock Channels..." << std::endl;
+            std::cout << "[SessionManager] Starting channels..." << std::endl;
 
-            // Start Control Service (Channel 0)
+            // ---------------------------------------------------------------
+            // CH 0: Control Service
+            // ---------------------------------------------------------------
             control_channel_ = std::make_shared<aasdk::channel::control::ControlServiceChannel>(
-                strand_, messenger_
-            );
-            control_handler_ = std::make_shared<ControlEventHandler>(strand_, control_channel_, cryptor_, orchestrator_);
+                strand_, messenger_);
+            control_handler_ = std::make_shared<ControlEventHandler>(
+                strand_, control_channel_, cryptor_, orchestrator_);
             control_channel_->receive(control_handler_);
             control_channel_->sendVersionRequest(makePromise("Control/VersionRequest"));
 
-            // Start Video Sink Service (Channel 1 - Usually it's channel 2 or dynamically assigned by discovery)
-            // For the mock, we assign it ID 2.
-            const auto videoChannelId = static_cast<aasdk::messenger::ChannelId>(2);
+            // ---------------------------------------------------------------
+            // CH 3: Video Sink
+            // Correzione: era 2 (bug silente), ora CH_VIDEO = 3
+            // ---------------------------------------------------------------
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
-                strand_, messenger_, videoChannelId
-            );
-            video_handler_ = std::make_shared<VideoEventHandler>(strand_, video_channel_, orchestrator_);
+                strand_, messenger_, kChVideo);
+            video_handler_ = std::make_shared<VideoEventHandler>(
+                strand_, video_channel_, orchestrator_);
             video_channel_->receive(video_handler_);
+
+            // ---------------------------------------------------------------
+            // CH 4: Media Audio Sink
+            // ---------------------------------------------------------------
+            media_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
+                strand_, messenger_, kChMediaAudio);
+            media_audio_handler_ = std::make_shared<AudioEventHandler>(
+                strand_, media_audio_channel_, orchestrator_, static_cast<int>(kChMediaAudio));
+            media_audio_channel_->receive(media_audio_handler_);
+
+            // ---------------------------------------------------------------
+            // CH 5: Speech Audio Sink (Guidance)
+            // ---------------------------------------------------------------
+            speech_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
+                strand_, messenger_, kChSpeechAudio);
+            speech_audio_handler_ = std::make_shared<AudioEventHandler>(
+                strand_, speech_audio_channel_, orchestrator_, static_cast<int>(kChSpeechAudio));
+            speech_audio_channel_->receive(speech_audio_handler_);
+
+            // ---------------------------------------------------------------
+            // CH 6: System Audio Sink
+            // ---------------------------------------------------------------
+            system_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
+                strand_, messenger_, kChSystemAudio);
+            system_audio_handler_ = std::make_shared<AudioEventHandler>(
+                strand_, system_audio_channel_, orchestrator_, static_cast<int>(kChSystemAudio));
+            system_audio_channel_->receive(system_audio_handler_);
+
+            // ---------------------------------------------------------------
+            // CH 9: Mic (MediaSource)
+            // AudioMediaSinkService riusa per il source: in aasdk il mic
+            // usa AudioMediaSinkService con ChannelId = MIC (9).
+            // Phase 5: sostituire con MediaSourceService per TX verso Android.
+            // ---------------------------------------------------------------
+            mic_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
+                strand_, messenger_, kChMic);
+            mic_handler_ = std::make_shared<AudioEventHandler>(
+                strand_, mic_channel_, orchestrator_, static_cast<int>(kChMic));
+            mic_channel_->receive(mic_handler_);
         });
     }
 
     void stop() {
         strand_.dispatch([this, self = shared_from_this()]() {
-            control_channel_.reset();
-            control_handler_.reset();
-            video_channel_.reset();
-            video_handler_.reset();
+            control_channel_.reset();      control_handler_.reset();
+            video_channel_.reset();        video_handler_.reset();
+            media_audio_channel_.reset();  media_audio_handler_.reset();
+            speech_audio_channel_.reset(); speech_audio_handler_.reset();
+            system_audio_channel_.reset(); system_audio_handler_.reset();
+            mic_channel_.reset();          mic_handler_.reset();
         });
     }
 
@@ -71,11 +128,23 @@ private:
     aasdk::messenger::ICryptor::Pointer cryptor_;
     std::shared_ptr<IOrchestrator> orchestrator_;
 
-    aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;
-    ControlEventHandler::Pointer control_handler_;
+    // CH 0
+    aasdk::channel::control::IControlServiceChannel::Pointer    control_channel_;
+    ControlEventHandler::Pointer                                 control_handler_;
 
+    // CH 3
     aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer video_channel_;
-    VideoEventHandler::Pointer video_handler_;
+    VideoEventHandler::Pointer                                          video_handler_;
+
+    // CH 4, 5, 6, 9
+    aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer media_audio_channel_;
+    aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer speech_audio_channel_;
+    aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer system_audio_channel_;
+    aasdk::channel::mediasink::audio::IAudioMediaSinkService::Pointer mic_channel_;
+    std::shared_ptr<AudioEventHandler>                                 media_audio_handler_;
+    std::shared_ptr<AudioEventHandler>                                 speech_audio_handler_;
+    std::shared_ptr<AudioEventHandler>                                 system_audio_handler_;
+    std::shared_ptr<AudioEventHandler>                                 mic_handler_;
 };
 
 } // namespace nemo
