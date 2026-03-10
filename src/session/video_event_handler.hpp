@@ -22,11 +22,13 @@ namespace nemo
             boost::asio::io_service::strand &strand,
             aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel,
             std::shared_ptr<IOrchestrator> orchestrator,
-            std::shared_ptr<GstVideoSink>  video_sink = nullptr)  // Phase 5
+            std::shared_ptr<GstVideoSink> video_sink = nullptr) // Phase 5
             : strand_(strand),
               channel_(std::move(channel)),
               orchestrator_(std::move(orchestrator)),
-              video_sink_(std::move(video_sink)) {}
+              video_sink_(std::move(video_sink))
+        {
+        }
 
         aasdk::channel::SendPromise::Pointer makePromise(const char *tag)
         {
@@ -181,7 +183,7 @@ namespace nemo
             if (dump_enabled_ && dump_file_.is_open() && dump_bytes_ < DUMP_LIMIT_)
             {
                 dump_file_.write(
-                    reinterpret_cast<const char *>(buffer.data),
+                    reinterpret_cast<const char *>(buffer.cdata),
                     static_cast<std::streamsize>(buffer.size));
                 dump_bytes_ += buffer.size;
 
@@ -201,7 +203,7 @@ namespace nemo
             {
                 video_sink_->pushBuffer(
                     static_cast<uint64_t>(ts),
-                    buffer.data,
+                    buffer.cdata,
                     buffer.size);
             }
 
@@ -231,7 +233,7 @@ namespace nemo
             if (dump_file_.is_open())
             {
                 dump_enabled_ = true;
-                dump_bytes_   = 0;
+                dump_bytes_ = 0;
                 std::cout << "[Video] Dump H.264 abilitato: " << path << std::endl;
             }
             else
@@ -253,13 +255,13 @@ namespace nemo
 
         boost::asio::io_service::strand &strand_;
         aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel_;
-        std::shared_ptr<IOrchestrator>  orchestrator_;
-        std::shared_ptr<GstVideoSink>   video_sink_;  // Phase 5
+        std::shared_ptr<IOrchestrator> orchestrator_;
+        std::shared_ptr<GstVideoSink> video_sink_; // Phase 5
 
         // ── Dump H.264 (Step 8) ───────────────────────────────────────────
         std::ofstream dump_file_;
-        bool          dump_enabled_ = false;
-        std::size_t   dump_bytes_   = 0;
+        bool dump_enabled_ = false;
+        std::size_t dump_bytes_ = 0;
         static constexpr std::size_t DUMP_LIMIT_ = 5UL * 1024UL * 1024UL; // 5 MB
     };
 

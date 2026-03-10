@@ -79,8 +79,8 @@ def main():
 
     _ensure_fakesink_if_headless()
 
-    if hasattr(core, "enable_aasdk_logging"):
-        core.enable_aasdk_logging()
+    #if hasattr(core, "enable_aasdk_logging"):
+    #    core.enable_aasdk_logging()
 
     runner = core.IoContextRunner()
     crypto = core.CryptoManager()
