@@ -8,7 +8,6 @@
 #include "core/io_context_runner.hpp"
 #include "session/session_manager.hpp"
 #include "session/iorchestrator.hpp"
-#include "crypto/crypto_manager.hpp"
 #include "gst/gst_video_sink.hpp"
 #include <aasdk/USB/USBWrapper.hpp>
 #include <aasdk/USB/USBHub.hpp>
@@ -26,10 +25,10 @@ namespace nemo {
 
     class UsbHubManager : public std::enable_shared_from_this<UsbHubManager> {
     public:
-        using Pointer = std::shared_ptr<UsbHubManager>;
+        using Pointer       = std::shared_ptr<UsbHubManager>;
         using ConnectCallback = std::function<void(bool success, std::string message)>;
 
-        UsbHubManager(IoContextRunner& runner);
+        explicit UsbHubManager(IoContextRunner& runner);
         ~UsbHubManager();
 
         bool start(ConnectCallback callback);
@@ -39,8 +38,14 @@ namespace nemo {
             orchestrator_ = std::move(orchestrator);
         }
 
-        void setCryptoManager(std::shared_ptr<CryptoManager> crypto) {
-            crypto_manager_ = std::move(crypto);
+        // ── Refactor: Python CryptoManager ────────────────────────────────
+        // Sostituisce setCryptoManager(shared_ptr<CryptoManager>).
+        // Python carica e valida i PEM, poi li passa come stringhe.
+        // ensureCertificatesExist() li scrive su disco per aasdk::Cryptor.
+        // -----------------------------------------------------------------
+        void setCertificateAndKey(const std::string& cert, const std::string& key) {
+            certificate_ = cert;
+            private_key_ = key;
         }
 
         // Phase 5: imposta il GstVideoSink da propagare a SessionManager
@@ -50,17 +55,14 @@ namespace nemo {
 
         // ── enableVideoDump ────────────────────────────────────────────────
         // Abilita la scrittura del dump H.264 grezzo su file.
-        // Chiamare dopo start() ma prima che arrivino NAL units (subito dopo
-        // la callback on_connect).
+        // Chiamare dopo start() ma prima che arrivino NAL units.
         // Thread-safe: delega a SessionManager::enableVideoDump() che
         // usa lo strand interno di Boost.Asio.
-        // path: percorso assoluto o relativo del file di output .h264
         // ------------------------------------------------------------------
         void enableVideoDump(const std::string& path) {
             if (session_manager_) {
                 session_manager_->enableVideoDump(path);
             } else {
-                // SessionManager non ancora costruito: salva per dopo
                 pending_dump_path_ = path;
             }
         }
@@ -69,28 +71,31 @@ namespace nemo {
         void startDiscovery();
         void onDeviceDiscovered(aasdk::usb::DeviceHandle handle);
         void onDiscoveryFailed(const aasdk::error::Error& e);
-        void ensureCertificatesExist(const std::string& cert_str, const std::string& key_str);
+        void ensureCertificatesExist();
 
-        IoContextRunner& runner_;
-        ConnectCallback python_callback_;
+        IoContextRunner&              runner_;
+        ConnectCallback               python_callback_;
         std::shared_ptr<IOrchestrator> orchestrator_;
-        std::shared_ptr<CryptoManager> crypto_manager_;
         std::shared_ptr<GstVideoSink>  video_sink_;
-        std::string pending_dump_path_;  // path pendente se enableVideoDump() prima di start()
 
-        std::unique_ptr<LibusbContext> libusb_context_;
-        std::unique_ptr<aasdk::usb::USBWrapper> usb_wrapper_;
-        std::unique_ptr<aasdk::usb::AccessoryModeQueryFactory> query_factory_;
+        // Cert + key come stringhe PEM (impostate da Python via setCertificateAndKey)
+        std::string certificate_;
+        std::string private_key_;
+        std::string pending_dump_path_;
+
+        std::unique_ptr<LibusbContext>                               libusb_context_;
+        std::unique_ptr<aasdk::usb::USBWrapper>                     usb_wrapper_;
+        std::unique_ptr<aasdk::usb::AccessoryModeQueryFactory>      query_factory_;
         std::unique_ptr<aasdk::usb::AccessoryModeQueryChainFactory> query_chain_factory_;
-        aasdk::usb::IUSBHub::Pointer usb_hub_;
+        aasdk::usb::IUSBHub::Pointer                                usb_hub_;
 
-        aasdk::usb::IAOAPDevice::Pointer aoap_device_;
-        aasdk::transport::ITransport::Pointer usb_transport_;
-        aasdk::transport::ISSLWrapper::Pointer ssl_wrapper_;
-        aasdk::messenger::ICryptor::Pointer cryptor_;
-        aasdk::messenger::IMessageInStream::Pointer message_in_stream_;
-        aasdk::messenger::IMessageOutStream::Pointer message_out_stream_;
-        aasdk::messenger::IMessenger::Pointer messenger_;
+        aasdk::usb::IAOAPDevice::Pointer              aoap_device_;
+        aasdk::transport::ITransport::Pointer         usb_transport_;
+        aasdk::transport::ISSLWrapper::Pointer        ssl_wrapper_;
+        aasdk::messenger::ICryptor::Pointer           cryptor_;
+        aasdk::messenger::IMessageInStream::Pointer   message_in_stream_;
+        aasdk::messenger::IMessageOutStream::Pointer  message_out_stream_;
+        aasdk::messenger::IMessenger::Pointer         messenger_;
 
         SessionManager::Pointer session_manager_;
     };

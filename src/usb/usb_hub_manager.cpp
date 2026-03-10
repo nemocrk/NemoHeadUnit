@@ -30,8 +30,8 @@ namespace nemo
             return false;
         }
 
-        usb_wrapper_ = std::make_unique<aasdk::usb::USBWrapper>(libusb_context_->get_context());
-        query_factory_ = std::make_unique<aasdk::usb::AccessoryModeQueryFactory>(*usb_wrapper_, io_ctx);
+        usb_wrapper_         = std::make_unique<aasdk::usb::USBWrapper>(libusb_context_->get_context());
+        query_factory_       = std::make_unique<aasdk::usb::AccessoryModeQueryFactory>(*usb_wrapper_, io_ctx);
         query_chain_factory_ = std::make_unique<aasdk::usb::AccessoryModeQueryChainFactory>(
             *usb_wrapper_, io_ctx, *query_factory_);
 
@@ -50,31 +50,50 @@ namespace nemo
 
         promise->then(
             [this, self = shared_from_this()](aasdk::usb::DeviceHandle handle)
-            {
-                this->onDeviceDiscovered(std::move(handle));
-            },
+            { this->onDeviceDiscovered(std::move(handle)); },
             [this, self = shared_from_this()](const aasdk::error::Error &e)
-            {
-                this->onDiscoveryFailed(e);
-            });
+            { this->onDiscoveryFailed(e); });
 
         usb_hub_->start(std::move(promise));
     }
 
-    void UsbHubManager::ensureCertificatesExist(const std::string &cert_str, const std::string &key_str)
+    // -------------------------------------------------------------------------
+    // ensureCertificatesExist
+    // Scrive cert e key (già validati da Python CryptoManager) su disco
+    // nel path ./cert/ affinché aasdk::Cryptor::init() li trovi.
+    // Side effect necessario: aasdk legge i PEM da filesystem, non da memoria.
+    // -------------------------------------------------------------------------
+    void UsbHubManager::ensureCertificatesExist()
     {
+        if (certificate_.empty() || private_key_.empty())
+        {
+            std::cerr << "[UsbHubManager] WARN: cert/key non impostati — "
+                         "chiamare set_certificate_and_key() prima di start()." << std::endl;
+            return;
+        }
+
         mkdir("cert", 0777);
+
         std::ofstream cert_file("cert/headunit.crt");
         if (cert_file.is_open())
         {
-            cert_file << cert_str;
-            cert_file.close();
+            cert_file << certificate_;
+            std::cout << "[UsbHubManager] cert/headunit.crt scritto." << std::endl;
         }
+        else
+        {
+            std::cerr << "[UsbHubManager] ERRORE: impossibile scrivere cert/headunit.crt" << std::endl;
+        }
+
         std::ofstream key_file("cert/headunit.key");
         if (key_file.is_open())
         {
-            key_file << key_str;
-            key_file.close();
+            key_file << private_key_;
+            std::cout << "[UsbHubManager] cert/headunit.key scritto." << std::endl;
+        }
+        else
+        {
+            std::cerr << "[UsbHubManager] ERRORE: impossibile scrivere cert/headunit.key" << std::endl;
         }
     }
 
@@ -96,12 +115,10 @@ namespace nemo
         usb_transport_ = std::make_shared<aasdk::transport::USBTransport>(
             runner_.get_io_context(), aoap_device_);
         ssl_wrapper_ = std::make_shared<aasdk::transport::SSLWrapper>();
-        cryptor_ = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
+        cryptor_     = std::make_shared<aasdk::messenger::Cryptor>(ssl_wrapper_);
 
-        if (crypto_manager_)
-        {
-            ensureCertificatesExist(crypto_manager_->getCertificate(), crypto_manager_->getPrivateKey());
-        }
+        // Scrive i PEM su disco per aasdk::Cryptor::init()
+        ensureCertificatesExist();
         cryptor_->init();
 
         if (orchestrator_)
@@ -109,7 +126,7 @@ namespace nemo
             orchestrator_->setCryptor(cryptor_);
         }
 
-        message_in_stream_ = std::make_shared<aasdk::messenger::MessageInStream>(
+        message_in_stream_  = std::make_shared<aasdk::messenger::MessageInStream>(
             runner_.get_io_context(), usb_transport_, cryptor_);
         message_out_stream_ = std::make_shared<aasdk::messenger::MessageOutStream>(
             runner_.get_io_context(), usb_transport_, cryptor_);
@@ -184,4 +201,4 @@ namespace nemo
         usb_hub_.reset();
     }
 
-}
+} // namespace nemo
