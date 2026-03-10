@@ -83,7 +83,7 @@ CH_SYSTEM_AUDIO = 6
 CH_INPUT        = 8
 CH_MIC          = 9
 CH_BLUETOOTH    = 10
-CH_NAVIGATION   = 13
+CH_NAVIGATION   = 12
 
 # Canali che richiedono AVChannelSetupRequest/Response
 AV_CHANNELS = {CH_VIDEO, CH_MEDIA_AUDIO, CH_SPEECH_AUDIO, CH_SYSTEM_AUDIO, CH_MIC}
@@ -331,7 +331,10 @@ class InteractiveOrchestrator:
     def on_av_channel_setup_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] AVChannelSetupRequest su CH {channel_id}")
         resp = AVChannelConfig()
-        resp.status = AVChannelConfig.Status.Value("STATUS_READY")
+        if channel_id == CH_VIDEO:
+            resp.status = AVChannelConfig.Status.Value("STATUS_WAIT")  # ← era STATUS_READY
+        else:
+            resp.status = AVChannelConfig.Status.Value("STATUS_READY")
         resp.max_unacked = 1
         resp.configuration_indices.append(0)
         setup_bytes = resp.SerializeToString()

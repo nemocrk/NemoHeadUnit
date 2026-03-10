@@ -107,6 +107,7 @@ namespace nemo
             aap_protobuf::service::control::message::ChannelOpenResponse open_resp;
             if (!open_resp.ParseFromString(open_res))
             {
+                std::cout << "[Video] Errore nel Parsing di onChannelOpenRequest." << std::endl;
                 // Fallback: STATUS_SUCCESS = 0
                 open_resp.set_status(static_cast<decltype(open_resp.status())>(0));
             }
