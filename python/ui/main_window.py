@@ -5,32 +5,35 @@ python/ui/main_window.py
 Finestra principale NemoHeadUnit — Fase 5.
 
 Architettura:
-  - VideoWidget: widget PyQt6 con WA_NativeWindow che fornisce il WId X11
-    a GStreamer. Python non tocca mai i buffer video.
-  - MainWindow: coordina IoContextRunner, CryptoManager, GstVideoSink e
-    UsbHubManager. Avvia la catena C++ 200 ms dopo show() per garantire
-    che il WId nativo sia valido.
-  - InteractiveOrchestrator: riuso completo dalla Fase 4. L'unico override
-    è on_video_channel_open_request che trigga start_pipeline() sul sink C++.
+  - VideoWidget   : widget PyQt6 con WA_NativeWindow che fornisce il WId X11
+                    a GStreamer. Python non tocca mai i buffer video.
+  - PipelineBridge: QObject con un Signal Qt — unico meccanismo thread-safe
+                    per postare lavoro nel thread Qt da un thread Boost.Asio.
+  - MainWindow    : coordina IoContextRunner, CryptoManager, GstVideoSink e
+                    UsbHubManager.
 
 Regola GIL:
   I buffer NAL units non attraversano MAI questa UI.
   Il flusso è esclusivamente:
     VideoEventHandler (C++) -> GstVideoSink::pushBuffer() -> xvimagesink -> WId
 
+Perché PipelineBridge invece di QTimer.singleShot():
+  on_video_channel_open_request è chiamato dal thread Boost.Asio C++.
+  QTimer.singleShot() chiamato da un thread non-Qt NON è thread-safe:
+  il timer viene creato nel thread sbagliato e il callback non viene mai
+  eseguito nell'event loop Qt principale.
+  La soluzione corretta è emettere un Signal Qt da qualsiasi thread:
+  Qt garantisce che lo slot connesso venga eseguito nel thread owner
+  dell'oggetto ricevente (AutoConnection -> QueuedConnection cross-thread).
+
 Note sui flag Qt (CRITICI):
-  - WA_NativeWindow      : crea una finestra X11 nativa con WId valido
-  - WA_PaintOnScreen     : NON usare — causa "paintEngine: Should no longer
-                           be called" perché Qt tenta il painter su un widget
-                           nativo senza backing store.
-  - WA_OpaquePaintEvent  : NON usare — stesso problema.
-  - paintEngine()        : deve ritornare nullptr per segnalare a Qt che
-                           il widget è gestito esternamente (da GStreamer).
+  - WA_NativeWindow   : crea una finestra X11 nativa con WId valido
+  - WA_PaintOnScreen  : NON usare
+  - WA_OpaquePaintEvent: NON usare
+  - paintEngine()     : deve ritornare None
 
 Avvio:
   DISPLAY=:0 python3 python/ui/main_window.py
-  oppure con display virtuale:
-  Xvfb :99 -screen 0 800x480x24 & DISPLAY=:99 python3 python/ui/main_window.py
 """
 
 import sys
@@ -62,11 +65,32 @@ except ImportError as e:
 # ── Import PyQt6 ───────────────────────────────────────────────────────────
 try:
     from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
-    from PyQt6.QtCore    import Qt, QTimer
-    from PyQt6.QtGui     import QPalette, QColor, QPaintEngine
+    from PyQt6.QtCore    import Qt, QTimer, QObject, pyqtSignal
+    from PyQt6.QtGui     import QPalette, QColor
 except ImportError:
     print("[ERRORE] PyQt6 non trovato. Installa con: pip install PyQt6")
     sys.exit(1)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PipelineBridge
+# ═══════════════════════════════════════════════════════════════════════════
+
+class PipelineBridge(QObject):
+    """
+    Ponte thread-safe tra il thread Boost.Asio C++ e il thread Qt.
+
+    Emettere pipeline_start_requested da qualsiasi thread è sicuro:
+    Qt instraderà automaticamente la chiamata allo slot connesso nel
+    thread principale (QueuedConnection) grazie all'AutoConnection.
+
+    Uso:
+        bridge = PipelineBridge()
+        bridge.pipeline_start_requested.connect(gst_sink.start_pipeline)
+        # Da thread Boost.Asio:
+        bridge.pipeline_start_requested.emit()
+    """
+    pipeline_start_requested = pyqtSignal()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -76,50 +100,26 @@ except ImportError:
 class VideoWidget(QWidget):
     """
     Widget nativo X11 che ospita il rendering diretto di GStreamer.
-
-    Flag usati:
-      WA_NativeWindow  -> crea subwindow X11 con WId proprio (obbligatorio
-                          per gst_video_overlay_set_window_handle)
-
-    Flag VOLUTAMENTE OMESSI:
-      WA_PaintOnScreen    -> causerebbe "paintEngine: Should no longer be
-                             called" perché Qt tenta di usare il painter
-                             su una finestra gestita da GStreamer.
-      WA_OpaquePaintEvent -> stesso problema.
-
-    paintEngine() ritorna None per comunicare a Qt che questo widget
-    non ha un paint engine Qt — il rendering è completamente delegato
-    a GStreamer/xvimagesink.
+    WA_NativeWindow garantisce una subwindow X11 con WId proprio.
+    paintEngine() ritorna None per delegare completamente il rendering
+    a GStreamer/xvimagesink senza interferenze dal painter Qt.
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Solo WA_NativeWindow: crea la subwindow X11 con WId valido
         self.setAttribute(Qt.WidgetAttribute.WA_NativeWindow, True)
-        # Sfondo nero — visibile finché GStreamer non inizia a renderizzare
         palette = self.palette()
         palette.setColor(QPalette.ColorRole.Window, QColor(0, 0, 0))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
     def paintEngine(self):
-        """
-        Ritorna None per segnalare a Qt che questo widget non ha un
-        paint engine interno. Senza questo override Qt chiama il painter
-        di default e stampa "Should no longer be called" in loop.
-        """
         return None
 
     def get_window_id(self) -> int:
-        """
-        Restituisce il WId X11 nativo.
-        Chiamare SOLO dopo show() + processEvents().
-        Ritorna 0 se la finestra X11 non è ancora stata creata.
-        """
         wid = int(self.winId())
         if wid == 0:
-            print("[VideoWidget] WARN: winId() == 0 — "
-                  "assicurarsi che show() sia stato chiamato prima.")
+            print("[VideoWidget] WARN: winId() == 0 — show() non ancora chiamato.")
         return wid
 
 
@@ -132,26 +132,17 @@ class MainWindow(QMainWindow):
     Finestra principale NemoHeadUnit.
 
     Flusso di avvio:
-      1. show() + processEvents()    -> crea finestra X11, WId valido
-      2. QTimer(200ms)               -> start_headunit()
-      3. start_headunit()            -> configura GstVideoSink con WId
-      4. UsbHubManager.start()       -> discovery USB
-      5. on_video_channel_open_request() chiamato da thread Boost.Asio
-         -> schedula start_pipeline() nel thread Qt via QTimer.singleShot(0)
-      6. start_pipeline() eseguito nel thread Qt -> xvimagesink ha già
-         ricevuto l'expose event con dimensioni valide (h != 0)
-      7. GStreamer renderizza dentro VideoWidget
-
-    CRITICO — perché QTimer.singleShot(0) per start_pipeline():
-      on_video_channel_open_request è chiamato dal thread Boost.Asio C++.
-      gst_element_set_state(PLAYING) internamente chiama xvimagesink che
-      tenta di leggere le dimensioni della finestra X11. Se la chiamata
-      avviene prima che Qt abbia processato l'expose event iniziale,
-      la finestra ha height=0 e GStreamer abortisce con:
-        'gst_video_center_rect: assertion src->h != 0 failed'
-      QTimer.singleShot(0) rimanda l'esecuzione al prossimo tick
-      dell'event loop Qt, garantendo che il widget sia completamente
-      renderizzato con dimensioni valide.
+      1. show() + processEvents()         -> WId X11 valido
+      2. QTimer(200ms) -> start_headunit()
+      3. start_headunit()                 -> crea PipelineBridge, GstVideoSink,
+                                            connette signal->slot nel thread Qt
+      4. UsbHubManager.start()            -> discovery USB
+      5. on_video_channel_open_request()  -> chiamato dal thread Boost.Asio
+                                            -> bridge.pipeline_start_requested.emit()
+      6. Qt consegna il signal allo slot  -> _start_pipeline() nel thread Qt
+      7. GstVideoSink.start_pipeline()    -> xvimagesink riceve WId con
+                                            dimensioni X11 già valide
+      8. pushBuffer() dal thread Asio     -> GStreamer decodifica e renderizza
     """
 
     def __init__(self, width: int = 800, height: int = 480):
@@ -169,13 +160,11 @@ class MainWindow(QMainWindow):
         self._runner      = None
         self._usb_manager = None
         self._gst_sink    = None
+        self._bridge      = None
 
     # ── Avvio catena C++ ───────────────────────────────────────────────────
 
     def start_headunit(self):
-        """
-        Inizializza la catena C++. Chiamato 200ms dopo show() via QTimer.
-        """
         QApplication.processEvents()
         wid = self._video_widget.get_window_id()
         print(f"[UI] Window ID nativo: {wid}")
@@ -193,33 +182,33 @@ class MainWindow(QMainWindow):
         self._gst_sink.set_window_id(wid)
         print(f"[UI] GstVideoSink configurato ({self._width}x{self._height})")
 
+        # ----------------------------------------------------------------
+        # PipelineBridge: creato nel thread Qt, connesso nel thread Qt.
+        # Il signal pipeline_start_requested può essere emesso da qualsiasi
+        # thread — Qt consegna lo slot _start_pipeline nel thread Qt
+        # grazie alla QueuedConnection automatica cross-thread.
+        # ----------------------------------------------------------------
+        self._bridge = PipelineBridge()
+        self._bridge.pipeline_start_requested.connect(self._start_pipeline)
+        print("[UI] PipelineBridge connesso (thread-safe cross-thread signal).")
+
         orchestrator = InteractiveOrchestrator(
             screen_width=self._width,
             screen_height=self._height,
         )
 
-        # ----------------------------------------------------------------
-        # Override on_video_channel_open_request — Phase 5
-        #
-        # IMPORTANTE: questa callback è chiamata dal thread Boost.Asio C++.
-        # NON chiamare start_pipeline() direttamente qui: xvimagesink
-        # leggerebbe le dimensioni X11 prima dell'expose event -> h==0.
-        #
-        # Soluzione: QTimer.singleShot(0) rimanda start_pipeline() al
-        # prossimo tick dell'event loop Qt (thread principale), dove le
-        # dimensioni del widget sono già valide.
-        # ----------------------------------------------------------------
-        gst_ref = self._gst_sink
+        # Cattura il bridge per l'uso nel thread Boost.Asio
+        bridge_ref = self._bridge
 
         def _on_video_channel_open(payload: bytes) -> bytes:
-            print("[UI] *** Video channel aperto → schedule start_pipeline() nel thread Qt ***")
-            QTimer.singleShot(0, _start_pipeline_in_qt_thread)
+            """
+            Chiamata dal thread Boost.Asio C++.
+            NON chiamare start_pipeline() qui direttamente.
+            Emette il signal Qt — thread-safe per definizione.
+            """
+            print("[UI] Video channel aperto → emit pipeline_start_requested")
+            bridge_ref.pipeline_start_requested.emit()
             return b""
-
-        def _start_pipeline_in_qt_thread():
-            print("[UI] start_pipeline() — thread Qt — avvio GStreamer...")
-            gst_ref.start_pipeline()
-            print(f"[UI] GStreamer running: {gst_ref.is_running()}")
 
         orchestrator.on_video_channel_open_request = _on_video_channel_open
 
@@ -231,6 +220,19 @@ class MainWindow(QMainWindow):
 
         self._runner.start()
         print("[UI] IoContextRunner avviato. In attesa del telefono via USB...")
+
+    def _start_pipeline(self):
+        """
+        Slot Qt — eseguito SEMPRE nel thread Qt principale.
+        Sicuro chiamare start_pipeline() qui: xvimagesink legge le
+        dimensioni X11 che sono già valide dopo show() + processEvents().
+        """
+        print("[UI] _start_pipeline() — thread Qt — avvio GStreamer...")
+        if self._gst_sink:
+            self._gst_sink.start_pipeline()
+            print(f"[UI] GStreamer running: {self._gst_sink.is_running()}")
+        else:
+            print("[UI] ERRORE: _gst_sink è None in _start_pipeline()")
 
     def _on_connect(self, success: bool, message: str):
         if success:
@@ -265,8 +267,6 @@ def main():
 
     window = MainWindow(width=800, height=480)
     window.show()
-    # processEvents() garantisce che la finestra X11 sia completamente
-    # creata e il WId sia valido prima di avviare start_headunit()
     QApplication.processEvents()
 
     QTimer.singleShot(200, window.start_headunit)
