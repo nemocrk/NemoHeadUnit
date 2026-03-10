@@ -22,7 +22,7 @@ namespace nemo
             boost::asio::io_service::strand &strand,
             aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel,
             std::shared_ptr<IOrchestrator> orchestrator,
-            std::shared_ptr<GstVideoSink> video_sink = nullptr) // Phase 5
+            std::shared_ptr<GstVideoSink> video_sink = nullptr)
             : strand_(strand),
               channel_(std::move(channel)),
               orchestrator_(std::move(orchestrator)),
@@ -42,10 +42,6 @@ namespace nemo
             return p;
         }
 
-        // -----------------------------------------------------------------------
-        // Step 1: AVChannelSetupRequest -> AVChannelSetupResponse (Config proto)
-        //         -> VideoFocusIndication(PROJECTED) nel promise->then
-        // -----------------------------------------------------------------------
         void onMediaChannelSetupRequest(
             const aap_protobuf::service::media::shared::message::Setup &request) override
         {
@@ -71,8 +67,7 @@ namespace nemo
             auto setup_promise = aasdk::channel::SendPromise::defer(strand_);
             auto self = this->shared_from_this();
             setup_promise->then(
-                [self]()
-                { self->sendVideoFocusIndication(); },
+                [self]() { self->sendVideoFocusIndication(); },
                 [](const aasdk::error::Error &e)
                 {
                     std::cerr << "[Video] sendChannelSetupResponse FAILED: " << e.what() << std::endl;
@@ -81,9 +76,6 @@ namespace nemo
             channel_->receive(this->shared_from_this());
         }
 
-        // -----------------------------------------------------------------------
-        // Step 2: ChannelOpenRequest -> ChannelOpenResponse(SUCCESS)
-        // -----------------------------------------------------------------------
         void onChannelOpenRequest(
             const aap_protobuf::service::control::message::ChannelOpenRequest &request) override
         {
@@ -104,16 +96,10 @@ namespace nemo
                 open_resp.set_status(static_cast<decltype(open_resp.status())>(0));
             }
             channel_->sendChannelOpenResponse(open_resp, makePromise("Video/ChannelOpenResponse"));
-
-            // Phase 5: notifica orchestrator -> trigga start_pipeline() in Python
             orchestrator_->onVideoChannelOpenRequest(req_str);
-
             channel_->receive(this->shared_from_this());
         }
 
-        // -----------------------------------------------------------------------
-        // Step 3: VideoFocusRequestNotification -> VideoFocusNotification(PROJECTED)
-        // -----------------------------------------------------------------------
         void onVideoFocusRequest(
             const aap_protobuf::service::media::video::message::VideoFocusRequestNotification &request) override
         {
@@ -130,16 +116,10 @@ namespace nemo
             {
                 aap_protobuf::service::media::video::message::VideoFocusNotification vf;
                 if (vf.ParseFromString(res_str))
-                {
                     channel_->sendVideoFocusIndication(vf, makePromise("Video/VideoFocusIndication"));
-                }
             }
             channel_->receive(this->shared_from_this());
         }
-
-        // -----------------------------------------------------------------------
-        // Media stream callbacks
-        // -----------------------------------------------------------------------
 
         void onMediaChannelStartIndication(
             const aap_protobuf::service::media::shared::message::Start &indication) override
@@ -152,7 +132,6 @@ namespace nemo
             const aap_protobuf::service::media::shared::message::Stop &indication) override
         {
             std::cout << "[Video] MediaChannelStop" << std::endl;
-            // Chiudi dump se ancora aperto
             if (dump_file_.is_open())
             {
                 dump_file_.close();
@@ -162,24 +141,78 @@ namespace nemo
         }
 
         // -----------------------------------------------------------------------
-        // onMediaWithTimestampIndication
-        // -----------------------------------------------------------------------
-        // Punto nevralgico della Fase 5:
-        //   - Step 8: scrive su file dump per verifica con VLC
-        //   - Step 9: inietta i byte nella pipeline GStreamer (zero-copy)
-        //
-        // REGOLA GIL: questa callback gira nel thread Boost.Asio.
-        // NON acquisire mai il GIL qui. GstVideoSink::pushBuffer() è
-        // interamente in C++ e non tocca Python.
+        // onMediaWithTimestampIndication — NAL units con timestamp (P/B frames)
         // -----------------------------------------------------------------------
         void onMediaWithTimestampIndication(
             aasdk::messenger::Timestamp::ValueType ts,
             const aasdk::common::DataConstBuffer &buffer) override
         {
-            std::cout << "[Video] NAL unit ts=" << ts
-                      << " size=" << buffer.size << " bytes" << std::endl;
+            processBuffer(ts, buffer);
+            channel_->receive(this->shared_from_this());
+        }
 
-            // ── Step 8: dump su file (abilitato da enableDump()) ──────────────
+        // -----------------------------------------------------------------------
+        // onMediaIndication — NAL units SENZA timestamp.
+        // BUG STORICO: questo callback trasportava il primo pacchetto
+        // SPS+PPS+IDR (size ~2508 bytes, ts=0) che veniva scartato con
+        // (void)buffer. Fix: instrada su processBuffer() con ts=0,
+        // identico a come fa openauto/VideoService::onAVMediaIndication().
+        // -----------------------------------------------------------------------
+        void onMediaIndication(const aasdk::common::DataConstBuffer &buffer) override
+        {
+            processBuffer(0, buffer);
+            channel_->receive(this->shared_from_this());
+        }
+
+        void onChannelError(const aasdk::error::Error &e) override
+        {
+            std::cerr << "[Video] Channel Error: " << e.what() << std::endl;
+        }
+
+        void enableDump(const std::string &path)
+        {
+            dump_file_.open(path, std::ios::binary | std::ios::trunc);
+            if (dump_file_.is_open())
+            {
+                dump_enabled_ = true;
+                dump_bytes_   = 0;
+                std::cout << "[Video] Dump H.264 abilitato: " << path << std::endl;
+            }
+            else
+            {
+                std::cerr << "[Video] ERRORE: impossibile aprire dump file: " << path << std::endl;
+            }
+        }
+
+    private:
+        // -----------------------------------------------------------------------
+        // processBuffer — logica comune a onMediaIndication e
+        //                 onMediaWithTimestampIndication.
+        // REGOLA GIL: gira nel thread Boost.Asio. NON toccare Python qui.
+        // -----------------------------------------------------------------------
+        void processBuffer(aasdk::messenger::Timestamp::ValueType ts,
+                           const aasdk::common::DataConstBuffer &buffer)
+        {
+            // Log NAL type per i primi 5 pacchetti (debug)
+            if (nal_count_ < 5)
+            {
+                uint8_t nal_type = (buffer.size > 4) ? (buffer.cdata[4] & 0x1Fu) : 0xFFu;
+                std::cout << "[Video] NAL #" << nal_count_
+                          << " type=" << static_cast<int>(nal_type)
+                          << " (7=SPS,8=PPS,5=IDR,1=slice)"
+                          << " ts=" << ts
+                          << " size=" << buffer.size
+                          << " dump_open=" << dump_file_.is_open()
+                          << std::endl;
+                ++nal_count_;
+            }
+            else
+            {
+                std::cout << "[Video] NAL unit ts=" << ts
+                          << " size=" << buffer.size << " bytes" << std::endl;
+            }
+
+            // ── Dump H.264 ────────────────────────────────────────────────
             if (dump_enabled_ && dump_file_.is_open() && dump_bytes_ < DUMP_LIMIT_)
             {
                 dump_file_.write(
@@ -193,12 +226,12 @@ namespace nemo
                     dump_enabled_ = false;
                     std::cout << "[Video] Dump completato ("
                               << DUMP_LIMIT_ / 1024 << " KB). "
-                              << "Apri con: vlc --demux h264 video_dump.h264"
+                              << "Verifica: vlc --demux h264 video_dump.h264"
                               << std::endl;
                 }
             }
 
-            // ── Step 9: push a GStreamer (zero-copy, NO GIL) ──────────────
+            // ── Push a GStreamer (zero-copy, NO GIL) ──────────────────────
             if (video_sink_ && video_sink_->isRunning())
             {
                 video_sink_->pushBuffer(
@@ -206,43 +239,8 @@ namespace nemo
                     buffer.cdata,
                     buffer.size);
             }
-
-            channel_->receive(this->shared_from_this());
         }
 
-        void onMediaIndication(const aasdk::common::DataConstBuffer &buffer) override
-        {
-            (void)buffer;
-            channel_->receive(this->shared_from_this());
-        }
-
-        void onChannelError(const aasdk::error::Error &e) override
-        {
-            std::cerr << "[Video] Channel Error: " << e.what() << std::endl;
-        }
-
-        // -----------------------------------------------------------------------
-        // enableDump() — API di supporto per test Step 8
-        // -----------------------------------------------------------------------
-        // Chiamare da Python (via binding o direttamente in C++) prima di
-        // avviare lo stream per abilitare la scrittura del dump su file.
-        // -----------------------------------------------------------------------
-        void enableDump(const std::string &path)
-        {
-            dump_file_.open(path, std::ios::binary | std::ios::trunc);
-            if (dump_file_.is_open())
-            {
-                dump_enabled_ = true;
-                dump_bytes_ = 0;
-                std::cout << "[Video] Dump H.264 abilitato: " << path << std::endl;
-            }
-            else
-            {
-                std::cerr << "[Video] ERRORE: impossibile aprire dump file: " << path << std::endl;
-            }
-        }
-
-    private:
         void sendVideoFocusIndication()
         {
             std::cout << "[Video] sendVideoFocusIndication() -> PROJECTED" << std::endl;
@@ -256,12 +254,13 @@ namespace nemo
         boost::asio::io_service::strand &strand_;
         aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer channel_;
         std::shared_ptr<IOrchestrator> orchestrator_;
-        std::shared_ptr<GstVideoSink> video_sink_; // Phase 5
+        std::shared_ptr<GstVideoSink> video_sink_;
 
-        // ── Dump H.264 (Step 8) ───────────────────────────────────────────
+        // ── Dump H.264 ────────────────────────────────────────────────────
         std::ofstream dump_file_;
-        bool dump_enabled_ = false;
-        std::size_t dump_bytes_ = 0;
+        bool          dump_enabled_ = false;
+        std::size_t   dump_bytes_   = 0;
+        std::size_t   nal_count_    = 0;
         static constexpr std::size_t DUMP_LIMIT_ = 5UL * 1024UL * 1024UL; // 5 MB
     };
 
