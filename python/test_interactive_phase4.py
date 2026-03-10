@@ -331,10 +331,7 @@ class InteractiveOrchestrator:
     def on_av_channel_setup_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] AVChannelSetupRequest su CH {channel_id}")
         resp = AVChannelConfig()
-        if channel_id == CH_VIDEO:
-            resp.status = AVChannelConfig.Status.Value("STATUS_WAIT")  # ← era STATUS_READY
-        else:
-            resp.status = AVChannelConfig.Status.Value("STATUS_READY")
+        resp.status = AVChannelConfig.Status.Value("STATUS_READY")  # tutti i canali -> READY
         resp.max_unacked = 1
         resp.configuration_indices.append(0)
         # ── DEBUG: stampa oggetto in chiaro ──────────────────────────────
