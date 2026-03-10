@@ -4,6 +4,7 @@
 #include <aasdk/Channel/SensorSource/ISensorSourceServiceEventHandler.hpp>
 #include <aasdk/Channel/SensorSource/SensorSourceService.hpp>
 #include <aasdk/Channel/Promise.hpp>
+#include <aap_protobuf/service/sensorsource/message/DrivingStatus.pb.h>
 #include "iorchestrator.hpp"
 
 namespace nemo
@@ -66,14 +67,15 @@ namespace nemo
             response.set_status(aap_protobuf::shared::MessageStatus::STATUS_SUCCESS);
 
             auto promise = aasdk::channel::SendPromise::defer(strand_);
-            auto self    = this->shared_from_this();
+            auto self = this->shared_from_this();
 
             if (request.type() ==
                 aap_protobuf::service::sensorsource::message::SensorType::SENSOR_DRIVING_STATUS_DATA)
             {
                 // Ref: SensorService.cpp: promise->then(sendDrivingStatusUnrestricted)
                 promise->then(
-                    [self]() { self->sendDrivingStatusUnrestricted(); },
+                    [self]()
+                    { self->sendDrivingStatusUnrestricted(); },
                     [](const aasdk::error::Error &e)
                     {
                         std::cerr << "[Sensor] SensorStartResponse(DRIVING) FAILED: " << e.what() << std::endl;
@@ -84,7 +86,8 @@ namespace nemo
             {
                 // Ref: SensorService.cpp: promise->then(sendNightData)
                 promise->then(
-                    [self]() { self->sendNightData(false); },
+                    [self]()
+                    { self->sendNightData(false); },
                     [](const aasdk::error::Error &e)
                     {
                         std::cerr << "[Sensor] SensorStartResponse(NIGHT) FAILED: " << e.what() << std::endl;

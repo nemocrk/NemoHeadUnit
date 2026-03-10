@@ -20,7 +20,7 @@ void enable_aasdk_logging()
     std::cout << "[NemoHeadUnit] Abilitazione aasdk ModernLogger (TRACE/DEBUG)..." << std::endl;
     auto &logger = aasdk::common::ModernLogger::getInstance();
     logger.setLevel(aasdk::common::LogLevel::TRACE);
-    logger.setCategoryLevel(aasdk::common::LogCategory::TRANSPORT, aasdk::common::LogLevel::DEBUG);
+    // logger.setCategoryLevel(aasdk::common::LogCategory::TRANSPORT, aasdk::common::LogLevel::DEBUG);
     logger.setCategoryLevel(aasdk::common::LogCategory::USB, aasdk::common::LogLevel::DEBUG);
     logger.setCategoryLevel(aasdk::common::LogCategory::TCP, aasdk::common::LogLevel::DEBUG);
 }

@@ -73,7 +73,8 @@ namespace nemo
             auto setup_promise = aasdk::channel::SendPromise::defer(strand_);
             auto self = this->shared_from_this();
             setup_promise->then(
-                [self]() { self->sendVideoFocusIndication(); },
+                [self]()
+                { self->sendVideoFocusIndication(); },
                 [](const aasdk::error::Error &e)
                 {
                     std::cerr << "[Video] sendChannelSetupResponse FAILED: " << e.what() << std::endl;
@@ -170,8 +171,10 @@ namespace nemo
         void onMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType ts,
                                             const aasdk::common::DataConstBuffer &buffer) override
         {
-            (void)ts;
-            (void)buffer;
+            //(void)ts;
+            //(void)buffer;
+            std::cout << "[Video] NAL unit ts=" << ts
+                      << " size=" << buffer.size << " bytes" << std::endl;
             // Phase 4: drop frame (no Ack necessario su video, solo receive).
             // Phase 5: NAL unit -> GStreamer appsrc / libavcodec (zero-copy, NO GIL).
             channel_->receive(this->shared_from_this());
