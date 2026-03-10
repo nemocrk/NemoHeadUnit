@@ -6,19 +6,22 @@
 #include <aasdk/Channel/Control/ControlServiceChannel.hpp>
 #include <aasdk/Channel/MediaSink/Video/VideoMediaSinkService.hpp>
 #include <aasdk/Channel/MediaSink/Audio/AudioMediaSinkService.hpp>
+#include <aasdk/Channel/SensorSource/SensorSourceService.hpp>
 #include <aasdk/Channel/Promise.hpp>
 #include "control_event_handler.hpp"
 #include "video_event_handler.hpp"
 #include "audio_event_handler.hpp"
+#include "sensor_event_handler.hpp"
 #include "iorchestrator.hpp"
 
 // Channel IDs da aasdk/Messenger/ChannelId.hpp
-// static constexpr aasdk::messenger::ChannelId kChControl = aasdk::messenger::ChannelId::CONTROL;
-// static constexpr aasdk::messenger::ChannelId kChVideo = aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO;
-// static constexpr aasdk::messenger::ChannelId kChMediaAudio = aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO;
-// static constexpr aasdk::messenger::ChannelId kChSpeechAudio = aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO;
-// static constexpr aasdk::messenger::ChannelId kChSystemAudio = aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO;
-// static constexpr aasdk::messenger::ChannelId kChMic = aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE;
+// static constexpr aasdk::messenger::ChannelId kChControl      = aasdk::messenger::ChannelId::CONTROL;
+// static constexpr aasdk::messenger::ChannelId kChSensor       = aasdk::messenger::ChannelId::SENSOR_SOURCE;
+// static constexpr aasdk::messenger::ChannelId kChVideo        = aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO;
+// static constexpr aasdk::messenger::ChannelId kChMediaAudio   = aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO;
+// static constexpr aasdk::messenger::ChannelId kChSpeechAudio  = aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO;
+// static constexpr aasdk::messenger::ChannelId kChSystemAudio  = aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO;
+// static constexpr aasdk::messenger::ChannelId kChMic          = aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE;
 
 namespace nemo
 {
@@ -66,8 +69,19 @@ namespace nemo
             control_channel_->sendVersionRequest(makePromise("Control/VersionRequest"));
 
             // ---------------------------------------------------------------
+            // CH 1: Sensor Source
+            // GATE CRITICO: Android attende SensorStartResponse(DRIVING_STATUS)
+            // + DrivingStatus UNRESTRICTED prima di avviare lo stream H.264.
+            // Ref: SensorService.cpp::onSensorStartRequest()
+            // ---------------------------------------------------------------
+            sensor_channel_ = std::make_shared<aasdk::channel::sensorsource::SensorSourceService>(
+                strand_, messenger_);
+            sensor_handler_ = std::make_shared<SensorEventHandler>(
+                strand_, sensor_channel_, orchestrator_);
+            sensor_channel_->receive(sensor_handler_);
+
+            // ---------------------------------------------------------------
             // CH 3: Video Sink
-            // Correzione: era 2 (bug silente), ora CH_VIDEO = 3
             // ---------------------------------------------------------------
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO);
@@ -104,8 +118,6 @@ namespace nemo
 
             // ---------------------------------------------------------------
             // CH 9: Mic (MediaSource)
-            // AudioMediaSinkService riusa per il source: in aasdk il mic
-            // usa AudioMediaSinkService con ChannelId = MIC (9).
             // Phase 5: sostituire con MediaSourceService per TX verso Android.
             // ---------------------------------------------------------------
             mic_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
@@ -120,6 +132,7 @@ namespace nemo
             strand_.dispatch([this, self = shared_from_this()]()
                              {
             control_channel_.reset();      control_handler_.reset();
+            sensor_channel_.reset();       sensor_handler_.reset();
             video_channel_.reset();        video_handler_.reset();
             media_audio_channel_.reset();  media_audio_handler_.reset();
             speech_audio_channel_.reset(); speech_audio_handler_.reset();
@@ -136,6 +149,10 @@ namespace nemo
         // CH 0
         aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;
         ControlEventHandler::Pointer control_handler_;
+
+        // CH 1
+        aasdk::channel::sensorsource::ISensorSourceService::Pointer sensor_channel_;
+        SensorEventHandler::Pointer sensor_handler_;
 
         // CH 3
         aasdk::channel::mediasink::video::IVideoMediaSinkService::Pointer video_channel_;
