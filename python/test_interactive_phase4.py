@@ -4,7 +4,8 @@ import binascii
 import time
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(current_dir))
+root_dir    = os.path.dirname(current_dir)
+sys.path.append(root_dir)
 sys.path.append(current_dir)
 
 try:
@@ -51,7 +52,6 @@ try:
     from aasdk_proto.aap_protobuf.service.sensorsource.SensorSourceService_pb2 import SensorSourceService
     from aasdk_proto.aap_protobuf.service.sensorsource.message.Sensor_pb2 import Sensor
     from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorType_pb2 import SensorType
-    # Aggiunto: risposta al SensorStartRequest e indicazione DrivingStatus/NightMode
     from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorStartResponseMessage_pb2 import SensorStartResponseMessage
     from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorBatch_pb2 import SensorBatch
     from aasdk_proto.aap_protobuf.service.sensorsource.message.DrivingStatus_pb2 import DrivingStatus
@@ -72,6 +72,15 @@ except ImportError as e:
     print("1) pip install protobuf")
     print("2) ./scripts/generate_protos.sh")
     sys.exit(1)
+
+
+# ── CryptoManager Python (sostituisce core.CryptoManager C++) ────────────────
+try:
+    from python.app.crypto_manager import CryptoManager
+except ImportError:
+    # Fallback: path relativo per chi esegue direttamente da python/
+    sys.path.insert(0, os.path.join(root_dir))
+    from python.app.crypto_manager import CryptoManager
 
 
 # ── ChannelId enum aasdk (da ChannelId.hpp) ───────────────────────────────────
@@ -159,12 +168,6 @@ class InteractiveOrchestrator:
         return data
 
     def _make_video_focus_indication(self, unsolicited: bool = False) -> bytes:
-        """
-        Costruisce VideoFocusNotification(focus=PROJECTED, unsolicited=unsolicited).
-        Allineato a VideoMediaSinkService.cpp::sendVideoFocusIndication().
-        Usato SOLO per on_video_focus_request (step 3 - gate H.264).
-        Il VideoFocus post-Setup e' inviato direttamente dal C++ via promise->then.
-        """
         vf = VideoFocusNotification()
         vf.focus       = VideoFocusMode.Value("VIDEO_FOCUS_PROJECTED")
         vf.unsolicited = unsolicited
@@ -205,11 +208,6 @@ class InteractiveOrchestrator:
     # ─────────────────────────────────────────────────────────────────────────
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
-        """
-        Costruisce la ServiceDiscoveryResponse con tutti i canali allineati
-        ai file C++ reali del repo.
-        Ref: fillFeatures() nei vari *Service-*.cpp
-        """
         print("\n[Orchestrator] Service Discovery Request ricevuta!")
 
         msg = ServiceDiscoveryResponse_pb2.ServiceDiscoveryResponse()
@@ -326,27 +324,24 @@ class InteractiveOrchestrator:
         )
 
     # ─────────────────────────────────────────────────────────────────────────
-    # AV Channel Setup (step 1 del 3 per aprire ogni canale media)
+    # AV Channel Setup
     # ─────────────────────────────────────────────────────────────────────────
     def on_av_channel_setup_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] AVChannelSetupRequest su CH {channel_id}")
         resp = AVChannelConfig()
-        resp.status = AVChannelConfig.Status.Value("STATUS_READY")  # tutti i canali -> READY
+        resp.status = AVChannelConfig.Status.Value("STATUS_READY")
         resp.max_unacked = 1
         resp.configuration_indices.append(0)
-        # ── DEBUG: stampa oggetto in chiaro ──────────────────────────────
-        print(f"  [DEBUG] resp.status         = {resp.status} "
-            f"({AVChannelConfig.Status.Name(resp.status)})")
+        print(f"  [DEBUG] resp.status         = {resp.status} ({AVChannelConfig.Status.Name(resp.status)})")
         print(f"  [DEBUG] resp.max_unacked    = {resp.max_unacked}")
         print(f"  [DEBUG] resp.config_indices = {list(resp.configuration_indices)}")
-        # ── DEBUG: serializzazione ───────────────────────────────────────
         setup_bytes = resp.SerializeToString()
         print(f"  [DEBUG] SerializeToString   = {setup_bytes.hex()}")
         self._log_and_send(f"Invia AVChannelSetupResponse CH {channel_id}", setup_bytes)
         return setup_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Channel Open (step 2 del 3)
+    # Channel Open
     # ─────────────────────────────────────────────────────────────────────────
     def on_channel_open_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] ChannelOpenRequest su CH {channel_id}")
@@ -357,72 +352,43 @@ class InteractiveOrchestrator:
         return open_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Sensor Start Request (CH1 gate)
-    # Ref: SensorService.cpp::onSensorStartRequest()
-    #
-    # Android → HU: SensorRequest (type = SENSOR_DRIVING_STATUS_DATA o SENSOR_NIGHT_MODE)
-    # HU → Android: SensorStartResponseMessage(STATUS_SUCCESS)
-    #
-    # GATE CRITICO: il messaggio SENSOR_DRIVING_STATUS_DATA deve ricevere
-    # risposta con SensorStartResponse + SensorBatch(DRIVE_STATUS_UNRESTRICTED).
-    # Senza questo Android NON avvia mai lo stream H.264.
-    #
-    # NOTA ARCHITETTURALE: il C++ (SensorEventHandler) invia
-    # SensorStartResponse via channel_->sendSensorStartResponse() e poi
-    # nel promise->then chiama sendDrivingStatusUnrestricted()/sendNightData().
-    # Questo metodo Python NON invia direttamente sul canale: è chiamato
-    # dall'Orchestrator binding SOLO come riferimento logico di test.
-    # L'handler reale è SensorEventHandler in sensor_event_handler.hpp.
+    # Sensor Start Request
     # ─────────────────────────────────────────────────────────────────────────
     def on_sensor_start_request(self, payload: bytes) -> bytes:
         from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorRequest_pb2 import SensorRequest
-
         req = SensorRequest()
         req.ParseFromString(payload)
         sensor_type = req.type
         print(f"\n[Orchestrator] SensorStartRequest tipo={sensor_type}")
 
-        # Step 1: SensorStartResponse(STATUS_SUCCESS)
         resp = SensorStartResponseMessage()
         resp.status = MessageStatus_pb2.MessageStatus.Value("STATUS_SUCCESS")
         resp_bytes = resp.SerializeToString()
         self._log_and_send(f"Invia SensorStartResponse tipo={sensor_type}", resp_bytes)
 
         if sensor_type == SensorType.Value("SENSOR_DRIVING_STATUS_DATA"):
-            # Step 2a: SensorBatch con DRIVE_STATUS_UNRESTRICTED
-            # GATE H.264: senza questo Android non invia NAL units.
-            # Ref: SensorService.cpp::sendDrivingStatusUnrestricted()
             batch = SensorBatch()
             batch.driving_status_data.add().status = DrivingStatus.Value("DRIVE_STATUS_UNRESTRICTED")
             batch_bytes = batch.SerializeToString()
             self._log_and_send("Invia SensorBatch DRIVE_STATUS_UNRESTRICTED", batch_bytes)
-            # Ritorna i due messaggi concatenati: il C++ li spacchetta singolarmente.
             return resp_bytes + batch_bytes
-
         elif sensor_type == SensorType.Value("SENSOR_NIGHT_MODE"):
-            # Step 2b: SensorBatch con night_mode=False (giorno)
-            # Ref: SensorService.cpp::sendNightData()
             batch = SensorBatch()
             batch.night_mode_data.add().night_mode = False
             batch_bytes = batch.SerializeToString()
             self._log_and_send("Invia SensorBatch NightMode=False", batch_bytes)
             return resp_bytes + batch_bytes
 
-        # Per altri tipi (es. SENSOR_LOCATION) risponde solo STATUS_SUCCESS
         return resp_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Video Focus Request (step 3 del 3 per CH_VIDEO)
-    # Ref: VideoMediaSinkService.cpp::onVideoFocusRequest()
+    # Video Focus
     # ─────────────────────────────────────────────────────────────────────────
     def on_video_focus_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] VideoFocusRequest ricevuta → rispondo PROJECTED")
         vf_bytes = self._make_video_focus_indication(unsolicited=False)
         return self._log_and_send("Invia VideoFocusIndication (gate video)", vf_bytes)
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # on_video_channel_open_request — Placeholder Phase 5
-    # ─────────────────────────────────────────────────────────────────────────
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] *** on_video_channel_open_request RAGGIUNTO! (Phase 5) ***")
         return b""
@@ -438,11 +404,6 @@ class InteractiveOrchestrator:
         return msg.SerializeToString()
 
     def on_audio_focus_request(self, payload: bytes) -> bytes:
-        """
-        Ref: AndroidAutoEntity.cpp::onAudioFocusRequest()
-        RELEASE → AUDIO_FOCUS_STATE_LOSS
-        GAIN    → AUDIO_FOCUS_STATE_GAIN
-        """
         print("\n[Orchestrator] AudioFocusRequest ricevuta.")
         req = AudioFocusRequest_pb2.AudioFocusRequest()
         req.ParseFromString(payload)
@@ -460,22 +421,16 @@ class InteractiveOrchestrator:
         return self._log_and_send("Invia AudioFocusNotification", msg.SerializeToString())
 
     def on_navigation_focus_request(self, payload: bytes) -> bytes:
-        """
-        Ref: AndroidAutoEntity.cpp::onNavigationFocusRequest()
-        Risponde sempre NAV_FOCUS_PROJECTED (OpenAuto non ha nav locale).
-        """
         print("\n[Orchestrator] NavigationFocusRequest ricevuta → PROJECTED")
         msg = NavFocusNotification_pb2.NavFocusNotification()
         msg.focus_type = NavFocusType_pb2.NavFocusType.Value("NAV_FOCUS_PROJECTED")
         return self._log_and_send("Invia NavFocusNotification", msg.SerializeToString())
 
     def on_voice_session_request(self, payload: bytes) -> bytes:
-        """Sink silente: il C++ fa solo channel->receive() senza risposta."""
         print("\n[Orchestrator] VoiceSessionRequest ricevuta (sink silente).")
         return b""
 
     def on_battery_status_notification(self, payload: bytes) -> bytes:
-        """Sink silente: il C++ fa solo channel->receive() senza risposta."""
         print("\n[Orchestrator] BatteryStatusNotification ricevuta (sink silente).")
         return b""
 
@@ -491,11 +446,14 @@ def main():
 
     runner = core.IoContextRunner()
 
-    crypto = core.CryptoManager()
-    crypto.initialize()
+    # ── CryptoManager Python (no più core.CryptoManager C++) ─────────────────
+    crypto = CryptoManager()
+    if not crypto.initialize():
+        print("[ERRORE] Certificati non trovati o non validi. Uscita.")
+        sys.exit(1)
 
     usb = core.UsbHubManager(runner)
-    usb.set_crypto_manager(crypto)
+    usb.set_certificate_and_key(crypto.get_certificate(), crypto.get_private_key())
 
     orchestrator = InteractiveOrchestrator(
         screen_width=800,

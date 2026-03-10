@@ -9,8 +9,8 @@ Architettura:
                     a GStreamer. Python non tocca mai i buffer video.
   - PipelineBridge: QObject con un Signal Qt — unico meccanismo thread-safe
                     per postare lavoro nel thread Qt da un thread Boost.Asio.
-  - MainWindow    : coordina IoContextRunner, CryptoManager, GstVideoSink e
-                    UsbHubManager.
+  - MainWindow    : coordina IoContextRunner, CryptoManager Python,
+                    GstVideoSink e UsbHubManager.
 
 Regola GIL:
   I buffer NAL units non attraversano MAI questa UI.
@@ -55,7 +55,14 @@ except ImportError as e:
     print("Compila prima con: cmake -B build && cmake --build build -j$(nproc)")
     sys.exit(1)
 
-# ── Import orchestrator Phase 4 ────────────────────────────────────────────
+# ── CryptoManager Python (sostituisce core.CryptoManager C++) ───────────────
+try:
+    from python.app.crypto_manager import CryptoManager
+except ImportError:
+    sys.path.insert(0, _ROOT_DIR)
+    from python.app.crypto_manager import CryptoManager
+
+# ── Import orchestrator ─────────────────────────────────────────────────────
 try:
     from test_interactive_phase4 import InteractiveOrchestrator
 except ImportError as e:
@@ -83,12 +90,6 @@ class PipelineBridge(QObject):
     Emettere pipeline_start_requested da qualsiasi thread è sicuro:
     Qt instraderà automaticamente la chiamata allo slot connesso nel
     thread principale (QueuedConnection) grazie all'AutoConnection.
-
-    Uso:
-        bridge = PipelineBridge()
-        bridge.pipeline_start_requested.connect(gst_sink.start_pipeline)
-        # Da thread Boost.Asio:
-        bridge.pipeline_start_requested.emit()
     """
     pipeline_start_requested = pyqtSignal()
 
@@ -134,8 +135,9 @@ class MainWindow(QMainWindow):
     Flusso di avvio:
       1. show() + processEvents()         -> WId X11 valido
       2. QTimer(200ms) -> start_headunit()
-      3. start_headunit()                 -> crea PipelineBridge, GstVideoSink,
-                                            connette signal->slot nel thread Qt
+      3. start_headunit()                 -> CryptoManager Python carica PEM,
+                                            crea PipelineBridge + GstVideoSink,
+                                            chiama set_certificate_and_key()
       4. UsbHubManager.start()            -> discovery USB
       5. on_video_channel_open_request()  -> chiamato dal thread Boost.Asio
                                             -> bridge.pipeline_start_requested.emit()
@@ -175,8 +177,12 @@ class MainWindow(QMainWindow):
 
         self._runner = core.IoContextRunner()
 
-        crypto = core.CryptoManager()
-        crypto.initialize()
+        # ── CryptoManager Python: carica e valida PEM, passa al C++ ──────────
+        crypto = CryptoManager()
+        if not crypto.initialize():
+            print("[UI] ERRORE CRITICO: certificati non trovati o non validi.")
+            print("[UI] Assicurati che cert/headunit.crt e cert/headunit.key esistano.")
+            return
 
         self._gst_sink = core.GstVideoSink(self._width, self._height)
         self._gst_sink.set_window_id(wid)
@@ -197,7 +203,6 @@ class MainWindow(QMainWindow):
             screen_height=self._height,
         )
 
-        # Cattura il bridge per l'uso nel thread Boost.Asio
         bridge_ref = self._bridge
 
         def _on_video_channel_open(payload: bytes) -> bytes:
@@ -213,7 +218,11 @@ class MainWindow(QMainWindow):
         orchestrator.on_video_channel_open_request = _on_video_channel_open
 
         self._usb_manager = core.UsbHubManager(self._runner)
-        self._usb_manager.set_crypto_manager(crypto)
+        # ── Refactor: set_certificate_and_key invece di set_crypto_manager ───
+        self._usb_manager.set_certificate_and_key(
+            crypto.get_certificate(),
+            crypto.get_private_key()
+        )
         self._usb_manager.set_orchestrator(orchestrator)
         self._usb_manager.set_video_sink(self._gst_sink)
         self._usb_manager.start(self._on_connect)

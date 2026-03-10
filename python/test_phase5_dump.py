@@ -52,6 +52,13 @@ except ImportError as e:
     print(f"[ERRORE] {e}")
     sys.exit(1)
 
+# ── CryptoManager Python (no più core.CryptoManager C++) ─────────────────────
+try:
+    from python.app.crypto_manager import CryptoManager
+except ImportError:
+    sys.path.insert(0, _ROOT_DIR)
+    from python.app.crypto_manager import CryptoManager
+
 DUMP_PATH  = os.path.join(_ROOT_DIR, "video_dump.h264")
 DUMP_LIMIT = 5 * 1024 * 1024  # 5 MB — stesso limite di VideoEventHandler
 
@@ -63,12 +70,13 @@ def main():
     print(f" Limite: {DUMP_LIMIT // 1024} KB")
     print("=" * 60 + "\n")
 
-#    if hasattr(core, "enable_aasdk_logging"):
-#        core.enable_aasdk_logging()
-
     runner = core.IoContextRunner()
-    crypto = core.CryptoManager()
-    crypto.initialize()
+
+    # ── Crypto: carica e valida in Python, passa stringhe PEM al C++ ──────────
+    crypto = CryptoManager()
+    if not crypto.initialize():
+        print("[ERRORE] Certificati non trovati o non validi. Uscita.")
+        sys.exit(1)
 
     orchestrator = InteractiveOrchestrator(
         screen_width=800,
@@ -76,17 +84,12 @@ def main():
     )
 
     usb = core.UsbHubManager(runner)
-    usb.set_crypto_manager(crypto)
+    usb.set_certificate_and_key(crypto.get_certificate(), crypto.get_private_key())
     usb.set_orchestrator(orchestrator)
     # Nessun GstVideoSink: modalita' dump puro
 
     # ----------------------------------------------------------------
     # CRITICO: enable_video_dump() PRIMA di start().
-    # Il path viene salvato in pending_dump_path_ (UsbHubManager) e
-    # propagato a VideoEventHandler non appena SessionManager::start()
-    # costruisce video_handler_. Questo garantisce che il primo NAL
-    # unit (SPS+PPS+IDR) venga scritto — senza di esso ffprobe non
-    # riesce a decodificare risoluzione e profilo del codec.
     # ----------------------------------------------------------------
     print(f"[Dump] Dump abilitato in anticipo -> {DUMP_PATH}")
     usb.enable_video_dump(DUMP_PATH)
