@@ -337,7 +337,14 @@ class InteractiveOrchestrator:
             resp.status = AVChannelConfig.Status.Value("STATUS_READY")
         resp.max_unacked = 1
         resp.configuration_indices.append(0)
+        # ── DEBUG: stampa oggetto in chiaro ──────────────────────────────
+        print(f"  [DEBUG] resp.status         = {resp.status} "
+            f"({AVChannelConfig.Status.Name(resp.status)})")
+        print(f"  [DEBUG] resp.max_unacked    = {resp.max_unacked}")
+        print(f"  [DEBUG] resp.config_indices = {list(resp.configuration_indices)}")
+        # ── DEBUG: serializzazione ───────────────────────────────────────
         setup_bytes = resp.SerializeToString()
+        print(f"  [DEBUG] SerializeToString   = {setup_bytes.hex()}")
         self._log_and_send(f"Invia AVChannelSetupResponse CH {channel_id}", setup_bytes)
         return setup_bytes
 

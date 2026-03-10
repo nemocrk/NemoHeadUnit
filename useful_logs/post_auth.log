@@ -1,40 +1,251 @@
+cd ~/NemoHeadUnit/ && python ./python/test_interactive_phase4.py
+
+************************************************************
+* TEST HEADLESS PHASE 4 - ServiceDiscovery reale          *
+* Collega un dispositivo Android via USB                  *
+************************************************************
+
+[NemoHeadUnit] Abilitazione aasdk ModernLogger (TRACE/DEBUG)...
+[CryptoManager] Loaded from: ./cert/headunit.crt
+[CryptoManager] Loaded from: ./cert/headunit.key
+[CryptoManager] Certificato e chiave validati con successo.
+[NemoHeadUnit] Avvio Boost.Asio event loop (Worker Thread C++)...
+[UsbHubManager] Avvio scansione USB (attendere device Google/AOAP)...
+[UsbHubManager] Device compatibile rilevato (MODO AOAP ATTIVO). Costruzione Transport...
+2026-03-10 16:53:42.114 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /etc/openauto/headunit.crt
+2026-03-10 16:53:42.115 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /usr/share/aasdk/cert/headunit.crt
+2026-03-10 16:53:42.115 [INFO] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Loaded certificate from: ./cert/headunit.crt
+2026-03-10 16:53:42.116 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /etc/openauto/headunit.key
+2026-03-10 16:53:42.116 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /usr/share/aasdk/cert/headunit.key
+2026-03-10 16:53:42.116 [INFO] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Loaded private key from: ./cert/headunit.key
+[Orchestrator] Cryptor inizializzato dal C++.
+[SessionManager] Starting channels...
+2026-03-10 16:53:42.132 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-10 16:53:42.133 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
+2026-03-10 16:53:42.133 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.133 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:73) - [AASDK] Processing promise.
+2026-03-10 16:53:42.133 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.133 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.134 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.134 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.134 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.136 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.136 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendVersionRequest] (ControlServiceChannel.cpp:39) - [AASDK] sendVersionRequest()
+2026-03-10 16:53:42.137 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 10
+2026-03-10 16:53:42.137 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-10 16:53:42.137 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
+2026-03-10 16:53:42.138 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.138 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.138 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.138 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.138 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.138 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_MEDIA_AUDIO
+2026-03-10 16:53:42.139 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.139 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.139 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_GUIDANCE_AUDIO
+2026-03-10 16:53:42.139 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.139 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.140 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_SYSTEM_AUDIO
+2026-03-10 16:53:42.140 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.140 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.140 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SOURCE_MICROPHONE
+2026-03-10 16:53:42.140 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+[UsbHubManager] Transport, Messenger e SessionManager operativi.
+
+[Python Callback] AOAP Avviato: Connessione AOAP stabilita e Sessione AA avviata
+2026-03-10 16:53:42.523 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.523 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.524 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.524 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch CONTROL Fr BULK
+2026-03-10 16:53:42.525 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.525 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.525 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.526 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.526 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.526 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.527 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.527 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.528 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.528 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.528 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId CONTROL
+2026-03-10 16:53:42.529 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.529 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.529 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.530 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.530 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.530 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.531 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.535 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.536 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-10 16:53:42.536 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] MessageId: 2
+2026-03-10 16:53:42.536 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleVersionResponse] (ControlServiceChannel.cpp:241) - [AASDK] handleVersionResponse()
+2026-03-10 16:53:42.537 [INFO] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] Handling Version - Major: 256 Minor: 1792Status: 0
+[Control] VersionResponse: 256.1792 Status: 0
+
+[Orchestrator] on_version_status: 256.1792 (status=0)
+
+==================================================
+[Azione: Invia TLS Flight 1 (drain)]
+Dimensione: 293 bytes
+Preview Hex: 16030101200100011c0303ea119e6f37ba89c5071fa0015b04831949b0adb61f...
+==================================================
+2026-03-10 16:53:42.541 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendHandshake] (ControlServiceChannel.cpp:55) - [AASDK] sendHandshake()
+2026-03-10 16:53:42.542 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 299
+2026-03-10 16:53:42.542 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-10 16:53:42.543 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
+2026-03-10 16:53:42.543 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+[Control/SendHandshake1] send OK.
+2026-03-10 16:53:42.565 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.565 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.565 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.566 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch CONTROL Fr BULK
+2026-03-10 16:53:42.566 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.567 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.567 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.567 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.568 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.568 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.568 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.569 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.569 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.570 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.570 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId CONTROL
+2026-03-10 16:53:42.571 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.571 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.571 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.572 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.572 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.572 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.573 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.576 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.577 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-10 16:53:42.577 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] MessageId: 3
+[Control] Handshake chunk ricevuto, size: 2347
+
+[Orchestrator] Ricevuto Handshake payload (2347 bytes)
+
+==================================================
+[Azione: Invia TLS chunk (drain)]
+Dimensione: 1191 bytes
+Preview Hex: 16030303380b00033400033100032e3082032a3082021202011b300d06092a86...
+==================================================
+2026-03-10 16:53:42.617 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendHandshake] (ControlServiceChannel.cpp:55) - [AASDK] sendHandshake()
+2026-03-10 16:53:42.618 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 1197
+2026-03-10 16:53:42.618 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-10 16:53:42.618 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
+2026-03-10 16:53:42.619 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+[Control/SendHandshakeX] send OK.
+2026-03-10 16:53:42.630 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.630 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.630 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.631 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch CONTROL Fr BULK
+2026-03-10 16:53:42.631 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.631 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.631 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.631 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.632 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.632 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.632 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.632 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.632 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.633 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.633 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId CONTROL
+2026-03-10 16:53:42.633 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.633 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.634 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.634 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.634 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.634 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.634 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.637 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.637 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-10 16:53:42.637 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] MessageId: 3
+[Control] Handshake chunk ricevuto, size: 51
+
+[Orchestrator] Ricevuto Handshake payload (51 bytes)
+
+[Orchestrator] *** HANDSHAKE TLS COMPLETATO ***
+
+[Orchestrator] Costruzione AuthResponse...
+
+==================================================
+[Azione: Invia AuthCompleteResponse]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+2026-03-10 16:53:42.639 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendAuthComplete] (ControlServiceChannel.cpp:68) - [AASDK] sendAuthComplete()
+2026-03-10 16:53:42.640 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 8
+2026-03-10 16:53:42.640 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-10 16:53:42.640 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
+2026-03-10 16:53:42.641 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+[Control/AuthComplete] send OK.
+2026-03-10 16:53:42.662 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.662 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.662 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.662 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch CONTROL Fr BULK
+2026-03-10 16:53:42.663 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.663 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.663 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.663 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.664 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.664 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.664 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.664 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.665 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.665 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.665 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId CONTROL
+2026-03-10 16:53:42.665 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.666 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.666 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.666 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.666 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.666 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.667 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.669 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.669 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-10 16:53:42.669 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] MessageId: 5
+2026-03-10 16:53:42.669 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleServiceDiscoveryRequest] (ControlServiceChannel.cpp:256) - [AASDK] handleServiceDiscoveryRequest()
+[Control] ServiceDiscoveryRequest received.
+
+[Orchestrator] Service Discovery Request ricevuta!
+
 ==================================================
 [Azione: Invia ServiceDiscoveryResponse (8 canali)]
 Dimensione: 251 bytes
 Preview Hex: 0a100801120c0a02080d0a0208010a02080a0a1508031a110803220b08011002...
 ==================================================
-2026-03-10 16:44:31.522 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendServiceDiscoveryResponse] (ControlServiceChannel.cpp:81) - [AASDK] sendServiceDiscoveryResponse()
-2026-03-10 16:44:31.523 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 286
-2026-03-10 16:44:31.524 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
-2026-03-10 16:44:31.524 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
-2026-03-10 16:44:31.524 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.672 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendServiceDiscoveryResponse] (ControlServiceChannel.cpp:81) - [AASDK] sendServiceDiscoveryResponse()
+2026-03-10 16:53:42.673 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 286
+2026-03-10 16:53:42.673 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-10 16:53:42.673 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
+2026-03-10 16:53:42.673 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
 [Control/ServiceDiscoveryResponse] send OK.
-2026-03-10 16:44:31.621 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.622 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.622 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.623 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch CONTROL Fr BULK
-2026-03-10 16:44:31.623 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.623 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.624 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.624 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.624 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.625 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.625 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.625 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.626 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.626 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.627 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId CONTROL
-2026-03-10 16:44:31.627 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.627 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.628 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.628 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.628 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.629 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.629 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.633 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.633 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
-2026-03-10 16:44:31.634 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] MessageId: 18
-2026-03-10 16:44:31.634 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleAudioFocusRequest] (ControlServiceChannel.cpp:267) - [AASDK] handleAudioFocusRequest()
+2026-03-10 16:53:42.769 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.770 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.770 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.771 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch CONTROL Fr BULK
+2026-03-10 16:53:42.771 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.771 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.772 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.772 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.772 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.773 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.773 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.774 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.774 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.775 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.775 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId CONTROL
+2026-03-10 16:53:42.775 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.776 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.776 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.776 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.777 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.777 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.777 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.781 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.782 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-10 16:53:42.782 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] MessageId: 18
+2026-03-10 16:53:42.783 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleAudioFocusRequest] (ControlServiceChannel.cpp:267) - [AASDK] handleAudioFocusRequest()
 [Control] AudioFocusRequest received.
 
 [Orchestrator] AudioFocusRequest ricevuta.
@@ -44,68 +255,68 @@ Preview Hex: 0a100801120c0a02080d0a0208010a02080a0a1508031a110803220b08011002...
 Dimensione: 2 bytes
 Preview Hex: 0803...
 ==================================================
-2026-03-10 16:44:31.636 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendAudioFocusResponse] (ControlServiceChannel.cpp:95) - [AASDK] sendAudioFocusResponse()
-2026-03-10 16:44:31.637 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.637 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
-2026-03-10 16:44:31.638 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
-2026-03-10 16:44:31.638 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.639 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.639 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.639 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.640 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
-2026-03-10 16:44:31.640 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.641 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.641 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.641 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.642 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.642 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.642 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.643 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.643 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.644 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.644 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
-2026-03-10 16:44:31.645 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.645 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.645 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.646 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.646 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.646 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.647 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.651 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.785 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendAudioFocusResponse] (ControlServiceChannel.cpp:95) - [AASDK] sendAudioFocusResponse()
+2026-03-10 16:53:42.786 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.786 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-10 16:53:42.787 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel CONTROL
+2026-03-10 16:53:42.787 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.788 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.789 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.789 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.790 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
+2026-03-10 16:53:42.790 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.790 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.791 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.791 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.791 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.792 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.792 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.793 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.793 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.794 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.794 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
+2026-03-10 16:53:42.794 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.795 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.795 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.796 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.796 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.796 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.797 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.800 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
 [Control/AudioFocusResponse] send OK.
-2026-03-10 16:44:31.651 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
-2026-03-10 16:44:31.652 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleChannelOpenRequest] (SensorSourceService.cpp:118) - [AASDK] handleChannelOpenRequest()
+2026-03-10 16:53:42.801 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-10 16:53:42.802 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleChannelOpenRequest] (SensorSourceService.cpp:118) - [AASDK] handleChannelOpenRequest()
 [Sensor] ChannelOpenRequest received.
-2026-03-10 16:44:31.652 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendChannelOpenResponse] (SensorSourceService.cpp:45) - [AASDK] sendChannelOpenResponse()
-2026-03-10 16:44:31.653 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.654 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
-2026-03-10 16:44:31.654 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
-2026-03-10 16:44:31.654 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.655 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.656 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.656 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.657 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_VIDEO Fr BULK
-2026-03-10 16:44:31.657 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.657 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.658 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.658 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.658 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.659 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.659 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.660 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.660 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.660 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.661 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_VIDEO
-2026-03-10 16:44:31.661 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.661 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.662 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.662 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.662 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.662 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.663 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.666 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.666 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
-2026-03-10 16:44:31.667 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (VideoMediaSinkService.cpp:173) - [AASDK] handleChannelOpenRequest()
+2026-03-10 16:53:42.803 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendChannelOpenResponse] (SensorSourceService.cpp:45) - [AASDK] sendChannelOpenResponse()
+2026-03-10 16:53:42.803 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.803 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-10 16:53:42.803 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
+2026-03-10 16:53:42.803 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.804 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.805 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.805 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.805 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_VIDEO Fr BULK
+2026-03-10 16:53:42.806 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.806 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.806 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.806 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.807 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.807 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.807 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.808 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.808 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.808 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.809 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.809 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.809 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.810 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.810 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.810 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.811 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.811 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.814 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.814 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
+2026-03-10 16:53:42.815 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (VideoMediaSinkService.cpp:173) - [AASDK] handleChannelOpenRequest()
 [Video] ChannelOpenRequest received.
 
 [Orchestrator] ChannelOpenRequest su CH 3
@@ -115,38 +326,38 @@ Preview Hex: 0803...
 Dimensione: 2 bytes
 Preview Hex: 0800...
 ==================================================
-2026-03-10 16:44:31.668 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (VideoMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
-2026-03-10 16:44:31.669 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.816 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (VideoMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-10 16:53:42.817 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
 
 [Orchestrator] *** on_video_channel_open_request RAGGIUNTO! (Phase 5) ***
-2026-03-10 16:44:31.670 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.671 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
-2026-03-10 16:44:31.671 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.671 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.671 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.671 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.672 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_MEDIA_AUDIO Fr BULK
-2026-03-10 16:44:31.672 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.672 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.673 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.673 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.673 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.673 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.674 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.674 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.674 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.674 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.675 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_MEDIA_AUDIO
-2026-03-10 16:44:31.675 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.675 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.676 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.676 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.676 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.676 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.676 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.679 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.679 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.680 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-10 16:53:42.818 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.818 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.818 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.819 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.819 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.819 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.820 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_MEDIA_AUDIO Fr BULK
+2026-03-10 16:53:42.820 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.820 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.820 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.821 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.821 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.822 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.822 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.822 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.822 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.823 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.823 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_MEDIA_AUDIO
+2026-03-10 16:53:42.823 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.824 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.824 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.824 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.824 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.824 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.825 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.827 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.827 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.827 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
 [Audio CH4] ChannelOpenRequest received.
 
 [Orchestrator] ChannelOpenRequest su CH 4
@@ -156,36 +367,36 @@ Preview Hex: 0800...
 Dimensione: 2 bytes
 Preview Hex: 0800...
 ==================================================
-2026-03-10 16:44:31.681 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
-2026-03-10 16:44:31.681 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.681 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.682 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_MEDIA_AUDIO
-2026-03-10 16:44:31.682 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.682 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.683 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.683 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.683 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_GUIDANCE_AUDIO Fr BULK
-2026-03-10 16:44:31.683 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.683 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.684 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.684 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.684 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.684 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.684 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.685 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.685 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.685 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.685 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_GUIDANCE_AUDIO
-2026-03-10 16:44:31.686 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.686 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.686 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.686 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.686 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.686 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.687 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.689 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.689 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.689 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-10 16:53:42.829 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-10 16:53:42.830 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.830 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.830 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_MEDIA_AUDIO
+2026-03-10 16:53:42.830 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.831 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.831 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.831 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.832 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_GUIDANCE_AUDIO Fr BULK
+2026-03-10 16:53:42.832 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.832 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.832 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.832 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.832 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.833 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.833 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.833 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.833 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.833 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.834 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_GUIDANCE_AUDIO
+2026-03-10 16:53:42.834 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.834 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.834 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.835 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.835 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.835 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.835 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.837 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.837 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.837 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
 [Audio CH5] ChannelOpenRequest received.
 
 [Orchestrator] ChannelOpenRequest su CH 5
@@ -195,36 +406,36 @@ Preview Hex: 0800...
 Dimensione: 2 bytes
 Preview Hex: 0800...
 ==================================================
-2026-03-10 16:44:31.690 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
-2026-03-10 16:44:31.691 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.691 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.691 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_GUIDANCE_AUDIO
-2026-03-10 16:44:31.691 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.693 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.693 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.693 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.694 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_SYSTEM_AUDIO Fr BULK
-2026-03-10 16:44:31.694 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.694 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.694 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.694 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.694 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.695 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.695 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.695 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.695 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.696 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.696 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_SYSTEM_AUDIO
-2026-03-10 16:44:31.696 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.696 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.697 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.697 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.697 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.697 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.697 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.699 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.699 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.700 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-10 16:53:42.838 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-10 16:53:42.839 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.839 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.839 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_GUIDANCE_AUDIO
+2026-03-10 16:53:42.839 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.841 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.841 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.842 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.842 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_SYSTEM_AUDIO Fr BULK
+2026-03-10 16:53:42.842 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.842 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.842 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.843 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.843 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.843 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.843 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.843 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.843 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.844 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.844 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_SYSTEM_AUDIO
+2026-03-10 16:53:42.844 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.844 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.845 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.845 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.845 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.845 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.845 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.847 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.847 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.847 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
 [Audio CH6] ChannelOpenRequest received.
 
 [Orchestrator] ChannelOpenRequest su CH 6
@@ -234,59 +445,59 @@ Preview Hex: 0800...
 Dimensione: 2 bytes
 Preview Hex: 0800...
 ==================================================
-2026-03-10 16:44:31.701 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
-2026-03-10 16:44:31.701 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.702 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.702 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_SYSTEM_AUDIO
-2026-03-10 16:44:31.702 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.703 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.703 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.704 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.704 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch INPUT_SOURCE Fr BULK
-2026-03-10 16:44:31.704 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.704 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.704 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.705 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.705 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.705 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.705 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.705 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.706 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.706 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.706 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId INPUT_SOURCE
-2026-03-10 16:44:31.706 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:105) - [AASDK] Pushing message to receive queue.
-2026-03-10 16:44:31.707 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.707 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.707 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.707 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.707 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.707 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.709 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.714 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.714 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.714 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.714 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SOURCE_MICROPHONE Fr BULK
-2026-03-10 16:44:31.714 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.715 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.716 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.716 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.716 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SOURCE_MICROPHONE
-2026-03-10 16:44:31.716 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.716 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.716 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.716 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.716 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.716 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.717 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.718 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.718 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.718 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-10 16:53:42.848 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-10 16:53:42.849 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.849 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.849 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_SYSTEM_AUDIO
+2026-03-10 16:53:42.849 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.852 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.852 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.852 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.852 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch INPUT_SOURCE Fr BULK
+2026-03-10 16:53:42.852 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.853 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.854 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.854 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.854 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId INPUT_SOURCE
+2026-03-10 16:53:42.854 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:105) - [AASDK] Pushing message to receive queue.
+2026-03-10 16:53:42.854 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.855 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.855 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.855 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.855 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.855 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.857 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.862 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.863 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.863 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.863 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SOURCE_MICROPHONE Fr BULK
+2026-03-10 16:53:42.863 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.863 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.863 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.863 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.864 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.864 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.864 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.864 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.864 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.864 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.865 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SOURCE_MICROPHONE
+2026-03-10 16:53:42.865 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.865 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.865 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.865 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.865 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.866 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.866 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.867 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.868 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.868 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
 [Audio CH9] ChannelOpenRequest received.
 
 [Orchestrator] ChannelOpenRequest su CH 9
@@ -296,318 +507,334 @@ Preview Hex: 0800...
 Dimensione: 2 bytes
 Preview Hex: 0800...
 ==================================================
-2026-03-10 16:44:31.719 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
-2026-03-10 16:44:31.720 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.720 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.720 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SOURCE_MICROPHONE
-2026-03-10 16:44:31.721 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.724 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.724 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.725 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.725 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch NAVIGATION_STATUS Fr BULK
-2026-03-10 16:44:31.725 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.725 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.726 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.726 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.726 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.726 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.726 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.727 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.727 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.727 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.727 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId NAVIGATION_STATUS
-2026-03-10 16:44:31.727 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:105) - [AASDK] Pushing message to receive queue.
-2026-03-10 16:44:31.728 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.728 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.728 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.728 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.728 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.729 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.731 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.735 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.735 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.735 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.735 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
-2026-03-10 16:44:31.735 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.736 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.736 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.736 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.736 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.736 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.737 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.737 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.737 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.737 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.737 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
-2026-03-10 16:44:31.738 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.738 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.738 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.738 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.738 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.739 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.739 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.741 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.741 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
-2026-03-10 16:44:31.741 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
+2026-03-10 16:53:42.869 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-10 16:53:42.869 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.869 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.870 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SOURCE_MICROPHONE
+2026-03-10 16:53:42.870 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.873 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.873 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.873 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.873 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch NAVIGATION_STATUS Fr BULK
+2026-03-10 16:53:42.873 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.874 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.875 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.875 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.875 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId NAVIGATION_STATUS
+2026-03-10 16:53:42.875 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:105) - [AASDK] Pushing message to receive queue.
+2026-03-10 16:53:42.875 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.876 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.876 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.876 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.876 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.876 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.878 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.884 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.884 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.884 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.884 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
+2026-03-10 16:53:42.884 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.885 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.886 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.886 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.886 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
+2026-03-10 16:53:42.886 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.886 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.886 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.887 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.887 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.887 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.887 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.889 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.889 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-10 16:53:42.889 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
 [Sensor] SensorStartRequest type=1
-2026-03-10 16:44:31.741 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
-2026-03-10 16:44:31.742 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.742 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
-2026-03-10 16:44:31.743 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
-2026-03-10 16:44:31.743 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.745 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.745 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.746 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.746 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_MEDIA_AUDIO Fr BULK
-2026-03-10 16:44:31.746 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.746 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.746 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.747 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.747 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.747 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.747 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.747 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.748 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.748 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.748 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_MEDIA_AUDIO
-2026-03-10 16:44:31.748 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.749 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.749 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.749 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.749 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.749 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.749 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.751 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.752 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.752 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
+2026-03-10 16:53:42.889 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
+2026-03-10 16:53:42.890 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.890 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-10 16:53:42.890 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
+2026-03-10 16:53:42.890 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.894 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.894 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.894 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.894 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_MEDIA_AUDIO Fr BULK
+2026-03-10 16:53:42.895 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.895 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.895 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.895 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.895 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.895 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.896 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.896 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.896 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.896 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.896 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_MEDIA_AUDIO
+2026-03-10 16:53:42.896 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.897 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.897 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.897 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.897 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.897 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.897 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.899 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.899 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.899 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
 [Audio CH4] AVChannelSetupRequest received.
 
 [Orchestrator] AVChannelSetupRequest su CH 4
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
 
 ==================================================
 [Azione: Invia AVChannelSetupResponse CH 4]
 Dimensione: 6 bytes
 Preview Hex: 080210011800...
 ==================================================
-2026-03-10 16:44:31.753 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
-2026-03-10 16:44:31.754 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
-2026-03-10 16:44:31.754 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.754 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_MEDIA_AUDIO
-2026-03-10 16:44:31.755 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.755 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.756 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.756 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.756 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_GUIDANCE_AUDIO Fr BULK
-2026-03-10 16:44:31.756 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.756 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.757 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.757 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.757 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.757 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.757 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.758 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.758 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.758 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.758 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_GUIDANCE_AUDIO
-2026-03-10 16:44:31.759 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.759 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.759 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.759 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.759 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.759 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.760 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.762 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.762 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.762 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
+2026-03-10 16:53:42.901 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-10 16:53:42.901 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
+2026-03-10 16:53:42.902 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.902 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_MEDIA_AUDIO
+2026-03-10 16:53:42.902 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.904 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.904 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.904 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.905 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_GUIDANCE_AUDIO Fr BULK
+2026-03-10 16:53:42.905 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.905 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.905 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.906 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.906 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.906 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.906 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.907 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.907 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.907 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.907 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_GUIDANCE_AUDIO
+2026-03-10 16:53:42.907 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.907 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.907 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.908 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.908 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.908 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.908 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.909 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.910 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.910 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
 [Audio CH5] AVChannelSetupRequest received.
 
 [Orchestrator] AVChannelSetupRequest su CH 5
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
 
 ==================================================
 [Azione: Invia AVChannelSetupResponse CH 5]
 Dimensione: 6 bytes
 Preview Hex: 080210011800...
 ==================================================
-2026-03-10 16:44:31.763 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
-2026-03-10 16:44:31.764 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
-2026-03-10 16:44:31.764 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.764 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_GUIDANCE_AUDIO
-2026-03-10 16:44:31.764 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.766 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.766 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.766 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.767 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_SYSTEM_AUDIO Fr BULK
-2026-03-10 16:44:31.767 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.767 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.767 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.767 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.767 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.768 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.768 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.768 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.768 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.769 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.769 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_SYSTEM_AUDIO
-2026-03-10 16:44:31.769 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.769 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.769 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.770 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.770 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.770 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.770 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.772 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.773 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
-2026-03-10 16:44:31.773 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
+2026-03-10 16:53:42.911 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-10 16:53:42.911 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
+2026-03-10 16:53:42.911 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.912 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_GUIDANCE_AUDIO
+2026-03-10 16:53:42.912 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.914 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.914 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.915 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.915 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_SYSTEM_AUDIO Fr BULK
+2026-03-10 16:53:42.915 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.915 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.915 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.915 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.916 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.916 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.916 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.916 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.916 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.916 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.917 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_SYSTEM_AUDIO
+2026-03-10 16:53:42.917 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.917 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.917 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.917 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.917 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.918 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.918 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.919 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.920 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-10 16:53:42.920 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
 [Audio CH6] AVChannelSetupRequest received.
 
 [Orchestrator] AVChannelSetupRequest su CH 6
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
 
 ==================================================
 [Azione: Invia AVChannelSetupResponse CH 6]
 Dimensione: 6 bytes
 Preview Hex: 080210011800...
 ==================================================
-2026-03-10 16:44:31.774 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
-2026-03-10 16:44:31.774 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
-2026-03-10 16:44:31.775 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.775 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_SYSTEM_AUDIO
-2026-03-10 16:44:31.775 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.777 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.777 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.777 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.777 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_VIDEO Fr BULK
-2026-03-10 16:44:31.778 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.778 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.778 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.778 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.778 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.778 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.779 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.779 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.779 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.779 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.779 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_VIDEO
-2026-03-10 16:44:31.780 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.780 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.780 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.780 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.780 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.780 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.781 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.782 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.783 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
-2026-03-10 16:44:31.783 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (VideoMediaSinkService.cpp:140) - [AASDK] handleChannelSetupRequest()
+2026-03-10 16:53:42.921 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-10 16:53:42.921 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
+2026-03-10 16:53:42.922 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.922 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_SYSTEM_AUDIO
+2026-03-10 16:53:42.922 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.925 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.925 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.925 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.925 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_VIDEO Fr BULK
+2026-03-10 16:53:42.925 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.925 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.926 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.927 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.927 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.927 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.927 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.927 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.928 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.928 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.928 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.928 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.930 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.930 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
+2026-03-10 16:53:42.930 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (VideoMediaSinkService.cpp:140) - [AASDK] handleChannelSetupRequest()
 [Video] AVChannelSetupRequest received.
 
 [Orchestrator] AVChannelSetupRequest su CH 3
+  [DEBUG] resp.status         = 1 (STATUS_WAIT)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080110011800
 
 ==================================================
 [Azione: Invia AVChannelSetupResponse CH 3]
 Dimensione: 6 bytes
 Preview Hex: 080110011800...
 ==================================================
-2026-03-10 16:44:31.783 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (VideoMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
-2026-03-10 16:44:31.784 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
-2026-03-10 16:44:31.784 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.784 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
-2026-03-10 16:44:31.784 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.787 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.787 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.788 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.788 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
-2026-03-10 16:44:31.788 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.788 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.788 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.788 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.789 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.789 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.789 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.789 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.789 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.789 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.790 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
-2026-03-10 16:44:31.790 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.790 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.790 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.790 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.790 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.790 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.790 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.792 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.931 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (VideoMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-10 16:53:42.932 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 41
+2026-03-10 16:53:42.932 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.932 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.933 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.935 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.935 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.935 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.936 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
+2026-03-10 16:53:42.936 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.936 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.936 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.936 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.936 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.936 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.937 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.937 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.937 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.937 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.937 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
+2026-03-10 16:53:42.938 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.938 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.938 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.938 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.938 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.938 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.938 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.940 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
 [Video] sendVideoFocusIndication() -> PROJECTED
-2026-03-10 16:44:31.792 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendVideoFocusIndication] (VideoMediaSinkService.cpp:94) - [AASDK] sendVideoFocusIndication()
-2026-03-10 16:44:31.792 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 39
-2026-03-10 16:44:31.792 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
-2026-03-10 16:44:31.793 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
+2026-03-10 16:53:42.940 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendVideoFocusIndication] (VideoMediaSinkService.cpp:94) - [AASDK] sendVideoFocusIndication()
+2026-03-10 16:53:42.941 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 39
+2026-03-10 16:53:42.941 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-10 16:53:42.941 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
 [Sensor] SensorStartRequest type=13
-2026-03-10 16:44:31.793 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
-2026-03-10 16:44:31.793 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
-2026-03-10 16:44:31.794 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
-2026-03-10 16:44:31.794 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.798 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.798 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.798 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.798 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_VIDEO Fr BULK
-2026-03-10 16:44:31.799 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.799 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.799 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.799 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.799 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.800 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
-2026-03-10 16:44:31.800 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.800 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.800 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.800 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.801 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
-2026-03-10 16:44:31.801 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_VIDEO
-2026-03-10 16:44:31.801 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.801 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.801 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.802 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.802 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.802 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.802 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.804 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.804 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
-2026-03-10 16:44:31.804 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleStartIndication] (VideoMediaSinkService.cpp:151) - [AASDK] handleStartIndication()
+2026-03-10 16:53:42.941 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
+2026-03-10 16:53:42.942 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-10 16:53:42.942 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
+2026-03-10 16:53:42.942 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.946 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.946 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.946 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.946 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch MEDIA_SINK_VIDEO Fr BULK
+2026-03-10 16:53:42.947 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.947 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.947 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.947 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.947 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.948 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.948 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.948 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.948 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.949 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.949 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.949 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.949 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.949 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.949 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.950 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.950 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.950 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.950 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.952 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.952 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
+2026-03-10 16:53:42.952 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleStartIndication] (VideoMediaSinkService.cpp:151) - [AASDK] handleStartIndication()
 [Video] MediaChannelStart session=0
-2026-03-10 16:44:31.804 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
-2026-03-10 16:44:31.804 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
-2026-03-10 16:44:31.805 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.808 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
-2026-03-10 16:44:31.808 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.809 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.809 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
-2026-03-10 16:44:31.809 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
-2026-03-10 16:44:31.809 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.809 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.809 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.810 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.810 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.810 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.810 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.810 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
-2026-03-10 16:44:31.810 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
+2026-03-10 16:53:42.952 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-10 16:53:42.952 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel MEDIA_SINK_VIDEO
+2026-03-10 16:53:42.953 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.957 [DEBUG] [TRANSPORT] [AASDK:receiveHandler(size_t)::receiveHandler] (Transport.cpp:106) - [AASDK] receiveHandler()
+2026-03-10 16:53:42.957 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.957 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.957 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [MessageInStream] Processing Frame Header: Ch SENSOR Fr BULK
+2026-03-10 16:53:42.957 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFrameHeaderHandler] (MessageInStream.cpp:83) - [AASDK] Could not find existing message.
+2026-03-10 16:53:42.957 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.958 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.958 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.958 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.958 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.958 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.958 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.959 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:128) - [AASDK] Resolve and clear message.
+2026-03-10 16:53:42.959 [DEBUG] [MESSENGER] [AASDK:DataConstBuffer&)::receiveFramePayloadHandler] (MessageInStream.cpp:151) - [AASDK] Resolving message.
 [Sensor] sendDrivingStatusUnrestricted() -> UNRESTRICTED
-2026-03-10 16:44:31.811 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorEventIndication] (SensorSourceService.cpp:81) - [AASDK] sendSensorEventIndication()
-2026-03-10 16:44:31.811 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 39
-2026-03-10 16:44:31.812 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
-2026-03-10 16:44:31.812 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
-2026-03-10 16:44:31.812 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
-2026-03-10 16:44:31.812 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
-2026-03-10 16:44:31.812 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
-2026-03-10 16:44:31.812 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
-2026-03-10 16:44:31.812 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
-2026-03-10 16:44:31.813 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
-2026-03-10 16:44:31.814 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
-2026-03-10 16:44:31.814 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
-2026-03-10 16:44:31.814 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
+2026-03-10 16:53:42.959 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorEventIndication] (SensorSourceService.cpp:81) - [AASDK] sendSensorEventIndication()
+2026-03-10 16:53:42.960 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 39
+2026-03-10 16:53:42.960 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::inStreamMessageHandler] Handling message for ChannelId SENSOR
+2026-03-10 16:53:42.960 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:102) - [AASDK] Pop and resolve message for message queue.
+2026-03-10 16:53:42.960 [DEBUG] [MESSENGER] [AASDK:Pointer)::inStreamMessageHandler] (Messenger.cpp:111) - [AASDK] Initiate queue for receiving.
+2026-03-10 16:53:42.960 [DEBUG] [MESSENGER] [AASDK:Pointer)::startReceive] (MessageInStream.cpp:35) - [AASDK] startReceiveCalled()
+2026-03-10 16:53:42.961 [DEBUG] [TRANSPORT] [AASDK:Pointer)::receive] (Transport.cpp:86) - [AASDK] receive()
+2026-03-10 16:53:42.961 [DEBUG] [TRANSPORT] [AASDK:<lambda()> mutable::operator()] (Transport.cpp:92) - [AASDK] Distribute received data.
+2026-03-10 16:53:42.961 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:118) - [AASDK] distributeReceivedData()
+2026-03-10 16:53:42.961 [DEBUG] [TRANSPORT] [AASDK:distributeReceivedData()::distributeReceivedData] (Transport.cpp:121) - [AASDK] Receiving from buffer.
+2026-03-10 16:53:42.963 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer � size 16384
+2026-03-10 16:53:42.963 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-10 16:53:42.963 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
 [Sensor] SensorStartRequest type=10
-2026-03-10 16:44:31.815 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
-2026-03-10 16:44:31.815 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
-2026-03-10 16:44:31.815 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
-2026-03-10 16:44:31.815 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
-2026-03-10 16:44:31.819 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
+2026-03-10 16:53:42.963 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
+2026-03-10 16:53:42.963 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-10 16:53:42.964 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [Messenger::enqueueReceive] Called on channel SENSOR
+2026-03-10 16:53:42.964 [DEBUG] [MESSENGER] [AASDK:<lambda()> mutable::operator()] (Messenger.cpp:69) - [AASDK] Push promise to queue.
+2026-03-10 16:53:42.967 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 37
 [Sensor] sendNightData() night_mode=0
-2026-03-10 16:44:31.829 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorEventIndication] (SensorSourceService.cpp:81) - [AASDK] sendSensorEventIndication()
-2026-03-10 16:44:31.830 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 39
+2026-03-10 16:53:42.978 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorEventIndication] (SensorSourceService.cpp:81) - [AASDK] sendSensorEventIndication()
+2026-03-10 16:53:42.979 [DEBUG] [GENERAL] [AASDK:] - [AASDK] [USBEndpoint] Fill Bulk Transfer  size 39
