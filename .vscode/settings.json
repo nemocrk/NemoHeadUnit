@@ -15,7 +15,8 @@
     "."
   ],
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/build"
+    "${workspaceFolder}/build",
+    "${workspaceFolder}/python"
   ],
   "python.envFile": "${workspaceFolder}/.env",
   "python-envs.defaultEnvManager": "ms-python.python:conda",
@@ -43,4 +44,11 @@
   "git.showPushSuccessNotification": true,
   "git.timeline.showUncommitted": true,
   "git.useCommitInputAsStashMessage": true,
+  "python-envs.pythonProjects": [
+    {
+      "path": "python",
+      "envManager": "ms-python.python:conda",
+      "packageManager": "ms-python.python:conda"
+    }
+  ],
 }

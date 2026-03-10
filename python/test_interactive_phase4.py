@@ -437,7 +437,7 @@ class InteractiveOrchestrator:
             AudioFocusStateType_pb2.AudioFocusStateType.Value("AUDIO_FOCUS_STATE_GAIN")
         )
         msg = AudioFocusNotification_pb2.AudioFocusNotification()
-        msg.audio_focus_state = state
+        msg.focus_state = 1  # AUDIO_FOCUS_STATE_GAIN
         return self._log_and_send("Invia AudioFocusNotification", msg.SerializeToString())
 
     def on_navigation_focus_request(self, payload: bytes) -> bytes:
