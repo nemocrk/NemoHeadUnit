@@ -1,0 +1,254 @@
+03-10 14:14:19.727 16890 16890 I CAR.FIRST.LITE: bypassFirstActivity enabled
+03-10 14:14:19.737 16890 16890 I CAR.SETUP.LITE: Using FirstActivity bypass from intent: Intent { act=android.hardware.usb.action.USB_ACCESSORY_ATTACHED flg=0x11800000 xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.FirstActivityImpl (has extras) }
+03-10 14:14:19.738 16890 16890 I CAR.SETUP.LITE: Checking preSetup required: gearheadUpToDate=true
+03-10 14:14:19.738 16890 16890 I CAR.SETUP.FRX.LITE: Sending presetup finish request
+03-10 14:14:19.738 16890 16890 I CAR.SETUP.LITE: Starting handoff.
+03-10 14:14:19.738 16890 16890 I CAR.SETUP.LITE: Starting carService: com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl
+03-10 14:14:19.753 16890 16890 I CAR.SETUP.LITE: Using FirstActivity bypass from intent: Intent { act=android.hardware.usb.action.USB_ACCESSORY_HANDSHAKE flg=0x11000010 xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarUsbReceiverTPlus (has extras) }
+03-10 14:14:19.759 16890 16890 I CAR.SETUP.LITE: Checking preSetup required: gearheadUpToDate=true
+03-10 14:14:19.759 16890 16890 I CAR.SETUP.FRX.LITE: Sending presetup finish request
+03-10 14:14:19.760 16890 16890 I CAR.SETUP.LITE: Starting handoff.
+03-10 14:14:19.760 16890 16890 I CAR.SETUP.LITE: Starting carService: com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl
+03-10 14:14:19.765 16890 16890 I CAR.SETUP.SERVICE.LITE: onCreate
+03-10 14:14:19.768 16890 16890 I CAR.SETUP.SERVICE.LITE: started foreground service
+03-10 14:14:19.769 16890 16890 I CAR.SERVICE.USBMON.LITE: Starting USB monitor
+03-10 14:14:19.772 16890 16890 I CAR.TOKEN: Connecting qcy@270faf6 using class qng@114753892/class qnl@114687735 (cx attempt 1)
+03-10 14:14:19.776 16890 16890 I CAR.SERVICE.USBMON.LITE: Port status changed for UsbPort{id=port0, supportedModes=dual, supportedContaminantProtectionModes=4, supportsEnableContaminantPresenceProtection=false, supportsEnableContaminantPresenceDetection=true, supportsComplianceWarnings=true: UsbPortStatus{connected=true, currentDataRole=2, currentPowerRole=2, supportedRoleCombinations=272, currentMode=1}
+03-10 14:14:19.781 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 171, detail OptionalInt.empty, CAR_SETUP_ACCESSORY_CONNECTED, at 155820520 
+03-10 14:14:19.790 16890 16890 I CAR.SERVICE.USBMON.LITE: Usb status changed to: UsbState{configured=true, connected=true, dataUnlocked=false, functionAccessory=true, functionAdb=false, functionAudioSource=false, functionMtp=false, functionPtp=false}
+03-10 14:14:19.797 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 174, detail OptionalInt.empty, CAR_SETUP_STARTED_SETUP_SERVICE, at 155820523 
+03-10 14:14:19.799 16890 16890 I CAR.SETUP.SERVICE.LITE: started foreground service
+03-10 14:14:19.799 16890 16890 I CAR.SETUP.SERVICE.LITE: onStartCommand (id=1): Intent { act=android.hardware.usb.action.USB_ACCESSORY_ATTACHED xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl (has extras) }
+03-10 14:14:19.803 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 175, detail OptionalInt.empty, CAR_SETUP_ACCESSORY_CONNECTED, at 155820537 
+03-10 14:14:19.810 16890 16890 I CAR.SETUP.SERVICE.LITE: Creating ConnectionHandoffStateManager
+03-10 14:14:19.810 16890 16890 I CAR.STARTUP.LITE: Starting handoff interest checks
+03-10 14:14:19.810 16890 24204 I CAR.STARTUP.LITE: Checking handoff interest for component com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService
+03-10 14:14:19.812 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 176, detail OptionalInt.empty, CAR_SETUP_STARTED_SETUP_SERVICE, at 155820544 
+03-10 14:14:19.815 16890 24204 I CAR.STARTUP.LITE: Successfully bound to component com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService
+03-10 14:14:19.822 16890 16890 I CAR.SETUP.SERVICE.LITE: started foreground service
+03-10 14:14:19.823 16890 16890 I CAR.SETUP.SERVICE.LITE: onStartCommand (id=2): Intent { act=android.hardware.usb.action.USB_ACCESSORY_ATTACHED xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl (has extras) }
+03-10 14:14:19.823 16890 16890 I CAR.SETUP.SERVICE.LITE: Already connected; ignoring connection request
+03-10 14:14:19.826 16890 16890 I CAR.STARTUP.LITE: Service available
+03-10 14:14:19.826 16890 24204 I GH.CAR  : isInterestedInHandoff - initialized
+03-10 14:14:19.827 16890 16890 I CAR.TOKEN: Successfully connected qno@5d66b01 using class qng@114753892/class qnl@114687735 (cx attempt 1)
+03-10 14:14:19.828 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 177, detail OptionalInt.empty, CAR_SETUP_SERVICE_CREATE, at 155820548 
+03-10 14:14:19.831 16890 24204 I GH.CAR  : Interested in handoff 2371128900442707127: true
+03-10 14:14:19.831 16890 16890 I CAR.TOKEN: Token caller not specified, so skipping telemetry logging. Process: com.google.android.projection.gearhead:car
+03-10 14:14:19.831 16890 24204 I CAR.STARTUP.LITE: onStartupServiceAvailable - IStartup interest is [INVALID: format=%b, type=ylq, value=true] for com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService
+03-10 14:14:19.831 16890 24204 I CAR.SETUP.SERVICE.LITE: Interested in handoff com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService [INVALID: format=%b, type=ylq, value=true]
+03-10 14:14:19.831 16890 24204 I CAR.SETUP.SERVICE.LITE: Interested in handoff - start handoff
+03-10 14:14:19.841 16890 24204 I CAR.STARTUP.LITE: Handing off session 2371128900442707127 (1)
+03-10 14:14:19.842 16890 24204 I GH.CAR  : Handoff session 2371128900442707127 (connection type: 1)
+03-10 14:14:19.842 16890 24204 I GH.CAR  : Projection runs in proxy. Update iCar to the proxy.
+03-10 14:14:19.872 16890  7554 I CAR.GAL.SECURITY.LITE: Successfully initialized SSL context for protocol: TLSv1.2 using provider: GmsCore_OpenSSL
+03-10 14:14:19.873 16890  7554 I CAR.GAL.GAL.LITE: Creating per-channel priority writer thread.
+03-10 14:14:19.875 16890  7554 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 0
+03-10 14:14:19.875 16890  7554 I GH.CAR.ProxyEP.LITE: Proxy created for channel 0
+03-10 14:14:19.876 16890 16890 I CAR.STARTUP.LITE: Handoff status true
+03-10 14:14:19.876 16890 24204 I CAR.SETUP.SERVICE.LITE: handoff initiated: true
+03-10 14:14:19.886 16890 24221 I CAR.GAL.GAL.LITE: Car requests protocol version ikl[majorVersion=1, minorVersion=6]
+03-10 14:14:19.886 16890 24221 I CAR.GAL.GAL.LITE: Requested protocol version ikl[majorVersion=1, minorVersion=6], negotiated protocol version ikl[majorVersion=1, minorVersion=7] (STATUS_SUCCESS)
+03-10 14:14:19.892 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 183, detail OptionalInt.empty, CAR_SETUP_SERVICE_SET_STATE_CONNECTING, at 155820583 
+03-10 14:14:19.915 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 187, detail OptionalInt.empty, CAR_SETUP_SERVICE_ALREADY_STARTED, at 155820606 
+03-10 14:14:19.922 16890 24221 W CAR.GAL.SECURITY.LITE: Phone will wait for car to send more SSL handshake data
+03-10 14:14:19.922 16890 24221 I CAR.GAL.SECURITY.LITE: Final result: java.nio.HeapByteBuffer[pos=0 lim=2347 cap=2347]
+03-10 14:14:19.959 16890 24221 I CAR.GAL.SECURITY.LITE: Peer certificate subject name: OU=01,O=JVC Kenwood,L=Hachioji,ST=Tokyo,C=JP
+03-10 14:14:19.959 16890 24221 I CAR.GAL.SECURITY.LITE: Peer certificate serial number: 27 (0x1b)
+03-10 14:14:19.960 16890 24221 I CAR.GAL.SECURITY.LITE: Valid Times:
+03-10 14:14:19.960 16890 24221 I CAR.GAL.SECURITY.LITE:     notBefore= Fri Jul 04 02:00:00 GMT+02:00 2014
+03-10 14:14:19.960 16890 24221 I CAR.GAL.SECURITY.LITE:     notAfter= Sat Apr 29 16:28:38 GMT+02:00 2045
+03-10 14:14:19.974 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 192, detail OptionalInt.empty, CAR_CONNECTION_CDM_REQUESTED, at 155820634 
+03-10 14:14:19.984 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 193, detail OptionalInt.empty, CAR_CONNECTION_CDM_APPROVED, at 155820647 
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: cakewalkMinimumRequirements=[INVALID: format=%b, type=ylq, value=true], isSupportedOsVersion=[INVALID: format=%b, type=ylq, value=true],  appsUpToDate=[INVALID: format=%b, type=ylq, value=true]
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: shouldSkipLegacyFrxForCakewalk true, min requirements met
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: Deciding where to run FRX (GMS vs. GH):
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: isFrxRequired=true
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: shouldRunLegacyFrx=false
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: isOsCompatible=true
+03-10 14:14:20.016 16890 16890 I CAR.FRX.CHECKS: areApplicationsFullyUpdated=true
+03-10 14:14:20.017 16890 16890 I CAR.STARTUP.LITE: Handoff service discovery complete 8
+03-10 14:14:20.018 16890 24204 I CAR.SETUP.SERVICE.LITE: Handoff complete. Interested component: com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService. Success: true. isCarAudioServiceMigrationEnabled: true. gearheadSuppliedSkipLegacyFrxValue: true.
+03-10 14:14:20.018 16890 24204 I CAR.SETUP.SERVICE.LITE: Handoff success with 8
+03-10 14:14:20.021 16890 24204 I CAR.SETUP.SERVICE.LITE: CarInfo authorization: UNKNOWN
+03-10 14:14:20.028 16890 24204 I CAR.SETUP.LITE: Triggering FRX: car connection is not allowed
+03-10 14:14:20.059 16890 24204 I CAR.SETUP.SERVICE.LITE: gearheadSuppliedSkipLegacyFrxValue: true
+03-10 14:14:20.062 16890 24204 I CAR.SETUP.LITE: cakewalkMinimumRequirements=[INVALID: format=%b, type=ylq, value=true], isSupportedOsVersion=[INVALID: format=%b, type=ylq, value=true],  appsUpToDate[INVALID: format=%b, type=ylq, value=true],  hasNoMissingPermissions=[INVALID: format=%b, type=ylq, value=true],  deviceIsSupportedOrAllowList=[INVALID: format=%b, type=ylq, value=true]
+03-10 14:14:20.062 16890 24204 I CAR.SETUP.LITE: skipViaGearheadSuppliedSkipLegacyFrxValue
+03-10 14:14:20.062 16890 24204 I CAR.SETUP.LITE: shouldSkipLegacyFrxForCakewalk [INVALID: format=%b, type=ylq, value=true]
+03-10 14:14:20.069 16890 24204 I CAR.SETUP.SERVICE.LITE: Starting transfer for handoff.
+03-10 14:14:20.069 16890 24204 I CAR.SETUP.SERVICE.LITE: isCarAudioServiceMigrationEnabled: true
+03-10 14:14:20.092 16890 16890 I CAR.SERVICE: Car connection state changed: DISCONNECTED->CONNECTING
+03-10 14:14:20.095 16890 16890 I CAR.POOL_VIDEO: Initializing managed buffer pools with direct buffers
+03-10 14:14:20.096 16890 16890 I CAR.AUTH: Package com.google.android.projection.gearhead for uid 10143: isGoogleSigned = [INVALID: format=%b, type=ylq, value=true], isPackageAllowed = [INVALID: format=%b, type=ylq, value=false]
+03-10 14:14:20.096 16890 16890 E CAR.AUTH: Call from UID 10143 is not allowed.
+03-10 14:14:20.101 16890 16890 I CAR.SERVICE.LITE: Overriding delegate with new Lite CarServiceBinder, sessionId: 2371128900442707127, connectionType: 1
+03-10 14:14:20.101 16890 16890 I CAR.SERVICE.LITE: Updating receiver callback and sessionId for connectionType: 1
+03-10 14:14:20.106 16890 24236 I GH.CAR  : Resume session 2371128900442707127
+03-10 14:14:20.106 16890 16890 I CAR.STARTUP.LITE: Resume complete with status true
+03-10 14:14:20.106 16890 24204 I CAR.SETUP.SERVICE.LITE: Car setup no longer needed
+03-10 14:14:20.106 16890 24204 I CAR.SETUP.SERVICE.LITE: tearDown
+03-10 14:14:20.106 16890 24204 I CAR.SETUP.SERVICE.LITE: Tearing down car connection
+03-10 14:14:20.106 16890 24204 W WakeLock: *gcore*:CAR.FIRST release without a matched acquire!
+03-10 14:14:20.106 16890 24204 W WakeLock: *gcore*:CAR.FIRST counter does not exist
+03-10 14:14:20.107 16890 24204 I CAR.SETUP.LITE: Setup finished: supported=true
+03-10 14:14:20.109 16890 24204 I CAR.SETUP.SERVICE.LITE: stopped foreground service id 2
+03-10 14:14:20.110 16890 16890 I CAR.GAL.SECURITY.LITE: Successfully initialized SSL context for protocol: TLSv1.2 using provider: GmsCore_OpenSSL
+03-10 14:14:20.111 16890 16890 I CAR.GAL.GAL.LITE: Adding service (Service id=1 type=SensorSourceService {sensors=[type=13,type=1,type=10,] locationCharacterization=0 fuelType=[] evConnectorType=[]} )
+03-10 14:14:20.111 16890 16890 I CAR.GAL.GAL.LITE: onChannelOpened: 0
+03-10 14:14:20.111 16890 16890 I CAR.SETUP.SERVICE.LITE: onDestroy
+03-10 14:14:20.111 16890 16890 I CAR.SETUP.SERVICE.LITE: tearDown
+03-10 14:14:20.116 16890 16890 I CAR.SERVICE.LITE: started foreground service
+03-10 14:14:20.117 16890 16890 I CAR.SERVICE.LITE: Car connection state changed: DISCONNECTED->CONNECTING
+03-10 14:14:20.127 16890 16890 I CAR.LITE.LITE: Start required services in lite 1
+03-10 14:14:20.128 16890 24236 I CAR.CONMAN.LITE: Connection start services in conman
+03-10 14:14:20.129 16890 24236 I CAR.XFER.LITE: CAR_SERVICE_LITE Start executor and read messages
+03-10 14:14:20.134 16890 24236 I GH.CAR  : Start required services with types 2371128900442707127
+03-10 14:14:20.141 16890 16890 I CAR.AUDIO: force single channel capturing:false
+03-10 14:14:20.141 16890 16890 I CAR.AUDIO: Select audio config: 0 for channel: MEDIA
+03-10 14:14:20.141 16890 16890 I CAR.AUDIO.CHANNEL: enabling stream: SYSTEM, had focus: false
+03-10 14:14:20.145 16890 24244 I CAR.AUDIO.AFM: Requesting initial Android audio focus
+03-10 14:14:20.148 16890 24243 I CAR.AUDIO.CHANNEL: waitForStreamToStop: MEDIA, wait for ack: true
+03-10 14:14:20.148 16890 24243 I CAR.AUDIO.CHANNEL: waitForStreamToStop: TTS, wait for ack: true
+03-10 14:14:20.148 16890 24244 I CAR.AUDIO.FOCUS: Sending AUDIO_FOCUS_RELEASE to HU for app null due to Android focus change: LOSS
+03-10 14:14:20.148 16890 24244 I CAR.AUDIO.FOCUS: Send focus request to HU: AUDIO_FOCUS_RELEASE, attempt#: 1
+03-10 14:14:20.148 16890 24244 I CAR.GAL.AUDIO.LITE: sent audio focus request: AUDIO_FOCUS_RELEASE
+03-10 14:14:20.150 16890 16890 W CAR.AUDIO: Failed to find 48kHz guidance config, fallback to 16KHz
+03-10 14:14:20.150 16890 16890 I CAR.AUDIO: Select audio config: 0 for channel: TTS
+03-10 14:14:20.150 16890 16890 I CAR.AUDIO.CHANNEL: enabling stream: SYSTEM, had focus: true
+03-10 14:14:20.150 16890 16890 W CAR.AUDIO: Unsupported stream type: 1
+03-10 14:14:20.150 16890 16890 W CAR.AUDIO: Failed to find 48kHz guidance config, fallback to 16KHz
+03-10 14:14:20.150 16890 16890 I CAR.AUDIO: Select audio config: 0 for channel: SYSTEM
+03-10 14:14:20.150 16890 16890 W CAR.AUDIO.Policy: Unsupported stream type: 1
+03-10 14:14:20.150 16890 16890 I CAR.AUDIO.CHANNEL: enabling stream: SYSTEM, had focus: true
+03-10 14:14:20.150 16890 16890 I GH.CAR.VIDEO: The videoCodecType to be used is: 3
+03-10 14:14:20.151 16890 16890 W CAR.INPUT: No touchpad found. Using default threshold.
+03-10 14:14:20.151 16890 16890 W CAR.INPUT: No touchpad found. Using default threshold.
+03-10 14:14:20.151 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 207, detail OptionalInt.empty, CAR_SETUP_SERVICE_SET_STATE_NOT_CONNECTED, at 155820893 
+03-10 14:14:20.151 16890 16890 I CAR.INPUT: Discovered input for display 0 with service 8: CarUiInfo (hasRotaryController: false, touchscreenType: 1, hasSearchButton: false, hasTouchpadForUiNavigation: false, hasDpad: true, isTouchpadUiAbsolute: false, touchpadMoveThresholdPx: 48, touchpadMultimoveThresholdPx: 64)
+03-10 14:14:20.151 16890 16890 I CAR.SENSOR: setDisplaySourceService Setting DisplaySourceService for DefaultSensorListener
+03-10 14:14:20.151 16890 16890 I CAR.XFER.LITE: CAR_SERVICE_PROXY Start executor and read messages
+03-10 14:14:20.152 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 1
+03-10 14:14:20.152 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 1
+03-10 14:14:20.154 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for TEMPLATE not defined [com.google.android.googlequicksearchbox]
+03-10 14:14:20.156 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 3
+03-10 14:14:20.156 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 3
+03-10 14:14:20.156 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 208, detail OptionalInt.empty, CAR_SETUP_SERVICE_STATE_ALREADY_NOT_CONNECTED_IN_TEARDOWN, at 155820895 
+03-10 14:14:20.157 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 4
+03-10 14:14:20.158 16890 16890 I CAR.GAL.GAL.LITE: Creating AudioPerChannelQueue for channel 4
+03-10 14:14:20.158 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 5
+03-10 14:14:20.158 16890 16890 I CAR.GAL.GAL.LITE: Creating AudioPerChannelQueue for channel 5
+03-10 14:14:20.158 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 6
+03-10 14:14:20.158 16890 16890 I CAR.GAL.GAL.LITE: Creating AudioPerChannelQueue for channel 6
+03-10 14:14:20.158 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 8
+03-10 14:14:20.158 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 8
+03-10 14:14:20.159 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 9
+03-10 14:14:20.159 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 9
+03-10 14:14:20.159 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 13
+03-10 14:14:20.160 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 13
+03-10 14:14:20.160 16890 16890 I CAR.AUDIO: Call state change: IDLE(0)
+03-10 14:14:20.166 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 209, detail OptionalInt.empty, CAR_SETUP_SERVICE_DESTROY, at 155820895 
+03-10 14:14:20.166 16890 24221 I CAR.GAL.AUDIO.LITE: Got audio focus state from car:AUDIO_FOCUS_STATE_LOSS
+03-10 14:14:20.166 16890 24221 I CAR.AUDIO.FOCUS: Received focus change from HU: AUDIO_FOCUS_STATE_LOSS, unsolicited: false
+03-10 14:14:20.166 16890 24244 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=AUDIO_FOCUS_RELEASE, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=false, pendingRequest=NONE
+03-10 14:14:20.166 16890 24244 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:14:20.166 16890 24244 I CAR.AUDIO.AFM: Invalidate audio focus stack monitor due to car audio focus change
+03-10 14:14:20.167 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:14:20.167 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:14:20.167 16890 24244 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:14:20.167 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:14:20.167 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:14:20.172 14566 14617 I GH.ConnLoggerV2: Session dd21109d-4061-42d1-a7b2-53a70b59ff39, event 210, detail OptionalInt.empty, CAR_SERVICE_ENDPOINTS_STARTING, at 155820901 
+03-10 14:14:20.173 16890 24248 I CAR.GAL.GAL.LITE: onChannelOpened: 1
+03-10 14:14:20.174 16890 24240 I CAR.GAL.GAL.LITE: onChannelOpened: 1
+03-10 14:14:20.174 16890 16890 I CAR.LITE.LITE: Car services started
+03-10 14:14:20.185 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.google.android.bluetooth]
+03-10 14:14:20.187 16890 24249 I CAR.GAL.GAL.LITE: onChannelOpened: 3
+03-10 14:14:20.187 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.google.android.youtube]
+03-10 14:14:20.188 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.alphainventor.filemanager]
+03-10 14:14:20.188 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.amazon.avod.thirdpartyclient]
+03-10 14:14:20.189 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.brave.browser]
+03-10 14:14:20.190 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.microsoft.emmx]
+03-10 14:14:20.190 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.microsoft.skydrive]
+03-10 14:14:20.192 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.technogym.tgapp]
+03-10 14:14:20.193 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [it.atm.appmobile]
+03-10 14:14:20.196 16890 24237 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [it.telecomitalia.centodiciannove]
+03-10 14:14:20.206 16890 24251 I CAR.GAL.GAL.LITE: onChannelOpened: 4
+03-10 14:14:20.216 16890 24251 I CAR.GAL.GAL.LITE: onChannelOpened: 5
+03-10 14:14:20.226 16890 24252 I CAR.GAL.GAL.LITE: onChannelOpened: 9
+03-10 14:14:20.257 16890 24251 I CAR.GAL.GAL.LITE: onChannelOpened: 6
+03-10 14:14:20.266 16890 24249 I CAR.GAL.VIDEO.LITE: Initialize video source flow controller with max unacked allowed: 1
+03-10 14:14:20.266 16890 24249 I CAR.GAL.VIDEO.LITE: configMessage, MAX_UNACK: 1
+03-10 14:14:20.266 16890 24249 I CAR.VIDEO: AVC Level 0x10000 fps 60 pixel 8294400
+03-10 14:14:20.266 16890 24249 I CAR.VIDEO: Choosing codec c2.exynos.h264.encoder
+03-10 14:14:20.276 16890 24249 I CAR.GAL.VIDEO.LITE: VideoFocus gained unsolicited=false
+03-10 14:14:20.276 16890 24249 I CAR.VIDEO: Video focus gained for display type: 0.
+03-10 14:14:20.276 16890 24249 I CAR.GAL.VIDEO.LITE: Input Focus Gained
+03-10 14:14:20.276 16890 24245 I CAR.VIDEO: AVC Level 0x10000 fps 60 pixel 8294400
+03-10 14:14:20.277 16890 24245 I CAR.VIDEO: Choosing codec c2.exynos.h264.encoder
+03-10 14:14:20.277 16890 24245 I CAR.MEDIA.VIDEO: wait for encoder init [Video EncodingThread.]
+03-10 14:14:20.284 16890 24251 I CAR.GAL.AUDIO.LITE: Creating MediaSourceFlowController for AUDIO_STREAM_MEDIA stream type with throttling disabled: false, maxHuAudioBufferFrames: 2147483647, maxUnackedFramesAllowed: 1
+03-10 14:14:20.284 16890 24251 I CAR.AUDIO.MEDIA.LITE: configMessage, MAX_UNACK: 1
+03-10 14:14:20.285 16890 24251 I CAR.AUDIO.MEDIA: Flag that enables save audio developer setting: false
+03-10 14:14:20.285 16890 24251 I CAR.AUDIO.CHANNEL: Mark stream ready: MEDIA
+03-10 14:14:20.286 16890 24251 I CAR.AUDIO.MEDIA: AudioSourceService is ready with stream type: MEDIA
+03-10 14:14:20.286 16890 24251 I CAR.AUDIO.MEDIA: startSystemSoundStreaming MEDIA
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=null, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=true, pendingRequest=NONE
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:14:20.286 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:14:20.286 16890 24266 I CAR.AUDIO.MEDIA: Start capturing system audio with sampling rate: 48000, buffer size: 65536, expected frame duration: 42.666667 ms
+03-10 14:14:20.286 16890 24266 I CAR.AUDIO.MEDIA: Creating audio record
+03-10 14:14:20.287 16890 24266 I CAR.AUDIO.Policy: Registering audio policy
+03-10 14:14:20.289 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:14:20.289 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:14:20.294 16890 24251 I CAR.GAL.AUDIO.LITE: Creating MediaSourceFlowController for AUDIO_STREAM_GUIDANCE stream type with throttling disabled: false, maxHuAudioBufferFrames: 2147483647, maxUnackedFramesAllowed: 1
+03-10 14:14:20.295 16890 24251 I CAR.AUDIO.TTS.LITE: configMessage, MAX_UNACK: 1
+03-10 14:14:20.295 16890 24251 I CAR.AUDIO.TTS: Flag that enables save audio developer setting: false
+03-10 14:14:20.296 16890 24251 I CAR.AUDIO.CHANNEL: Mark stream ready: TTS
+03-10 14:14:20.296 16890 24251 I CAR.AUDIO.TTS: AudioSourceService is ready with stream type: TTS
+03-10 14:14:20.296 16890 24251 I CAR.AUDIO.TTS: startSystemSoundStreaming TTS
+03-10 14:14:20.296 16890 24244 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=null, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=true, pendingRequest=NONE
+03-10 14:14:20.296 16890 24271 I CAR.AUDIO.TTS: Start capturing system audio with sampling rate: 16000, buffer size: 16384, expected frame duration: 64.000000 ms
+03-10 14:14:20.297 16890 24244 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:14:20.297 16890 24271 I CAR.AUDIO.TTS: Creating audio record
+03-10 14:14:20.297 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:14:20.297 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:14:20.297 16890 24244 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:14:20.297 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:14:20.297 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:14:20.298 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:14:20.299 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:14:20.316 16890 24251 I CAR.GAL.AUDIO.LITE: Creating MediaSourceFlowController for AUDIO_STREAM_SYSTEM_AUDIO stream type with throttling disabled: false, maxHuAudioBufferFrames: 2147483647, maxUnackedFramesAllowed: 1
+03-10 14:14:20.316 16890 24251 I CAR.AUDIO.TTS.LITE: configMessage, MAX_UNACK: 1
+03-10 14:14:20.316 16890 24251 I CAR.AUDIO.SYSTEM: Flag that enables save audio developer setting: false
+03-10 14:14:20.319 16890 24251 I CAR.AUDIO.CHANNEL: Mark stream ready: SYSTEM
+03-10 14:14:20.319 16890 24251 I CAR.AUDIO.SYSTEM: AudioSourceService is ready with stream type: SYSTEM
+03-10 14:14:20.319 16890 24244 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=null, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=true, pendingRequest=NONE
+03-10 14:14:20.319 16890 24244 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:14:20.319 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:14:20.319 16890 24244 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:14:20.319 16890 24244 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:14:20.320 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:14:20.320 16890 24244 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:14:20.322 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:14:20.323 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:14:20.325 16890 24240 W CAR.SENSOR.LITE: sensor event while no listener, sensor:11 [CONTEXT ratelimit_period="1 MINUTES" skipped=1 ]
+03-10 14:14:20.335 16890 24235 I CAR.SENSOR: Requested sensor 2 not supported
+03-10 14:14:20.336 16890 24235 I CAR.SENSOR: Requested sensor 7 not supported
+03-10 14:14:20.336 16890 24235 I CAR.SENSOR: Requested sensor 6 not supported
+03-10 14:14:20.343 16890 24245 I CAR.MEDIA.VIDEO: encoder init done [Video EncodingThread.]
+03-10 14:14:20.346 16890 24248 I CAR.SENSOR: getDayNightModeUserSetting DisplaySourceService available
+03-10 14:14:20.346 16890 24248 I CAR.SENSOR: getDayNightModeUserSetting getting day night mode from CarServiceSettings: car
+03-10 14:14:20.346 16890 24248 I CAR.SENSOR: isNightModeEnabled DAY_NIGHT_MODE_VAL_CAR returning car day night sensor night=false
+03-10 14:14:20.346 16890 24248 I CAR.SENSOR: getDayNightModeUserSetting DisplaySourceService available
+03-10 14:14:20.346 16890 24248 I CAR.SENSOR: getDayNightModeUserSetting getting day night mode from CarServiceSettings: car
+03-10 14:14:20.346 16890 24248 I CAR.SENSOR: updateDayNightMode(source=SENSOR): userSetting=car, isNightMode=false
+03-10 14:14:20.346 16890 24248 I CAR.SYS : setting night mode false
+03-10 14:14:20.346 16890 16890 I CAR.SERVICE: Delaying day/night mode update because projection has not started.
+03-10 14:14:20.400 16890 24266 I CAR.BT.SVC.LITE: Routing media audio via device type 0
+03-10 14:14:20.487 16890 24271 I CAR.BT.SVC.LITE: Routing media audio via device type 0
+03-10 14:14:24.792 16890 16890 I CAR.SERVICE.FCD.LITE: timed out at stage ACCESSORY_MODE after 5000 milliseconds, publishing FIRST_ACTIVITY_NOT_LAUNCHED
+03-10 14:14:30.162 16890 24204 I CAR.SETUP.SERVICE.LITE: quit handler thread
