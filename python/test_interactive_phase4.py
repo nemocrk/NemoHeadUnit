@@ -17,16 +17,25 @@ try:
     import google.protobuf
     from aasdk_proto.aap_protobuf.service.control.message import AuthResponse_pb2
     from aasdk_proto.aap_protobuf.service.control.message import ServiceDiscoveryResponse_pb2
+    from aasdk_proto.aap_protobuf.service.control.message import HeadUnitInfo_pb2
+    from aasdk_proto.aap_protobuf.service.control.message import DriverPosition_pb2
     from aasdk_proto.aap_protobuf.service.control.message import PingResponse_pb2
     from aasdk_proto.aap_protobuf.service.control.message import AudioFocusNotification_pb2
     from aasdk_proto.aap_protobuf.shared import MessageStatus_pb2
-    # Service schema reale: ServiceConfiguration (non "Service")
     from aasdk_proto.aap_protobuf.service.Service_pb2 import ServiceConfiguration
+    # Media sink
     from aasdk_proto.aap_protobuf.service.media.sink.MediaSinkService_pb2 import MediaSinkService
-    from aasdk_proto.aap_protobuf.service.media.sink.message.VideoConfiguration_pb2 import VideoConfiguration
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoCodecResolutionType_pb2 import VideoCodecResolutionType
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoFrameRateType_pb2 import VideoFrameRateType
     from aasdk_proto.aap_protobuf.service.media.sink.message.DisplayType_pb2 import DisplayType
+    # Sensor source
+    from aasdk_proto.aap_protobuf.service.sensorsource.SensorSourceService_pb2 import SensorSourceService
+    from aasdk_proto.aap_protobuf.service.sensorsource.message.Sensor_pb2 import Sensor
+    from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorType_pb2 import SensorType
+    # Input source
+    from aasdk_proto.aap_protobuf.service.inputsource.InputSourceService_pb2 import InputSourceService
+    # Media source (microfono)
+    from aasdk_proto.aap_protobuf.service.media.source.MediaSourceService_pb2 import MediaSourceService
     PROTOBUF_AVAILABLE = True
 except ImportError as e:
     print(f"\n[ERRORE CRITICO] Moduli Protobuf non trovati: {e}")
@@ -35,12 +44,19 @@ except ImportError as e:
     sys.exit(1)
 
 
-# Mappa ChannelId enum aasdk (posizionale, da ChannelId.hpp):
-#   0=CONTROL, 1=SENSOR, 2=MEDIA_SINK, 3=MEDIA_SINK_VIDEO,
-#   4=MEDIA_SINK_MEDIA_AUDIO, 5=MEDIA_SINK_GUIDANCE_AUDIO,
-#   6=MEDIA_SINK_SYSTEM_AUDIO, 7=MEDIA_SINK_TELEPHONY_AUDIO,
-#   8=INPUT_SOURCE, 9=MEDIA_SOURCE_MICROPHONE, 10=BLUETOOTH, ...
-CH_MEDIA_SINK_VIDEO = 3
+# ChannelId enum aasdk (da ChannelId.hpp):
+#   0=CONTROL, 1=SENSOR_SOURCE, 2=MEDIA_SINK,
+#   3=MEDIA_SINK_VIDEO, 4=MEDIA_SINK_MEDIA_AUDIO,
+#   5=MEDIA_SINK_GUIDANCE_AUDIO, 6=MEDIA_SINK_SYSTEM_AUDIO,
+#   7=MEDIA_SINK_TELEPHONY_AUDIO, 8=INPUT_SOURCE,
+#   9=MEDIA_SOURCE_MICROPHONE, 10=BLUETOOTH
+CH_SENSOR        = 1
+CH_VIDEO         = 3
+CH_MEDIA_AUDIO   = 4
+CH_SPEECH_AUDIO  = 5
+CH_SYSTEM_AUDIO  = 6
+CH_INPUT         = 8
+CH_MIC           = 9
 
 
 class InteractiveOrchestrator:
@@ -110,42 +126,108 @@ class InteractiveOrchestrator:
 
     def on_service_discovery_request(self, payload: bytes) -> bytes:
         """
-        ServiceConfiguration.id deve corrispondere all'enum ChannelId di aasdk:
-          MEDIA_SINK_VIDEO = 3  (posizione nell'enum ChannelId.hpp)
-        Il Messenger di aasdk smista i frame in base a questo id numerico.
+        Costruisce la ServiceDiscoveryResponse con TUTTI i canali obbligatori.
+
+        Struttura ServiceConfiguration (Service_pb2.py, field names reali):
+          .id                    → int32 (required)
+          .sensor_source_service → SensorSourceService  (field 2)
+          .media_sink_service    → MediaSinkService      (field 3)
+          .input_source_service  → InputSourceService    (field 4)
+          .media_source_service  → MediaSourceService    (field 5)
+
+        Canali minimi richiesti da Android Auto:
+          CH 1  = SENSOR_SOURCE       → sensor_source_service
+          CH 3  = MEDIA_SINK_VIDEO    → media_sink_service (display_type=MAIN)
+          CH 4  = MEDIA_SINK_AUDIO    → media_sink_service (display_type=NONE)
+          CH 5  = SPEECH_AUDIO        → media_sink_service (display_type=NONE)
+          CH 6  = SYSTEM_AUDIO        → media_sink_service (display_type=NONE)
+          CH 8  = INPUT_SOURCE        → input_source_service
+          CH 9  = MICROPHONE          → media_source_service
         """
         print("\n[Orchestrator] Service Discovery Request ricevuta!")
 
         msg = ServiceDiscoveryResponse_pb2.ServiceDiscoveryResponse()
-        msg.make = "NemoDev"
-        msg.model = "NemoHU v0.1"
-        msg.year = "2024"
-        msg.head_unit_make = "NemoDev"
-        msg.head_unit_model = "NemoHU"
-        msg.head_unit_software_build = "phase4"
-        msg.head_unit_software_version = "0.1.0"
+
+        # ── HeadUnitInfo (sub-message moderno, field deprecated ignorati) ──────
+        msg.headunit_info.make                       = "NemoDev"
+        msg.headunit_info.model                      = "NemoHU"
+        msg.headunit_info.year                       = "2025"
+        msg.headunit_info.vehicle_id                 = "NEMO0001"
+        msg.headunit_info.head_unit_make             = "NemoDev"
+        msg.headunit_info.head_unit_model            = "NemoHeadUnit"
+        msg.headunit_info.head_unit_software_build   = "1"
+        msg.headunit_info.head_unit_software_version = "0.1.0"
+
+        # Guida a sinistra (Italia/Europa)
+        msg.driver_position = DriverPosition_pb2.DRIVER_POSITION_LEFT
         msg.can_play_native_media_during_vr = False
 
-        # Canale video: id=3 = MEDIA_SINK_VIDEO nell'enum aasdk
-        ch = msg.channels.add()
-        ch.id = CH_MEDIA_SINK_VIDEO  # 3
+        # ── CH 1: SENSOR SOURCE ───────────────────────────────────────────────
+        ch1 = msg.channels.add()
+        ch1.id = CH_SENSOR
+        svc_sensor = SensorSourceService()
+        s1 = svc_sensor.sensors.add()
+        s1.sensor_type = SensorType.Value("SENSOR_DRIVING_STATUS_DATA")
+        s2 = svc_sensor.sensors.add()
+        s2.sensor_type = SensorType.Value("SENSOR_NIGHT_MODE")
+        ch1.sensor_source_service.CopyFrom(svc_sensor)
 
-        sink = MediaSinkService()
-        sink.display_type = DisplayType.Value("DISPLAY_TYPE_MAIN")
-        sink.available_while_in_call = True
+        # ── CH 3: VIDEO (MEDIA_SINK_VIDEO) ────────────────────────────────────
+        ch3 = msg.channels.add()
+        ch3.id = CH_VIDEO
+        svc_video = MediaSinkService()
+        svc_video.display_type            = DisplayType.Value("DISPLAY_TYPE_MAIN")
+        svc_video.available_while_in_call = True
+        vcfg = svc_video.video_configs.add()
+        vcfg.codec_resolution = VideoCodecResolutionType.Value("VIDEO_800x480")
+        vcfg.frame_rate       = VideoFrameRateType.Value("VIDEO_FPS_30")
+        vcfg.density          = 140
+        vcfg.width_margin     = 0
+        vcfg.height_margin    = 0
+        ch3.media_sink_service.CopyFrom(svc_video)
 
-        vid_cfg = sink.video_configs.add()
-        vid_cfg.codec_resolution = VideoCodecResolutionType.Value("VIDEO_800x480")
-        vid_cfg.frame_rate = VideoFrameRateType.Value("VIDEO_FPS_30")
-        vid_cfg.density = 140
-        vid_cfg.width_margin = 0
-        vid_cfg.height_margin = 0
+        # ── CH 4: MEDIA AUDIO (MEDIA_SINK_MEDIA_AUDIO) ───────────────────────
+        ch4 = msg.channels.add()
+        ch4.id = CH_MEDIA_AUDIO
+        svc_media_audio = MediaSinkService()
+        svc_media_audio.display_type = DisplayType.Value("DISPLAY_TYPE_NONE")
+        ch4.media_sink_service.CopyFrom(svc_media_audio)
 
-        ch.media_sink_service.CopyFrom(sink)
+        # ── CH 5: SPEECH AUDIO (MEDIA_SINK_GUIDANCE_AUDIO) ───────────────────
+        ch5 = msg.channels.add()
+        ch5.id = CH_SPEECH_AUDIO
+        svc_speech = MediaSinkService()
+        svc_speech.display_type = DisplayType.Value("DISPLAY_TYPE_NONE")
+        ch5.media_sink_service.CopyFrom(svc_speech)
+
+        # ── CH 6: SYSTEM AUDIO (MEDIA_SINK_SYSTEM_AUDIO) ─────────────────────
+        ch6 = msg.channels.add()
+        ch6.id = CH_SYSTEM_AUDIO
+        svc_sys = MediaSinkService()
+        svc_sys.display_type = DisplayType.Value("DISPLAY_TYPE_NONE")
+        ch6.media_sink_service.CopyFrom(svc_sys)
+
+        # ── CH 8: INPUT SOURCE ────────────────────────────────────────────────
+        # TouchScreen è nested message: InputSourceService.TouchScreen
+        # field 'touchscreen' è repeated (non touchscreen_configs)
+        ch8 = msg.channels.add()
+        ch8.id = CH_INPUT
+        svc_input = InputSourceService()
+        ts = svc_input.touchscreen.add()
+        ts.width  = 800
+        ts.height = 480
+        # ts.type default = TOUCHSCREEN_TYPE_CAPACITIVE (non serve impostarlo)
+        ch8.input_source_service.CopyFrom(svc_input)
+
+        # ── CH 9: MICROPHONE (MEDIA_SOURCE_MICROPHONE) ────────────────────────
+        ch9 = msg.channels.add()
+        ch9.id = CH_MIC
+        svc_mic = MediaSourceService()
+        ch9.media_source_service.CopyFrom(svc_mic)
 
         serialized = msg.SerializeToString()
         return self._log_and_send(
-            f"Invia ServiceDiscoveryResponse (ch={CH_MEDIA_SINK_VIDEO}=MEDIA_SINK_VIDEO)",
+            f"Invia ServiceDiscoveryResponse ({len(msg.channels)} canali)",
             serialized
         )
 
