@@ -162,8 +162,9 @@ class InteractiveOrchestrator:
     def _make_video_focus_indication(self, unsolicited: bool = False) -> bytes:
         """
         Costruisce VideoFocusNotification(focus=PROJECTED, unsolicited=unsolicited).
-        Allineato a VideoMediaSinkService-14.cpp::sendVideoFocusIndication().
-        Chiamato sia dopo AVChannelSetupResponse che dopo ChannelOpenResponse su CH_VIDEO.
+        Allineato a VideoMediaSinkService.cpp::sendVideoFocusIndication().
+        Usato SOLO per on_video_focus_request (step 3 - gate H.264).
+        Il VideoFocus post-Setup e' inviato direttamente dal C++ via promise->then.
         """
         vf = VideoFocusNotification()
         vf.focus       = VideoFocusMode.Value("VIDEO_FOCUS_PROJECTED")
@@ -327,15 +328,17 @@ class InteractiveOrchestrator:
 
     # ─────────────────────────────────────────────────────────────────────────
     # AV Channel Setup (step 1 del 3 per aprire ogni canale media)
-    # Ref: AudioMediaSinkService-19.cpp::onMediaChannelSetupRequest()
-    #      VideoMediaSinkService-14.cpp::onMediaChannelSetupRequest()
+    # Ref: AudioMediaSinkService.cpp::onMediaChannelSetupRequest()
+    #      VideoMediaSinkService.cpp::onMediaChannelSetupRequest()
     # Android → HU: AVChannelSetupRequest (contiene .type = codec)
     # HU → Android: AVChannelSetupResponse (= Config proto)
     #   status=STATUS_READY, max_unacked=1, configuration_indices=[0]
-    # Per CH_VIDEO: subito dopo invia VideoFocusIndication(PROJECTED)
-    # NOTA: channel_id viene passato dal binding C++ per sapere di che canale si tratta
+    #
+    # IMPORTANTE: Python restituisce SOLO il Config serializzato per TUTTI i canali.
+    # Per CH_VIDEO il VideoFocusIndication(PROJECTED) e' inviato automaticamente
+    # dal C++ nel promise->then di sendChannelSetupResponse.
+    # Ref: video_event_handler.hpp::onMediaChannelSetupRequest()
     # ─────────────────────────────────────────────────────────────────────────
-
     def on_av_channel_setup_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] AVChannelSetupRequest su CH {channel_id}")
         resp = AVChannelConfig()
@@ -344,56 +347,38 @@ class InteractiveOrchestrator:
         resp.configuration_indices.append(0)
         setup_bytes = resp.SerializeToString()
         self._log_and_send(f"Invia AVChannelSetupResponse CH {channel_id}", setup_bytes)
-
-        if channel_id == CH_VIDEO:
-            # Ref: VideoMediaSinkService-14.cpp: dopo sendChannelSetupResponse
-            # chiama sendVideoFocusIndication()
-            vf_bytes = self._make_video_focus_indication(unsolicited=False)
-            self._log_and_send("Invia VideoFocusIndication post-Setup CH_VIDEO", vf_bytes)
-            # Il binding C++ si aspetta un singolo bytes di ritorno;
-            # per CH_VIDEO restituiamo la concatenazione setup+videoFocus
-            # oppure gestiamo separatamente se il binding lo supporta.
-            # Restituiamo solo il setup: il VideoFocus viene inviato come
-            # messaggio separato tramite send_video_focus_indication se
-            # disponibile, altrimenti lo incolliamo via side-channel.
-            # Per ora restituiamo il setup e il focus come coppia.
-            return setup_bytes + vf_bytes  # il binding deve gestire 2 messaggi
+        # Restituisce SOLO Config. Per CH_VIDEO il VideoFocus e' inviato dal C++
+        # tramite promise->then (video_event_handler.hpp::onMediaChannelSetupRequest).
         return setup_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
     # Channel Open (step 2 del 3)
-    # Ref: AudioMediaSinkService-19.cpp::onChannelOpenRequest()
-    #      VideoMediaSinkService-14.cpp::onChannelOpenRequest()
+    # Ref: AudioMediaSinkService.cpp::onChannelOpenRequest()
+    #      VideoMediaSinkService.cpp::onChannelOpenRequest()
     # Android → HU: ChannelOpenRequest
     # HU → Android: ChannelOpenResponse(STATUS_SUCCESS)
-    # Per CH_VIDEO: invia anche VideoFocusIndication(PROJECTED) come fa il C++
+    #
+    # IMPORTANTE: Python restituisce SOLO ChannelOpenResponse per TUTTI i canali.
+    # Per CH_VIDEO NON si invia VideoFocusIndication qui.
+    # Ref: VideoMediaSinkService.cpp::onChannelOpenRequest() -> solo receive().
     # ─────────────────────────────────────────────────────────────────────────
-
     def on_channel_open_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] ChannelOpenRequest su CH {channel_id}")
         resp = ChannelOpenResponse_pb2.ChannelOpenResponse()
         resp.status = MessageStatus_pb2.MessageStatus.Value("STATUS_SUCCESS")
         open_bytes = resp.SerializeToString()
         self._log_and_send(f"Invia ChannelOpenResponse CH {channel_id}", open_bytes)
-
-        if channel_id == CH_VIDEO:
-            # Ref: VideoMediaSinkService-14.cpp::onChannelOpenRequest()
-            # Dopo sendChannelOpenResponse: channel->receive(this->shared_from_this())
-            # Poi arriverà onVideoFocusRequest da Android, che chiama sendVideoFocusIndication.
-            # Anticipiamo qui per sicurezza (comportamento openauto originale).
-            vf_bytes = self._make_video_focus_indication(unsolicited=False)
-            self._log_and_send("Invia VideoFocusIndication post-ChannelOpen CH_VIDEO", vf_bytes)
-            return open_bytes + vf_bytes
+        # Restituisce SOLO ChannelOpenResponse per tutti i canali.
+        # Nessun VideoFocus concatenato: vedere video_event_handler.hpp per CH_VIDEO.
         return open_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
     # Video Focus Request (step 3 del 3 per CH_VIDEO)
-    # Ref: VideoMediaSinkService-14.cpp::onVideoFocusRequest()
+    # Ref: VideoMediaSinkService.cpp::onVideoFocusRequest()
     # Android → HU: VideoFocusRequestNotification (mode, reason)
     # HU → Android: VideoFocusNotification(focus=PROJECTED, unsolicited=False)
-    # Questo è il gate finale che sblocca lo stream H.264
+    # Questo è il gate finale che sblocca lo stream H.264.
     # ─────────────────────────────────────────────────────────────────────────
-
     def on_video_focus_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] VideoFocusRequest ricevuta → rispondo PROJECTED")
         vf_bytes = self._make_video_focus_indication(unsolicited=False)
@@ -403,7 +388,6 @@ class InteractiveOrchestrator:
     # on_video_channel_open_request
     # Placeholder Phase 5: in produzione VideoMediaSinkService C++ lo gestisce
     # ─────────────────────────────────────────────────────────────────────────
-
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] *** on_video_channel_open_request RAGGIUNTO! (Phase 5) ***")
         return b""
@@ -420,7 +404,7 @@ class InteractiveOrchestrator:
 
     def on_audio_focus_request(self, payload: bytes) -> bytes:
         """
-        Ref: AndroidAutoEntity-17.cpp::onAudioFocusRequest()
+        Ref: AndroidAutoEntity.cpp::onAudioFocusRequest()
         RELEASE → AUDIO_FOCUS_STATE_LOSS
         GAIN    → AUDIO_FOCUS_STATE_GAIN
         """
@@ -437,12 +421,12 @@ class InteractiveOrchestrator:
             AudioFocusStateType_pb2.AudioFocusStateType.Value("AUDIO_FOCUS_STATE_GAIN")
         )
         msg = AudioFocusNotification_pb2.AudioFocusNotification()
-        msg.focus_state = 1  # AUDIO_FOCUS_STATE_GAIN
+        msg.focus_state = state
         return self._log_and_send("Invia AudioFocusNotification", msg.SerializeToString())
 
     def on_navigation_focus_request(self, payload: bytes) -> bytes:
         """
-        Ref: AndroidAutoEntity-17.cpp::onNavigationFocusRequest()
+        Ref: AndroidAutoEntity.cpp::onNavigationFocusRequest()
         Risponde sempre NAV_FOCUS_PROJECTED (OpenAuto non ha nav locale).
         """
         print("\n[Orchestrator] NavigationFocusRequest ricevuta → PROJECTED")
