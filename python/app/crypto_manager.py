@@ -29,10 +29,35 @@ Uso:
 from __future__ import annotations
 
 import os
+import sys
 import logging
 from typing import Optional
 
 log = logging.getLogger(__name__)
+
+# ── Import top-level: fallisce subito con traceback completo se mancante ─────
+# Questo permette di diagnosticare immediatamente problemi di venv/sys.path
+# invece di ricevere il silenzioso "validazione saltata" a runtime.
+try:
+    from cryptography import x509
+    from cryptography.hazmat.primitives.serialization import (
+        load_pem_private_key,
+        Encoding,
+        PublicFormat,
+    )
+    from cryptography.hazmat.backends import default_backend as _default_backend
+    _CRYPTO_AVAILABLE = True
+except ImportError as _crypto_import_err:
+    _CRYPTO_AVAILABLE = False
+    # Stampa su stderr subito così non passa inosservato
+    print(
+        f"[CryptoManager] WARN: libreria 'cryptography' non importabile: {_crypto_import_err}\n"
+        f"  sys.prefix  = {sys.prefix}\n"
+        f"  sys.version = {sys.version}\n"
+        f"  Prova: {sys.executable} -m pip install cryptography\n"
+        "  Validazione PEM del certificato disabilitata (solo warning).",
+        file=sys.stderr,
+    )
 
 # Percorsi standard (allineati a aasdk::Cryptor e crypto_manager.cpp)
 _CERT_PATHS: list[str] = [
@@ -67,18 +92,16 @@ def _validate_cert_key_pair(cert_pem: str, key_pem: str) -> bool:
     Verifica che la chiave privata corrisponda al certificato X.509.
     Equivalente di X509_check_private_key() usato in crypto_manager.cpp.
 
-    Usa `cryptography` (PyCA) — nessun binding C++/OpenSSL diretto.
+    Se `cryptography` non è disponibile, skip con warning (non blocca il boot).
     """
-    try:
-        from cryptography import x509
-        from cryptography.hazmat.primitives.serialization import (
-            load_pem_private_key,
-            Encoding,
-            PublicFormat,
+    if not _CRYPTO_AVAILABLE:
+        log.warning(
+            "[CryptoManager] validazione PEM saltata: 'cryptography' non disponibile."
         )
-        from cryptography.hazmat.backends import default_backend
+        return True  # fallback permissivo: OpenSSL in C++ farà la vera verifica
 
-        backend = default_backend()
+    try:
+        backend = _default_backend()
 
         cert = x509.load_pem_x509_certificate(cert_pem.encode(), backend)
         key  = load_pem_private_key(key_pem.encode(), password=None, backend=backend)
@@ -96,14 +119,6 @@ def _validate_cert_key_pair(cert_pem: str, key_pem: str) -> bool:
 
         log.info("[CryptoManager] Certificato e chiave validati con successo.")
         return True
-
-    except ImportError:
-        # cryptography non installata: skip validazione, solo warning
-        log.warning(
-            "[CryptoManager] libreria `cryptography` non trovata: "
-            "validazione PEM saltata. Installa con: pip install cryptography"
-        )
-        return True  # non bloccare il boot se la lib non c'è
 
     except Exception as e:
         log.error("[CryptoManager] ERRORE parsing PEM: %s", e)
@@ -153,6 +168,11 @@ class CryptoManager:
                 "[CryptoManager] ERRORE: nessun certificato trovato nei path: %s",
                 self._cert_paths,
             )
+            print(
+                f"[CryptoManager] ERRORE: nessun certificato trovato.\n"
+                f"  Path cercati: {self._cert_paths}",
+                file=sys.stderr,
+            )
             return False
 
         key_pem = _find_file(self._key_paths)
@@ -160,6 +180,11 @@ class CryptoManager:
             log.error(
                 "[CryptoManager] ERRORE: nessuna chiave privata trovata nei path: %s",
                 self._key_paths,
+            )
+            print(
+                f"[CryptoManager] ERRORE: nessuna chiave privata trovata.\n"
+                f"  Path cercati: {self._key_paths}",
+                file=sys.stderr,
             )
             return False
 
