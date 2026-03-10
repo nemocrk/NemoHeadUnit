@@ -31,16 +31,13 @@ try:
     from aasdk_proto.aap_protobuf.shared import MessageStatus_pb2
 
     # ── Media Sink (video + audio) ───────────────────────────────────────────
-    # MediaSinkService_pb2.py è in media/sink/ (NON in media/sink/message/)
     from aasdk_proto.aap_protobuf.service.media.sink import MediaSinkService_pb2
     from aasdk_proto.aap_protobuf.service.media.sink.MediaSinkService_pb2 import MediaSinkService
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoCodecResolutionType_pb2 import VideoCodecResolutionType
     from aasdk_proto.aap_protobuf.service.media.sink.message.VideoFrameRateType_pb2 import VideoFrameRateType
     from aasdk_proto.aap_protobuf.service.media.sink.message.AudioStreamType_pb2 import AudioStreamType
-    # MediaCodecType e AudioConfiguration sono in media/shared/message/ (condivisi sink+source)
     from aasdk_proto.aap_protobuf.service.media.shared.message.MediaCodecType_pb2 import MediaCodecType
     from aasdk_proto.aap_protobuf.service.media.shared.message.AudioConfiguration_pb2 import AudioConfiguration
-    # AVChannelSetupResponse (= Config nel proto)
     from aasdk_proto.aap_protobuf.service.media.shared.message.Config_pb2 import Config as AVChannelConfig
 
     # ── Video focus ─────────────────────────────────────────────────────────────
@@ -48,19 +45,21 @@ try:
     from aasdk_proto.aap_protobuf.service.media.video.message.VideoFocusMode_pb2 import VideoFocusMode
 
     # ── Media Source (microfono) ──────────────────────────────────────────────
-    # MediaSourceService_pb2.py è in media/source/ (NON in media/source/message/)
     from aasdk_proto.aap_protobuf.service.media.source.MediaSourceService_pb2 import MediaSourceService
 
     # ── Sensor Source ─────────────────────────────────────────────────────────
     from aasdk_proto.aap_protobuf.service.sensorsource.SensorSourceService_pb2 import SensorSourceService
     from aasdk_proto.aap_protobuf.service.sensorsource.message.Sensor_pb2 import Sensor
     from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorType_pb2 import SensorType
+    # Aggiunto: risposta al SensorStartRequest e indicazione DrivingStatus/NightMode
+    from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorStartResponseMessage_pb2 import SensorStartResponseMessage
+    from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorBatch_pb2 import SensorBatch
+    from aasdk_proto.aap_protobuf.service.sensorsource.message.DrivingStatus_pb2 import DrivingStatus
 
     # ── Input Source ──────────────────────────────────────────────────────────
     from aasdk_proto.aap_protobuf.service.inputsource.InputSourceService_pb2 import InputSourceService
 
     # ── Navigation Status ─────────────────────────────────────────────────────
-    # ATTENZIONE proto2: minimum_interval_ms e type sono REQUIRED
     from aasdk_proto.aap_protobuf.service.navigationstatus.NavigationStatusService_pb2 import NavigationStatusService
 
     # ── Bluetooth ─────────────────────────────────────────────────────────────
@@ -328,16 +327,6 @@ class InteractiveOrchestrator:
 
     # ─────────────────────────────────────────────────────────────────────────
     # AV Channel Setup (step 1 del 3 per aprire ogni canale media)
-    # Ref: AudioMediaSinkService.cpp::onMediaChannelSetupRequest()
-    #      VideoMediaSinkService.cpp::onMediaChannelSetupRequest()
-    # Android → HU: AVChannelSetupRequest (contiene .type = codec)
-    # HU → Android: AVChannelSetupResponse (= Config proto)
-    #   status=STATUS_READY, max_unacked=1, configuration_indices=[0]
-    #
-    # IMPORTANTE: Python restituisce SOLO il Config serializzato per TUTTI i canali.
-    # Per CH_VIDEO il VideoFocusIndication(PROJECTED) e' inviato automaticamente
-    # dal C++ nel promise->then di sendChannelSetupResponse.
-    # Ref: video_event_handler.hpp::onMediaChannelSetupRequest()
     # ─────────────────────────────────────────────────────────────────────────
     def on_av_channel_setup_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] AVChannelSetupRequest su CH {channel_id}")
@@ -347,20 +336,10 @@ class InteractiveOrchestrator:
         resp.configuration_indices.append(0)
         setup_bytes = resp.SerializeToString()
         self._log_and_send(f"Invia AVChannelSetupResponse CH {channel_id}", setup_bytes)
-        # Restituisce SOLO Config. Per CH_VIDEO il VideoFocus e' inviato dal C++
-        # tramite promise->then (video_event_handler.hpp::onMediaChannelSetupRequest).
         return setup_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
     # Channel Open (step 2 del 3)
-    # Ref: AudioMediaSinkService.cpp::onChannelOpenRequest()
-    #      VideoMediaSinkService.cpp::onChannelOpenRequest()
-    # Android → HU: ChannelOpenRequest
-    # HU → Android: ChannelOpenResponse(STATUS_SUCCESS)
-    #
-    # IMPORTANTE: Python restituisce SOLO ChannelOpenResponse per TUTTI i canali.
-    # Per CH_VIDEO NON si invia VideoFocusIndication qui.
-    # Ref: VideoMediaSinkService.cpp::onChannelOpenRequest() -> solo receive().
     # ─────────────────────────────────────────────────────────────────────────
     def on_channel_open_request(self, channel_id: int, payload: bytes) -> bytes:
         print(f"\n[Orchestrator] ChannelOpenRequest su CH {channel_id}")
@@ -368,16 +347,66 @@ class InteractiveOrchestrator:
         resp.status = MessageStatus_pb2.MessageStatus.Value("STATUS_SUCCESS")
         open_bytes = resp.SerializeToString()
         self._log_and_send(f"Invia ChannelOpenResponse CH {channel_id}", open_bytes)
-        # Restituisce SOLO ChannelOpenResponse per tutti i canali.
-        # Nessun VideoFocus concatenato: vedere video_event_handler.hpp per CH_VIDEO.
         return open_bytes
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Sensor Start Request (CH1 gate)
+    # Ref: SensorService.cpp::onSensorStartRequest()
+    #
+    # Android → HU: SensorRequest (type = SENSOR_DRIVING_STATUS_DATA o SENSOR_NIGHT_MODE)
+    # HU → Android: SensorStartResponseMessage(STATUS_SUCCESS)
+    #
+    # GATE CRITICO: il messaggio SENSOR_DRIVING_STATUS_DATA deve ricevere
+    # risposta con SensorStartResponse + SensorBatch(DRIVE_STATUS_UNRESTRICTED).
+    # Senza questo Android NON avvia mai lo stream H.264.
+    #
+    # NOTA ARCHITETTURALE: il C++ (SensorEventHandler) invia
+    # SensorStartResponse via channel_->sendSensorStartResponse() e poi
+    # nel promise->then chiama sendDrivingStatusUnrestricted()/sendNightData().
+    # Questo metodo Python NON invia direttamente sul canale: è chiamato
+    # dall'Orchestrator binding SOLO come riferimento logico di test.
+    # L'handler reale è SensorEventHandler in sensor_event_handler.hpp.
+    # ─────────────────────────────────────────────────────────────────────────
+    def on_sensor_start_request(self, payload: bytes) -> bytes:
+        from aasdk_proto.aap_protobuf.service.sensorsource.message.SensorRequest_pb2 import SensorRequest
+
+        req = SensorRequest()
+        req.ParseFromString(payload)
+        sensor_type = req.type
+        print(f"\n[Orchestrator] SensorStartRequest tipo={sensor_type}")
+
+        # Step 1: SensorStartResponse(STATUS_SUCCESS)
+        resp = SensorStartResponseMessage()
+        resp.status = MessageStatus_pb2.MessageStatus.Value("STATUS_SUCCESS")
+        resp_bytes = resp.SerializeToString()
+        self._log_and_send(f"Invia SensorStartResponse tipo={sensor_type}", resp_bytes)
+
+        if sensor_type == SensorType.Value("SENSOR_DRIVING_STATUS_DATA"):
+            # Step 2a: SensorBatch con DRIVE_STATUS_UNRESTRICTED
+            # GATE H.264: senza questo Android non invia NAL units.
+            # Ref: SensorService.cpp::sendDrivingStatusUnrestricted()
+            batch = SensorBatch()
+            batch.driving_status_data.add().status = DrivingStatus.Value("DRIVE_STATUS_UNRESTRICTED")
+            batch_bytes = batch.SerializeToString()
+            self._log_and_send("Invia SensorBatch DRIVE_STATUS_UNRESTRICTED", batch_bytes)
+            # Ritorna i due messaggi concatenati: il C++ li spacchetta singolarmente.
+            return resp_bytes + batch_bytes
+
+        elif sensor_type == SensorType.Value("SENSOR_NIGHT_MODE"):
+            # Step 2b: SensorBatch con night_mode=False (giorno)
+            # Ref: SensorService.cpp::sendNightData()
+            batch = SensorBatch()
+            batch.night_mode_data.add().night_mode = False
+            batch_bytes = batch.SerializeToString()
+            self._log_and_send("Invia SensorBatch NightMode=False", batch_bytes)
+            return resp_bytes + batch_bytes
+
+        # Per altri tipi (es. SENSOR_LOCATION) risponde solo STATUS_SUCCESS
+        return resp_bytes
 
     # ─────────────────────────────────────────────────────────────────────────
     # Video Focus Request (step 3 del 3 per CH_VIDEO)
     # Ref: VideoMediaSinkService.cpp::onVideoFocusRequest()
-    # Android → HU: VideoFocusRequestNotification (mode, reason)
-    # HU → Android: VideoFocusNotification(focus=PROJECTED, unsolicited=False)
-    # Questo è il gate finale che sblocca lo stream H.264.
     # ─────────────────────────────────────────────────────────────────────────
     def on_video_focus_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] VideoFocusRequest ricevuta → rispondo PROJECTED")
@@ -385,8 +414,7 @@ class InteractiveOrchestrator:
         return self._log_and_send("Invia VideoFocusIndication (gate video)", vf_bytes)
 
     # ─────────────────────────────────────────────────────────────────────────
-    # on_video_channel_open_request
-    # Placeholder Phase 5: in produzione VideoMediaSinkService C++ lo gestisce
+    # on_video_channel_open_request — Placeholder Phase 5
     # ─────────────────────────────────────────────────────────────────────────
     def on_video_channel_open_request(self, payload: bytes) -> bytes:
         print("\n[Orchestrator] *** on_video_channel_open_request RAGGIUNTO! (Phase 5) ***")
