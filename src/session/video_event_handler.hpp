@@ -67,7 +67,8 @@ namespace nemo
             auto setup_promise = aasdk::channel::SendPromise::defer(strand_);
             auto self = this->shared_from_this();
             setup_promise->then(
-                [self]() { self->sendVideoFocusIndication(); },
+                [self]()
+                { self->sendVideoFocusIndication(); },
                 [](const aasdk::error::Error &e)
                 {
                     std::cerr << "[Video] sendChannelSetupResponse FAILED: " << e.what() << std::endl;
@@ -175,7 +176,7 @@ namespace nemo
             if (dump_file_.is_open())
             {
                 dump_enabled_ = true;
-                dump_bytes_   = 0;
+                dump_bytes_ = 0;
                 std::cout << "[Video] Dump H.264 abilitato: " << path << std::endl;
             }
             else
@@ -258,9 +259,9 @@ namespace nemo
 
         // ── Dump H.264 ────────────────────────────────────────────────────
         std::ofstream dump_file_;
-        bool          dump_enabled_ = false;
-        std::size_t   dump_bytes_   = 0;
-        std::size_t   nal_count_    = 0;
+        bool dump_enabled_ = false;
+        std::size_t dump_bytes_ = 0;
+        std::size_t nal_count_ = 0;
         static constexpr std::size_t DUMP_LIMIT_ = 5UL * 1024UL * 1024UL; // 5 MB
     };
 

@@ -31,7 +31,7 @@ namespace nemo
                        aasdk::messenger::IMessenger::Pointer messenger,
                        aasdk::messenger::ICryptor::Pointer cryptor,
                        std::shared_ptr<IOrchestrator> orchestrator,
-                       std::shared_ptr<GstVideoSink>  video_sink = nullptr)
+                       std::shared_ptr<GstVideoSink> video_sink = nullptr)
             : strand_(io_ctx),
               messenger_(std::move(messenger)),
               cryptor_(std::move(cryptor)),
@@ -59,18 +59,14 @@ namespace nemo
         void enableVideoDump(const std::string &path)
         {
             strand_.dispatch([this, self = shared_from_this(), path]()
-            {
-                if (video_handler_)
-                {
+                             {
+                if (video_handler_) {
+                    std::cout << "[Session] enableVideoDump -> video_handler_ ESISTE: " << path << std::endl;
                     video_handler_->enableDump(path);
-                }
-                else
-                {
-                    // Salva il path: video_handler_ potrebbe non essere
-                    // ancora costruito se chiamato prima di start().
+                } else {
+                    std::cout << "[Session] enableVideoDump -> video_handler_ NULL, salvo pending: " << path << std::endl;
                     pending_dump_path_ = path;
-                }
-            });
+                } });
         }
 
         void start()
@@ -96,14 +92,16 @@ namespace nemo
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO);
             video_handler_ = std::make_shared<VideoEventHandler>(
                 strand_, video_channel_, orchestrator_, video_sink_);
-            video_channel_->receive(video_handler_);
 
             // Applica dump path pendente (se enableVideoDump() chiamato prima di start())
+            std::cout << "[Session] video_handler_ costruito." << std::endl;
             if (!pending_dump_path_.empty())
             {
+                std::cout << "[Session] Applico pending_dump_path_ a video_handler_: " << pending_dump_path_ << std::endl;
                 video_handler_->enableDump(pending_dump_path_);
                 pending_dump_path_.clear();
             }
+            video_channel_->receive(video_handler_);
 
             media_audio_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO);
@@ -162,8 +160,8 @@ namespace nemo
         aasdk::messenger::IMessenger::Pointer messenger_;
         aasdk::messenger::ICryptor::Pointer cryptor_;
         std::shared_ptr<IOrchestrator> orchestrator_;
-        std::shared_ptr<GstVideoSink>  video_sink_;
-        std::string pending_dump_path_;  // per enableVideoDump() prima di start()
+        std::shared_ptr<GstVideoSink> video_sink_;
+        std::string pending_dump_path_; // per enableVideoDump() prima di start()
 
         // CH 0
         aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;

@@ -63,8 +63,8 @@ def main():
     print(f" Limite: {DUMP_LIMIT // 1024} KB")
     print("=" * 60 + "\n")
 
-    if hasattr(core, "enable_aasdk_logging"):
-        core.enable_aasdk_logging()
+#    if hasattr(core, "enable_aasdk_logging"):
+#        core.enable_aasdk_logging()
 
     runner = core.IoContextRunner()
     crypto = core.CryptoManager()
