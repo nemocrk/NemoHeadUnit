@@ -7,21 +7,23 @@
 #include <aasdk/Channel/MediaSink/Video/VideoMediaSinkService.hpp>
 #include <aasdk/Channel/MediaSink/Audio/AudioMediaSinkService.hpp>
 #include <aasdk/Channel/SensorSource/SensorSourceService.hpp>
+#include <aasdk/Channel/InputSource/InputSourceService.hpp>
+#include <aasdk/Channel/NavigationStatus/NavigationStatusService.hpp>
 #include <aasdk/Channel/Promise.hpp>
 #include "control_event_handler.hpp"
 #include "video_event_handler.hpp"
 #include "audio_event_handler.hpp"
 #include "sensor_event_handler.hpp"
+#include "input_event_handler.hpp"
+#include "navigation_event_handler.hpp"
 #include "iorchestrator.hpp"
 
-// Channel IDs da aasdk/Messenger/ChannelId.hpp
-// static constexpr aasdk::messenger::ChannelId kChControl      = aasdk::messenger::ChannelId::CONTROL;
-// static constexpr aasdk::messenger::ChannelId kChSensor       = aasdk::messenger::ChannelId::SENSOR_SOURCE;
-// static constexpr aasdk::messenger::ChannelId kChVideo        = aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO;
-// static constexpr aasdk::messenger::ChannelId kChMediaAudio   = aasdk::messenger::ChannelId::MEDIA_SINK_MEDIA_AUDIO;
-// static constexpr aasdk::messenger::ChannelId kChSpeechAudio  = aasdk::messenger::ChannelId::MEDIA_SINK_GUIDANCE_AUDIO;
-// static constexpr aasdk::messenger::ChannelId kChSystemAudio  = aasdk::messenger::ChannelId::MEDIA_SINK_SYSTEM_AUDIO;
-// static constexpr aasdk::messenger::ChannelId kChMic          = aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE;
+// Channel IDs da aasdk/Messenger/ChannelId.hpp (enum posizionale)
+// CONTROL=0, SENSOR=1, MEDIA_SINK=2, MEDIA_SINK_VIDEO=3,
+// MEDIA_SINK_MEDIA_AUDIO=4, MEDIA_SINK_GUIDANCE_AUDIO=5,
+// MEDIA_SINK_SYSTEM_AUDIO=6, MEDIA_SINK_TELEPHONY_AUDIO=7,
+// INPUT_SOURCE=8, MEDIA_SOURCE_MICROPHONE=9,
+// BLUETOOTH=10, RADIO=11, NAVIGATION_STATUS=12, ...
 
 namespace nemo
 {
@@ -117,6 +119,18 @@ namespace nemo
             system_audio_channel_->receive(system_audio_handler_);
 
             // ---------------------------------------------------------------
+            // CH 8: Input Source
+            // Android invia touch/knob events via KeyBindingRequest/InputReport.
+            // GATE: senza questo handler Android Auto non si avvia visivamente.
+            // Ref: InputSourceService.cpp (openauto)
+            // ---------------------------------------------------------------
+            input_channel_ = std::make_shared<aasdk::channel::inputsource::InputSourceService>(
+                strand_, messenger_);
+            input_handler_ = std::make_shared<InputEventHandler>(
+                strand_, input_channel_, orchestrator_);
+            input_channel_->receive(input_handler_);
+
+            // ---------------------------------------------------------------
             // CH 9: Mic (MediaSource)
             // Phase 5: sostituire con MediaSourceService per TX verso Android.
             // ---------------------------------------------------------------
@@ -124,7 +138,19 @@ namespace nemo
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE);
             mic_handler_ = std::make_shared<AudioEventHandler>(
                 strand_, mic_channel_, orchestrator_, aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE);
-            mic_channel_->receive(mic_handler_); });
+            mic_channel_->receive(mic_handler_);
+
+            // ---------------------------------------------------------------
+            // CH 12: Navigation Status
+            // Android invia status/turn/distance events di navigazione.
+            // Sink silente in Phase 4; Phase 5 esporrà i dati a Python.
+            // Ref: NavigationStatusService.cpp (openauto)
+            // ---------------------------------------------------------------
+            navigation_channel_ = std::make_shared<aasdk::channel::navigationstatus::NavigationStatusService>(
+                strand_, messenger_);
+            navigation_handler_ = std::make_shared<NavigationEventHandler>(
+                strand_, navigation_channel_, orchestrator_);
+            navigation_channel_->receive(navigation_handler_); });
         }
 
         void stop()
@@ -137,7 +163,9 @@ namespace nemo
             media_audio_channel_.reset();  media_audio_handler_.reset();
             speech_audio_channel_.reset(); speech_audio_handler_.reset();
             system_audio_channel_.reset(); system_audio_handler_.reset();
-            mic_channel_.reset();          mic_handler_.reset(); });
+            input_channel_.reset();        input_handler_.reset();
+            mic_channel_.reset();          mic_handler_.reset();
+            navigation_channel_.reset();   navigation_handler_.reset(); });
         }
 
     private:
@@ -167,6 +195,14 @@ namespace nemo
         std::shared_ptr<AudioEventHandler> speech_audio_handler_;
         std::shared_ptr<AudioEventHandler> system_audio_handler_;
         std::shared_ptr<AudioEventHandler> mic_handler_;
+
+        // CH 8
+        aasdk::channel::inputsource::IInputSourceService::Pointer input_channel_;
+        InputEventHandler::Pointer input_handler_;
+
+        // CH 12
+        aasdk::channel::navigationstatus::INavigationStatusService::Pointer navigation_channel_;
+        NavigationEventHandler::Pointer navigation_handler_;
     };
 
 } // namespace nemo
