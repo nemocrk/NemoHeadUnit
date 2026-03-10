@@ -17,6 +17,7 @@
 #include "input_event_handler.hpp"
 #include "navigation_event_handler.hpp"
 #include "iorchestrator.hpp"
+#include "gst/gst_video_sink.hpp"
 
 // Channel IDs da aasdk/Messenger/ChannelId.hpp (enum posizionale)
 // CONTROL=0, SENSOR=1, MEDIA_SINK=2, MEDIA_SINK_VIDEO=3,
@@ -36,11 +37,13 @@ namespace nemo
         SessionManager(boost::asio::io_context &io_ctx,
                        aasdk::messenger::IMessenger::Pointer messenger,
                        aasdk::messenger::ICryptor::Pointer cryptor,
-                       std::shared_ptr<IOrchestrator> orchestrator)
+                       std::shared_ptr<IOrchestrator> orchestrator,
+                       std::shared_ptr<GstVideoSink>  video_sink = nullptr)  // Phase 5
             : strand_(io_ctx),
               messenger_(std::move(messenger)),
               cryptor_(std::move(cryptor)),
-              orchestrator_(std::move(orchestrator)) {}
+              orchestrator_(std::move(orchestrator)),
+              video_sink_(std::move(video_sink)) {}
 
         aasdk::channel::SendPromise::Pointer makePromise(const char *tag)
         {
@@ -74,7 +77,6 @@ namespace nemo
             // CH 1: Sensor Source
             // GATE CRITICO: Android attende SensorStartResponse(DRIVING_STATUS)
             // + DrivingStatus UNRESTRICTED prima di avviare lo stream H.264.
-            // Ref: SensorService.cpp::onSensorStartRequest()
             // ---------------------------------------------------------------
             sensor_channel_ = std::make_shared<aasdk::channel::sensorsource::SensorSourceService>(
                 strand_, messenger_);
@@ -84,11 +86,13 @@ namespace nemo
 
             // ---------------------------------------------------------------
             // CH 3: Video Sink
+            // Phase 5: video_sink_ passato a VideoEventHandler per
+            // abilitare pushBuffer() diretto verso GStreamer (no GIL).
             // ---------------------------------------------------------------
             video_channel_ = std::make_shared<aasdk::channel::mediasink::video::VideoMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SINK_VIDEO);
             video_handler_ = std::make_shared<VideoEventHandler>(
-                strand_, video_channel_, orchestrator_);
+                strand_, video_channel_, orchestrator_, video_sink_);  // Phase 5
             video_channel_->receive(video_handler_);
 
             // ---------------------------------------------------------------
@@ -120,9 +124,6 @@ namespace nemo
 
             // ---------------------------------------------------------------
             // CH 8: Input Source
-            // Android invia touch/knob events via KeyBindingRequest/InputReport.
-            // GATE: senza questo handler Android Auto non si avvia visivamente.
-            // Ref: InputSourceService.cpp (openauto)
             // ---------------------------------------------------------------
             input_channel_ = std::make_shared<aasdk::channel::inputsource::InputSourceService>(
                 strand_, messenger_);
@@ -132,7 +133,6 @@ namespace nemo
 
             // ---------------------------------------------------------------
             // CH 9: Mic (MediaSource)
-            // Phase 5: sostituire con MediaSourceService per TX verso Android.
             // ---------------------------------------------------------------
             mic_channel_ = std::make_shared<aasdk::channel::mediasink::audio::AudioMediaSinkService>(
                 strand_, messenger_, aasdk::messenger::ChannelId::MEDIA_SOURCE_MICROPHONE);
@@ -142,9 +142,6 @@ namespace nemo
 
             // ---------------------------------------------------------------
             // CH 12: Navigation Status
-            // Android invia status/turn/distance events di navigazione.
-            // Sink silente in Phase 4; Phase 5 esporrà i dati a Python.
-            // Ref: NavigationStatusService.cpp (openauto)
             // ---------------------------------------------------------------
             navigation_channel_ = std::make_shared<aasdk::channel::navigationstatus::NavigationStatusService>(
                 strand_, messenger_);
@@ -173,6 +170,7 @@ namespace nemo
         aasdk::messenger::IMessenger::Pointer messenger_;
         aasdk::messenger::ICryptor::Pointer cryptor_;
         std::shared_ptr<IOrchestrator> orchestrator_;
+        std::shared_ptr<GstVideoSink>  video_sink_;  // Phase 5
 
         // CH 0
         aasdk::channel::control::IControlServiceChannel::Pointer control_channel_;
