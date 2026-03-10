@@ -11,17 +11,20 @@ Obiettivo:
 
 Funzionamento:
   Il dump e' scritto direttamente da VideoEventHandler in C++ (NO GIL).
-  Python chiama usb.enable_video_dump(path) dopo la connessione,
-  il C++ scrive i NAL units raw su file fino a 5 MB poi chiude.
+  Python chiama usb.enable_video_dump(path) PRIMA di usb.start() cosi'
+  il path e' salvato in pending_dump_path_ e applicato non appena
+  VideoEventHandler e' costruito — garantendo che SPS+PPS+IDR
+  (primo NAL unit) vengano scritti nel file.
 
-Prerequisiti:
+PREREQUISITI:
   - Fase 4 funzionante
   - Telefono Android connesso via USB con Android Auto abilitato
   - cmake -B build && cmake --build build -j$(nproc)
 
-Verifica output:
+VERIFICA OUTPUT:
   vlc --demux h264 video_dump.h264
-  ffprobe -v quiet -show_streams -select_streams v video_dump.h264
+  ffprobe -v error -show_streams -select_streams v video_dump.h264
+    -> codec_name=h264, width/height valorizzati = stream valido
 
 NOTA: per il rendering visivo completo usare python/ui/main_window.py
 """
@@ -75,19 +78,23 @@ def main():
     usb = core.UsbHubManager(runner)
     usb.set_crypto_manager(crypto)
     usb.set_orchestrator(orchestrator)
-    # Nessun GstVideoSink: modalita' dump puro (fakesink implicito in C++)
+    # Nessun GstVideoSink: modalita' dump puro
 
-    dump_enabled = False
+    # ----------------------------------------------------------------
+    # CRITICO: enable_video_dump() PRIMA di start().
+    # Il path viene salvato in pending_dump_path_ (UsbHubManager) e
+    # propagato a VideoEventHandler non appena SessionManager::start()
+    # costruisce video_handler_. Questo garantisce che il primo NAL
+    # unit (SPS+PPS+IDR) venga scritto — senza di esso ffprobe non
+    # riesce a decodificare risoluzione e profilo del codec.
+    # ----------------------------------------------------------------
+    print(f"[Dump] Dump abilitato in anticipo -> {DUMP_PATH}")
+    usb.enable_video_dump(DUMP_PATH)
 
     def on_connect(ok: bool, msg: str):
-        nonlocal dump_enabled
         status = "\u2713" if ok else "\u2717"
         print(f"[USB] {status} {msg}")
-        if ok and not dump_enabled:
-            print(f"[Dump] Abilitazione dump -> {DUMP_PATH}")
-            usb.enable_video_dump(DUMP_PATH)
-            dump_enabled = True
-        elif not ok:
+        if not ok:
             runner.stop()
 
     usb.start(on_connect)
@@ -106,7 +113,8 @@ def main():
                     print(f"\n[Dump] \u2713 Completato! {DUMP_PATH}")
                     print("[Dump] Verifica con:")
                     print(f"         vlc --demux h264 {DUMP_PATH}")
-                    print(f"         ffprobe -show_streams -select_streams v {DUMP_PATH}")
+                    print(f"         ffprobe -v error -show_streams -select_streams v {DUMP_PATH}")
+                    print("[Dump] Se width/height sono valorizzati = stream H.264 valido.")
                     break
     except KeyboardInterrupt:
         print("\n[Info] Interruzione manuale.")
