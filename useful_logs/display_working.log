@@ -1,0 +1,115 @@
+questo è il massimo dei log che riesco a recuperare dal vecchio tool:
+(base) nemo@nemo-hpomni10:~/NemoHeadUnit$ DISPLAY=:0 ../dash/bin/dash 
+[2026-03-10 16:41:00.803943] [0x00007914bbfea940] [info]    [Dash] loaded config: /home/nemo/.config/openDsh/dash.conf
+[2026-03-10 16:41:01.322476] [0x00007914bbfea940] [info]    [Dash] [Bluetooth] Init
+[2026-03-10 16:41:01.829359] [0x00007914bbfea940] [warning] [OpenAuto] [Configuration] failed to read configuration file: openauto.ini, error: openauto.ini: cannot open file. Using default configuration.
+[2026-03-10 16:41:02.164614] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Selecting the avdec_h264 h264 decoder
+[2026-03-10 16:41:03.374388] [0x00007914bbfea940] [info]    [OpenAuto] [AndroidBluetoothServer] listening.
+[2026-03-10 16:41:03.417888] [0x00007914bbfea940] [info]    [OpenAuto] [btservice] Listening for connections, address: 73:4E:4B:7F:FB:FD, port: 22
+[2026-03-10 16:41:03.426697] [0x00007914bbfea940] [info]    [OpenAuto] [btservice] Service registered, port: 22
+[2026-03-10 16:41:03.426956] [0x00007914bbfea940] [info]    [OpenAuto] [btservice] Attempting to connect to last bluetooth device, 00:00:00:00:00:00 with bluetoothctl
+[2026-03-10 16:41:03.525221] [0x00007914bbfea940] [info]    [OpenAuto] SERVICE FACTORY INITED
+[2026-03-10 16:41:03.530804] [0x00007914bbfea940] [info]    [OpenAuto] [App] Waiting for USB device...
+[2026-03-10 16:41:03.531623] [0x00007914bbfea940] [info]    [OpenAuto] [App] Waiting for Wireless device...
+[2026-03-10 16:41:03.564920] [0x0000791473fff6c0] [info]    [OpenAuto] [App] Devices enumeration result: true
+[2026-03-10 16:41:03.893147] [0x00007914bbfea940] [info]    [Dash] [SocketCANBus] 'socketcan' Available
+[2026-03-10 16:41:03.897553] [0x00007914bbfea940] [info]    [Dash] [SocketCANBus] Connecting CAN interface disabled
+[2026-03-10 16:41:03.897845] [0x00007914bbfea940] [info]    [Dash] [Gauges] Registered frame handler for id 2024
+[2026-03-10 16:41:03.898178] [0x00007914bbfea940] [info]    [Dash] [Gauges] Registered frame handler for id 2024
+[2026-03-10 16:41:03.898430] [0x00007914bbfea940] [info]    [Dash] [Gauges] Registered frame handler for id 2024
+[2026-03-10 16:41:03.898677] [0x00007914bbfea940] [info]    [Dash] [Gauges] Registered frame handler for id 2024
+[2026-03-10 16:41:04.586728] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Got resize request to 1860x1125
+[2026-03-10 16:41:04.586838] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Android Auto is 800x480, calculated margins of: 3.2x0
+[2026-03-10 16:41:04.794698] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Got resize request to 1844x1107
+[2026-03-10 16:41:04.794774] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Android Auto is 800x480, calculated margins of: 0.216802x0
+[2026-03-10 16:41:05.137445] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Got resize request to 1844x1106
+[2026-03-10 16:41:05.137549] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Android Auto is 800x480, calculated margins of: 0x0.0867679
+[2026-03-10 16:41:05.201464] [0x00007914bbfea940] [info]    [Dash] [Bluetooth] Init complete!
+[2026-03-10 16:41:05.201540] [0x00007914bbfea940] [info]    [Dash] [Bluetooth] Has Adapter: true, Has Media Device: false
+[2026-03-10 16:41:07.558765] [0x000079147bfff6c0] [info]    [OpenAuto] [App] USB Device connected.
+[2026-03-10 16:41:07.672023] [0x00007914bbfea940] [debug]   [OpenAuto] [AudioInput] create.
+[2026-03-10 16:41:07.726446] [0x000079147bfff6c0] [info]    [OpenAuto] [InputService] Created
+[2026-03-10 16:41:07.726682] [0x000079147bfff6c0] [info]    [OpenAuto] [AndroidAutoEntity] start.
+[2026-03-10 16:41:07.726796] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioInputService] start.
+[2026-03-10 16:41:07.727470] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioService] start, channel: MEDIA_AUDIO
+[2026-03-10 16:41:07.727614] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioService] start, channel: SPEECH_AUDIO
+[2026-03-10 16:41:07.727740] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioService] start, channel: SYSTEM_AUDIO
+[2026-03-10 16:41:07.727940] [0x000079147bfff6c0] [info]    [OpenAuto] [SensorService] start.
+[2026-03-10 16:41:07.728063] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] start.
+[2026-03-10 16:41:07.728249] [0x000079147bfff6c0] [info]    [OpenAuto] [BluetoothService] start.
+[2026-03-10 16:41:07.728462] [0x000079147bfff6c0] [info]    [AaSdk] [BluetoothServiceChannel] receive 
+[2026-03-10 16:41:07.728597] [0x000079147bfff6c0] [info]    [OpenAuto] [NavigationStatusService] start.
+[2026-03-10 16:41:07.728702] [0x000079147bfff6c0] [info]    [AaSdk] [NavigationStatusServiceChannel] receive 
+[2026-03-10 16:41:07.728902] [0x000079147bfff6c0] [info]    [OpenAuto] [MediaStatusService] start.
+[2026-03-10 16:41:07.729027] [0x000079147bfff6c0] [info]    [OpenAuto] [InputService] start.
+[2026-03-10 16:41:07.745386] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] version response, version: 1.7, status: 0
+[2026-03-10 16:41:07.745542] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] Begin handshake.
+[2026-03-10 16:41:07.835612] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] Handshake, size: 2347
+[2026-03-10 16:41:07.849525] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] continue handshake.
+[2026-03-10 16:41:07.871114] [0x0000791473fff6c0] [info]    [OpenAuto] [AndroidAutoEntity] Handshake, size: 51
+[2026-03-10 16:41:07.871676] [0x0000791473fff6c0] [info]    [OpenAuto] [AndroidAutoEntity] Auth completed.
+[2026-03-10 16:41:07.933565] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] Discovery request, device name: Android, brand: Google Pixel 7
+[2026-03-10 16:41:07.933805] [0x000079147b7fe6c0] [info]    [OpenAuto] [AudioInputService] fill features.
+[2026-03-10 16:41:07.934151] [0x000079147b7fe6c0] [info]    [OpenAuto] [AudioService] fill features, channel: MEDIA_AUDIO
+[2026-03-10 16:41:07.934331] [0x000079147b7fe6c0] [info]    [OpenAuto] [AudioService] fill features, channel: SPEECH_AUDIO
+[2026-03-10 16:41:07.934456] [0x000079147b7fe6c0] [info]    [OpenAuto] [AudioService] fill features, channel: SYSTEM_AUDIO
+[2026-03-10 16:41:07.934592] [0x000079147b7fe6c0] [info]    [OpenAuto] [SensorService] fill features.
+[2026-03-10 16:41:07.934800] [0x000079147b7fe6c0] [info]    [OpenAuto] [VideoService] fill features.
+[2026-03-10 16:41:07.935010] [0x000079147b7fe6c0] [info]    [OpenAuto] [BluetoothService] fill features
+[2026-03-10 16:41:07.935167] [0x000079147b7fe6c0] [info]    [OpenAuto] [NavigationStatusService] fill features
+[2026-03-10 16:41:07.935440] [0x000079147b7fe6c0] [info]    [OpenAuto] [MediaStatusService] fill features
+[2026-03-10 16:41:07.935709] [0x000079147b7fe6c0] [info]    [OpenAuto] [InputService] fill features.
+[2026-03-10 16:41:08.154513] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] requested audio focus, type: 4
+[2026-03-10 16:41:08.154660] [0x000079147b7fe6c0] [info]    [OpenAuto] [AndroidAutoEntity] audio focus state: 3
+[2026-03-10 16:41:08.163311] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioInputService] open request, priority: 0
+[2026-03-10 16:41:08.163476] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioInputService] open status: 0
+[2026-03-10 16:41:08.164394] [0x000079147b7fe6c0] [info]    [OpenAuto] [AudioService] open request, channel: MEDIA_AUDIO, priority: 0
+[2026-03-10 16:41:08.165665] [0x000079147b7fe6c0] [debug]   [OpenAuto] [AudioService] channel: MEDIA_AUDIO audio output sample rate: 48000, sample size: 16, channel count: 2
+[2026-03-10 16:41:08.165854] [0x0000791473fff6c0] [info]    [OpenAuto] [AudioService] open request, channel: SPEECH_AUDIO, priority: 0
+[2026-03-10 16:41:08.165967] [0x0000791473fff6c0] [debug]   [OpenAuto] [AudioService] channel: SPEECH_AUDIO audio output sample rate: 16000, sample size: 16, channel count: 1
+[2026-03-10 16:41:08.166517] [0x000079147affd6c0] [info]    [OpenAuto] [AudioService] open request, channel: SYSTEM_AUDIO, priority: 0
+[2026-03-10 16:41:08.166654] [0x000079147affd6c0] [debug]   [OpenAuto] [AudioService] channel: SYSTEM_AUDIO audio output sample rate: 16000, sample size: 16, channel count: 1
+[2026-03-10 16:41:08.167659] [0x000079147bfff6c0] [info]    [OpenAuto] [SensorService] open request, priority: 0
+[2026-03-10 16:41:08.167813] [0x000079147bfff6c0] [info]    [OpenAuto] [SensorService] open status: 0
+[2026-03-10 16:41:08.168681] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] open request, priority: 0
+[2026-03-10 16:41:08.200665] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] open status: 0
+[2026-03-10 16:41:08.201259] [0x000079147bfff6c0] [info]    [AaSdk] [NavigationStatusServiceChannel] message handler 
+[2026-03-10 16:41:08.201490] [0x000079147bfff6c0] [info]    [AaSdk] [NavigationStatusServiceChannel] channel open request 
+[2026-03-10 16:41:08.201558] [0x000079147bfff6c0] [info]    [OpenAuto] [NavigationStatusService] open request, priority: 0
+[2026-03-10 16:41:08.201613] [0x000079147bfff6c0] [info]    [OpenAuto] [NavigationStatusService] open status: 0
+[2026-03-10 16:41:08.201669] [0x000079147bfff6c0] [info]    [AaSdk] [NavigationStatusServiceChannel] channel open response 
+[2026-03-10 16:41:08.201740] [0x000079147bfff6c0] [info]    [AaSdk] [NavigationStatusServiceChannel] receive 
+[2026-03-10 16:41:08.202792] [0x000079147bfff6c0] [info]    [AaSdk] [MediaStatusServiceChannel] channel open request 
+[2026-03-10 16:41:08.202901] [0x000079147bfff6c0] [info]    [OpenAuto] [MediaStatusService] open request, priority: 0
+[2026-03-10 16:41:08.202927] [0x000079147bfff6c0] [info]    [OpenAuto] [MediaStatusService] open status: 0
+[2026-03-10 16:41:08.202953] [0x000079147bfff6c0] [info]    [AaSdk] [MediaStatusServiceChannel] channel open response 
+[2026-03-10 16:41:08.203360] [0x000079147bfff6c0] [info]    [OpenAuto] [InputService] open request, priority: 0
+[2026-03-10 16:41:08.203395] [0x000079147bfff6c0] [info]    [OpenAuto] [InputService] open status: 0
+[2026-03-10 16:41:08.203870] [0x000079147bfff6c0] [info]    [OpenAuto] [SensorService] sensor start request, type: 13
+[2026-03-10 16:41:08.204743] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] setup request, config index: 3
+[2026-03-10 16:41:08.204791] [0x000079147bfff6c0] [info]    [OpenAuto] [GSTVideoOutput] init
+[2026-03-10 16:41:08.204945] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] setup status: 2
+[2026-03-10 16:41:08.205357] [0x000079147bfff6c0] [info]    [OpenAuto] [InputService] binding request, scan codes count: 0
+[2026-03-10 16:41:08.205419] [0x000079147bfff6c0] [info]    [OpenAuto] [InputDevice] start.
+[2026-03-10 16:41:08.205451] [0x000079147bfff6c0] [info]    [OpenAuto] [InputService] binding request, status: 0
+[2026-03-10 16:41:08.205654] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] video focus indication.
+[2026-03-10 16:41:08.205938] [0x000079147bfff6c0] [info]    [OpenAuto] [SensorService] sensor start request, type: 10
+[2026-03-10 16:41:08.209851] [0x000079147bfff6c0] [info]    [OpenAuto] [VideoService] start indication, session: 0
+RtAudio pulse: [2026-03-10 16:41:08.369839] [0x000079147b7fe6c0] [info]    [OpenAuto] [AudioService] open status: 0, channel: MEDIA_AUDIO
+_NOT_ running realtime scheduling
+[2026-03-10 16:41:08.371732] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioService] setup request, channel: MEDIA_AUDIO, config index: 1
+[2026-03-10 16:41:08.371791] [0x000079147bfff6c0] [info]    [OpenAuto] [AudioService] setup status: 2, channel: MEDIA_AUDIO
+[2026-03-10 16:41:08.383002] [0x00007914bbfea940] [info]    [OpenAuto] [GSTVideoOutput] Resizing to video container
+[2026-03-10 16:41:08.558811] [0x0000791473fff6c0] [info]    [OpenAuto] [AudioService] open status: 0, channel: SPEECH_AUDIO
+RtAudio pulse: _NOT_ running realtime scheduling
+[2026-03-10 16:41:08.560343] [0x0000791473fff6c0] [info]    [OpenAuto] [AudioService] setup request, channel: SPEECH_AUDIO, config index: 1
+[2026-03-10 16:41:08.560401] [0x0000791473fff6c0] [info]    [OpenAuto] [AudioService] setup status: 2, channel: SPEECH_AUDIO
+RtAudio pulse: [2026-03-10 16:41:08.681987] [0x000079147affd6c0] [info]    [OpenAuto] [AudioService] open status: 0, channel: SYSTEM_AUDIO
+_NOT_ running realtime scheduling
+[2026-03-10 16:41:08.684687] [0x000079147affd6c0] [info]    [OpenAuto] [AudioService] setup request, channel: SYSTEM_AUDIO, config index: 1
+[2026-03-10 16:41:08.684812] [0x000079147affd6c0] [info]    [OpenAuto] [AudioService] setup status: 2, channel: SYSTEM_AUDIO
+[2026-03-10 16:41:09.033891] [0x000079147affd6c0] [info]    [OpenAuto] [VideoService] video focus request, display index: 0, focus mode: 1, focus reason: 0
+[2026-03-10 16:41:09.034020] [0x000079147affd6c0] [info]    [OpenAuto] [VideoService] video focus indication.
+[2026-03-10 16:41:09.678785] [0x000079147b7fe6c0] [info]    [OpenAuto] [GSTVideoOutput] Intercepted and replaced h264 header
+[2026-03-10 16:41:10.149880] [0x000079143e1fe6c0] [info]    [OpenAuto] [GSTVideoOutput] Video Width: 800
+[2026-03-10 16:41:10.150017] [0x000079143e1fe6c0] [info]    [OpenAuto] [GSTVideoOutput] Video Height: 480

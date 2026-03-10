@@ -30,18 +30,19 @@ FetchContent_Declare(
 set(SKIP_BUILD_PROTOBUF ON)
 FetchContent_MakeAvailable(aasdk)
 
+# --- Python Bindings ---
 pybind11_add_module(nemo_head_unit
     src/binding.cpp
     src/crypto/crypto_manager.cpp
     src/usb/libusb_context.cpp
     src/usb/usb_hub_manager.cpp
 )
-
 target_include_directories(nemo_head_unit PRIVATE 
     ${LIBUSB_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    # Aggiunge la directory dei sorgenti di aasdk per risolvere gli #include
+    ${aasdk_SOURCE_DIR}/include
 )
-
 target_link_libraries(nemo_head_unit PRIVATE
     aasdk
     Boost::system

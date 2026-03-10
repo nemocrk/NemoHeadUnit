@@ -1,0 +1,457 @@
+03-10 14:56:17.622 16890 16890 I CAR.SETUP.LITE: Using FirstActivity bypass from intent: Intent { act=android.hardware.usb.action.USB_ACCESSORY_HANDSHAKE flg=0x11000010 xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarUsbReceiverTPlus (has extras) }
+03-10 14:56:17.628 16890 16890 I CAR.SETUP.LITE: Checking preSetup required: gearheadUpToDate=true
+03-10 14:56:17.629 16890 16890 I CAR.SETUP.FRX.LITE: Sending presetup finish request
+03-10 14:56:17.629 16890 16890 I CAR.SETUP.LITE: Starting handoff.
+03-10 14:56:17.629 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 20, detail OptionalInt.empty, CAR_SETUP_ACCESSORY_CONNECTED, at 158338408 
+03-10 14:56:17.629 16890 16890 I CAR.SETUP.LITE: Starting carService: com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl
+03-10 14:56:17.635 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 21, detail OptionalInt.empty, CAR_SETUP_STARTED_SETUP_SERVICE, at 158338413 
+03-10 14:56:17.644 16890 16890 I CAR.FIRST.LITE: bypassFirstActivity enabled
+03-10 14:56:17.647 16890 16890 I CAR.SETUP.LITE: Using FirstActivity bypass from intent: Intent { act=android.hardware.usb.action.USB_ACCESSORY_ATTACHED flg=0x11800000 xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.FirstActivityImpl (has extras) }
+03-10 14:56:17.648 16890 16890 I CAR.SETUP.LITE: Checking preSetup required: gearheadUpToDate=true
+03-10 14:56:17.648 16890 16890 I CAR.SETUP.FRX.LITE: Sending presetup finish request
+03-10 14:56:17.648 16890 16890 I CAR.SETUP.LITE: Starting handoff.
+03-10 14:56:17.648 16890 16890 I CAR.SETUP.LITE: Starting carService: com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl
+03-10 14:56:17.656 16890 16890 I CAR.SETUP.SERVICE.LITE: onCreate
+03-10 14:56:17.657 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 25, detail OptionalInt.empty, CAR_SETUP_ACCESSORY_CONNECTED, at 158338430 
+03-10 14:56:17.659 16890 16890 I CAR.SETUP.SERVICE.LITE: started foreground service
+03-10 14:56:17.660 16890 16890 I CAR.SERVICE.USBMON.LITE: Starting USB monitor
+03-10 14:56:17.660 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 28, detail OptionalInt.empty, CAR_SETUP_STARTED_SETUP_SERVICE, at 158338433 
+03-10 14:56:17.661 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 29, detail OptionalInt.empty, CAR_SETUP_SERVICE_CREATE, at 158338439 
+03-10 14:56:17.667 16890 16890 I CAR.TOKEN: Connecting qcy@c4a7806 using class qng@174517492/class qnl@116072135 (cx attempt 1)
+03-10 14:56:17.670 16890 16890 I CAR.SERVICE.USBMON.LITE: Port status changed for UsbPort{id=port0, supportedModes=dual, supportedContaminantProtectionModes=4, supportsEnableContaminantPresenceProtection=false, supportsEnableContaminantPresenceDetection=true, supportsComplianceWarnings=true: UsbPortStatus{connected=true, currentDataRole=2, currentPowerRole=2, supportedRoleCombinations=272, currentMode=1}
+03-10 14:56:17.672 16890 16890 I CAR.SERVICE.USBMON.LITE: Usb status changed to: UsbState{configured=true, connected=true, dataUnlocked=false, functionAccessory=true, functionAdb=false, functionAudioSource=false, functionMtp=false, functionPtp=false}
+03-10 14:56:17.674 16890 16890 I CAR.SETUP.SERVICE.LITE: started foreground service
+03-10 14:56:17.674 16890 16890 I CAR.SETUP.SERVICE.LITE: onStartCommand (id=1): Intent { act=android.hardware.usb.action.USB_ACCESSORY_ATTACHED xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl (has extras) }
+03-10 14:56:17.677 16890 16890 I CAR.SETUP.SERVICE.LITE: Creating ConnectionHandoffStateManager
+03-10 14:56:17.677 16890 16890 I CAR.STARTUP.LITE: Starting handoff interest checks
+03-10 14:56:17.677 16890  1669 I CAR.STARTUP.LITE: Checking handoff interest for component com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService
+03-10 14:56:17.678 16890  1669 I CAR.STARTUP.LITE: Successfully bound to component com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService
+03-10 14:56:17.679 16890 16890 I CAR.SETUP.SERVICE.LITE: started foreground service
+03-10 14:56:17.679 16890 16890 I CAR.SETUP.SERVICE.LITE: onStartCommand (id=2): Intent { act=android.hardware.usb.action.USB_ACCESSORY_ATTACHED xflg=0x4 cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompat.CarSetupServiceImpl (has extras) }
+03-10 14:56:17.679 16890 16890 I CAR.SETUP.SERVICE.LITE: Already connected; ignoring connection request
+03-10 14:56:17.687 16890 16890 I CAR.STARTUP.LITE: Service available
+03-10 14:56:17.697 16890 16890 I CAR.TOKEN: Successfully connected qno@869df78 using class qng@174517492/class qnl@116072135 (cx attempt 1)
+03-10 14:56:17.697 16890 16890 I CAR.TOKEN: Token caller not specified, so skipping telemetry logging. Process: com.google.android.projection.gearhead:car
+03-10 14:56:17.699 16890  1669 I GH.CAR  : isInterestedInHandoff - initialized
+03-10 14:56:17.699 16890  1669 I GH.CAR  : Interested in handoff 4331109864398946810: true
+03-10 14:56:17.700 16890 16890 W WakeLock: *gcore*:CAR.FIRST release without a matched acquire!
+03-10 14:56:17.700 16890 16890 W WakeLock: *gcore*:CAR.FIRST counter does not exist
+03-10 14:56:17.700 16890  1669 I CAR.STARTUP.LITE: onStartupServiceAvailable - IStartup interest is [INVALID: format=%b, type=ylq, value=true] for com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService
+03-10 14:56:17.700 16890  1669 I CAR.SETUP.SERVICE.LITE: Interested in handoff com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService [INVALID: format=%b, type=ylq, value=true]
+03-10 14:56:17.700 16890  1669 I CAR.SETUP.SERVICE.LITE: Interested in handoff - start handoff
+03-10 14:56:17.701 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 35, detail OptionalInt.empty, CAR_SETUP_SERVICE_SET_STATE_CONNECTING, at 158338458 
+03-10 14:56:17.711 16890  1669 I CAR.STARTUP.LITE: Handing off session 4331109864398946810 (1)
+03-10 14:56:17.712 16890  1669 I GH.CAR  : Handoff session 4331109864398946810 (connection type: 1)
+03-10 14:56:17.712 16890  1669 I GH.CAR  : Projection runs in proxy. Update iCar to the proxy.
+03-10 14:56:17.718 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 38, detail OptionalInt.empty, CAR_SETUP_SERVICE_ALREADY_STARTED, at 158338463 
+03-10 14:56:17.742 16890  7554 I CAR.GAL.SECURITY.LITE: Successfully initialized SSL context for protocol: TLSv1.2 using provider: GmsCore_OpenSSL
+03-10 14:56:17.743 16890  7554 I CAR.GAL.GAL.LITE: Creating per-channel priority writer thread.
+03-10 14:56:17.744 16890  7554 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 0
+03-10 14:56:17.745 16890  7554 I GH.CAR.ProxyEP.LITE: Proxy created for channel 0
+03-10 14:56:17.747 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 44, detail OptionalInt.empty, CAR_CONNECTION_CDM_REQUESTED, at 158338499 
+03-10 14:56:17.747 16890 16890 I CAR.STARTUP.LITE: Handoff status true
+03-10 14:56:17.747 16890  1669 I CAR.SETUP.SERVICE.LITE: handoff initiated: true
+03-10 14:56:17.753 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 45, detail OptionalInt.empty, CAR_CONNECTION_CDM_APPROVED, at 158338511 
+03-10 14:56:20.694 16890  1672 I CAR.GAL.GAL.LITE: Car requests protocol version ikl[majorVersion=1, minorVersion=1]
+03-10 14:56:20.694 16890  1672 I CAR.GAL.GAL.LITE: Requested protocol version ikl[majorVersion=1, minorVersion=1], negotiated protocol version ikl[majorVersion=1, minorVersion=7] (STATUS_SUCCESS)
+03-10 14:56:20.722 16890  1672 W CAR.GAL.SECURITY.LITE: Phone will wait for car to send more SSL handshake data
+03-10 14:56:20.722 16890  1672 I CAR.GAL.SECURITY.LITE: Final result: java.nio.HeapByteBuffer[pos=0 lim=2347 cap=2347]
+03-10 14:56:20.776 16890  1672 I CAR.GAL.SECURITY.LITE: Peer certificate subject name: OU=01,O=JVC Kenwood,L=Hachioji,ST=Tokyo,C=JP
+03-10 14:56:20.776 16890  1672 I CAR.GAL.SECURITY.LITE: Peer certificate serial number: 27 (0x1b)
+03-10 14:56:20.776 16890  1672 I CAR.GAL.SECURITY.LITE: Valid Times:
+03-10 14:56:20.776 16890  1672 I CAR.GAL.SECURITY.LITE:     notBefore= Fri Jul 04 02:00:00 GMT+02:00 2014
+03-10 14:56:20.776 16890  1672 I CAR.GAL.SECURITY.LITE:     notAfter= Sat Apr 29 16:28:38 GMT+02:00 2045
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: cakewalkMinimumRequirements=[INVALID: format=%b, type=ylq, value=true], isSupportedOsVersion=[INVALID: format=%b, type=ylq, value=true],  appsUpToDate=[INVALID: format=%b, type=ylq, value=true]
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: shouldSkipLegacyFrxForCakewalk true, min requirements met
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: Deciding where to run FRX (GMS vs. GH):
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: isFrxRequired=true
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: shouldRunLegacyFrx=false
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: isOsCompatible=true
+03-10 14:56:20.821 16890 16890 I CAR.FRX.CHECKS: areApplicationsFullyUpdated=true
+03-10 14:56:20.823 16890 16890 I CAR.STARTUP.LITE: Handoff service discovery complete 9
+03-10 14:56:20.823 16890  1669 I CAR.SETUP.SERVICE.LITE: Handoff complete. Interested component: com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService. Success: true. isCarAudioServiceMigrationEnabled: true. gearheadSuppliedSkipLegacyFrxValue: true.
+03-10 14:56:20.823 16890  1669 I CAR.SETUP.SERVICE.LITE: Handoff success with 9
+03-10 14:56:20.825 16890  1669 I CAR.SETUP.SERVICE.LITE: CarInfo authorization: UNKNOWN
+03-10 14:56:20.831 16890  1669 I CAR.SETUP.LITE: Triggering FRX: car connection is not allowed
+03-10 14:56:20.832 16890  1669 I CAR.SETUP.SERVICE.LITE: gearheadSuppliedSkipLegacyFrxValue: true
+03-10 14:56:20.839 16890  1669 I CAR.SETUP.LITE: cakewalkMinimumRequirements=[INVALID: format=%b, type=ylq, value=true], isSupportedOsVersion=[INVALID: format=%b, type=ylq, value=true],  appsUpToDate[INVALID: format=%b, type=ylq, value=true],  hasNoMissingPermissions=[INVALID: format=%b, type=ylq, value=true],  deviceIsSupportedOrAllowList=[INVALID: format=%b, type=ylq, value=true]
+03-10 14:56:20.839 16890  1669 I CAR.SETUP.LITE: skipViaGearheadSuppliedSkipLegacyFrxValue
+03-10 14:56:20.839 16890  1669 I CAR.SETUP.LITE: shouldSkipLegacyFrxForCakewalk [INVALID: format=%b, type=ylq, value=true]
+03-10 14:56:20.844 16890  1669 I CAR.SETUP.SERVICE.LITE: Starting transfer for handoff.
+03-10 14:56:20.844 16890  1669 I CAR.SETUP.SERVICE.LITE: isCarAudioServiceMigrationEnabled: true
+03-10 14:56:20.862 16890 16890 I CAR.SERVICE: Car connection state changed: DISCONNECTED->CONNECTING
+03-10 14:56:20.864 16890 16890 I CAR.POOL_VIDEO: Initializing managed buffer pools with direct buffers
+03-10 14:56:20.864 16890 16890 I CAR.AUTH: Package com.google.android.projection.gearhead for uid 10143: isGoogleSigned = [INVALID: format=%b, type=ylq, value=true], isPackageAllowed = [INVALID: format=%b, type=ylq, value=false]
+03-10 14:56:20.864 16890 16890 E CAR.AUTH: Call from UID 10143 is not allowed.
+03-10 14:56:20.869 16890 16890 I CAR.SERVICE.LITE: Overriding delegate with new Lite CarServiceBinder, sessionId: 4331109864398946810, connectionType: 1
+03-10 14:56:20.869 16890 16890 I CAR.SERVICE.LITE: Updating receiver callback and sessionId for connectionType: 1
+03-10 14:56:20.872 16890  1745 I GH.CAR  : Resume session 4331109864398946810
+03-10 14:56:20.873 16890 16890 I CAR.STARTUP.LITE: Resume complete with status true
+03-10 14:56:20.873 16890  1669 I CAR.SETUP.SERVICE.LITE: Car setup no longer needed
+03-10 14:56:20.873 16890  1669 I CAR.SETUP.SERVICE.LITE: tearDown
+03-10 14:56:20.873 16890  1669 I CAR.SETUP.SERVICE.LITE: Tearing down car connection
+03-10 14:56:20.874 16890  1669 I CAR.SETUP.LITE: Setup finished: supported=true
+03-10 14:56:20.878 16890  1669 I CAR.SETUP.SERVICE.LITE: stopped foreground service id 2
+03-10 14:56:20.878 16890 16890 I CAR.GAL.SECURITY.LITE: Successfully initialized SSL context for protocol: TLSv1.2 using provider: GmsCore_OpenSSL
+03-10 14:56:20.879 16890 16890 I CAR.GAL.GAL.LITE: Adding service (Service id=2 type=SensorSourceService {sensors=[type=13,type=10,] locationCharacterization=0 fuelType=[] evConnectorType=[]} )
+03-10 14:56:20.879 16890 16890 I CAR.GAL.GAL.LITE: onChannelOpened: 0
+03-10 14:56:20.879 16890 16890 I CAR.SETUP.SERVICE.LITE: onDestroy
+03-10 14:56:20.879 16890 16890 I CAR.SETUP.SERVICE.LITE: tearDown
+03-10 14:56:20.883 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 59, detail OptionalInt.empty, CAR_SETUP_SERVICE_SET_STATE_NOT_CONNECTED, at 158341662 
+03-10 14:56:20.893 16890 16890 I CAR.SERVICE.LITE: started foreground service
+03-10 14:56:20.893 16890 16890 I CAR.SERVICE.LITE: Car connection state changed: DISCONNECTED->CONNECTING
+03-10 14:56:20.896 16890 16890 I CAR.LITE.LITE: Start required services in lite 1
+03-10 14:56:20.896 16890  1745 I CAR.CONMAN.LITE: Connection start services in conman
+03-10 14:56:20.896 16890  1745 I CAR.XFER.LITE: CAR_SERVICE_LITE Start executor and read messages
+03-10 14:56:20.896 16890  1745 I GH.CAR  : Start required services with types 4331109864398946810
+03-10 14:56:20.898 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 60, detail OptionalInt.empty, CAR_SETUP_SERVICE_STATE_ALREADY_NOT_CONNECTED_IN_TEARDOWN, at 158341663 
+03-10 14:56:20.906 16890 16890 I CAR.AUDIO: force single channel capturing:false
+03-10 14:56:20.906 16890 16890 I CAR.AUDIO: Select audio config: 0 for channel: MEDIA
+03-10 14:56:20.906 16890 16890 I CAR.AUDIO.CHANNEL: enabling stream: SYSTEM, had focus: false
+03-10 14:56:20.910 16890  1754 I CAR.AUDIO.AFM: Requesting initial Android audio focus
+03-10 14:56:20.913 16890  1753 I CAR.AUDIO.CHANNEL: waitForStreamToStop: MEDIA, wait for ack: true
+03-10 14:56:20.913 16890  1753 I CAR.AUDIO.CHANNEL: waitForStreamToStop: TTS, wait for ack: true
+03-10 14:56:20.913 16890  1754 I CAR.AUDIO.FOCUS: Sending AUDIO_FOCUS_RELEASE to HU for app null due to Android focus change: LOSS
+03-10 14:56:20.913 16890  1754 I CAR.AUDIO.FOCUS: Send focus request to HU: AUDIO_FOCUS_RELEASE, attempt#: 1
+03-10 14:56:20.913 16890  1754 I CAR.GAL.AUDIO.LITE: sent audio focus request: AUDIO_FOCUS_RELEASE
+03-10 14:56:20.913 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 61, detail OptionalInt.empty, CAR_SETUP_SERVICE_DESTROY, at 158341663 
+03-10 14:56:20.917 16890  1672 I CAR.GAL.AUDIO.LITE: Got audio focus state from car:AUDIO_FOCUS_STATE_LOSS
+03-10 14:56:20.918 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 62, detail OptionalInt.empty, CAR_SERVICE_ENDPOINTS_STARTING, at 158341677 
+03-10 14:56:20.920 16890 16890 I CAR.AUDIO: 48Khz guidance is not supported in GAL 1.5 and below
+03-10 14:56:20.920 16890 16890 I CAR.AUDIO: Select audio config: 0 for channel: TTS
+03-10 14:56:20.920 16890  1672 I CAR.AUDIO.FOCUS: Received focus change from HU: AUDIO_FOCUS_STATE_LOSS, unsolicited: false
+03-10 14:56:20.920 16890  1754 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=AUDIO_FOCUS_RELEASE, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=false, pendingRequest=NONE
+03-10 14:56:20.920 16890 16890 I CAR.AUDIO.CHANNEL: enabling stream: SYSTEM, had focus: true
+03-10 14:56:20.920 16890  1754 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:56:20.921 16890  1754 I CAR.AUDIO.AFM: Invalidate audio focus stack monitor due to car audio focus change
+03-10 14:56:20.921 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:56:20.921 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:56:20.921 16890 16890 W CAR.AUDIO: Unsupported stream type: 1
+03-10 14:56:20.921 16890  1754 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:56:20.921 16890 16890 I CAR.AUDIO: 48Khz guidance is not supported in GAL 1.5 and below
+03-10 14:56:20.921 16890 16890 I CAR.AUDIO: Select audio config: 0 for channel: SYSTEM
+03-10 14:56:20.921 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:56:20.921 16890 16890 W CAR.AUDIO.Policy: Unsupported stream type: 1
+03-10 14:56:20.921 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:56:20.922 16890 16890 I CAR.AUDIO.CHANNEL: enabling stream: SYSTEM, had focus: true
+03-10 14:56:20.922 16890 16890 I GH.CAR.VIDEO: The videoCodecType to be used is: 3
+03-10 14:56:20.922 16890 16890 W CAR.INPUT: No touchpad found. Using default threshold.
+03-10 14:56:20.922 16890 16890 W CAR.INPUT: No touchpad found. Using default threshold.
+03-10 14:56:20.922 16890 16890 I CAR.INPUT: Discovered input for display 0 with service 1: CarUiInfo (hasRotaryController: false, touchscreenType: 1, hasSearchButton: false, hasTouchpadForUiNavigation: false, hasDpad: false, isTouchpadUiAbsolute: false, touchpadMoveThresholdPx: 48, touchpadMultimoveThresholdPx: 64)
+03-10 14:56:20.923 16890 16890 I CAR.SENSOR: setDisplaySourceService Setting DisplaySourceService for DefaultSensorListener
+03-10 14:56:20.923 16890 16890 I CAR.XFER.LITE: CAR_SERVICE_PROXY Start executor and read messages
+03-10 14:56:20.927 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 7
+03-10 14:56:20.927 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 7
+03-10 14:56:20.928 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 4
+03-10 14:56:20.928 16890 16890 I CAR.GAL.GAL.LITE: Creating AudioPerChannelQueue for channel 4
+03-10 14:56:20.929 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 5
+03-10 14:56:20.929 16890 16890 I CAR.GAL.GAL.LITE: Creating AudioPerChannelQueue for channel 5
+03-10 14:56:20.929 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 6
+03-10 14:56:20.929 16890 16890 I CAR.GAL.GAL.LITE: Creating AudioPerChannelQueue for channel 6
+03-10 14:56:20.930 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 2
+03-10 14:56:20.930 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 2
+03-10 14:56:20.931 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 3
+03-10 14:56:20.931 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 3
+03-10 14:56:20.931 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 9
+03-10 14:56:20.931 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 9
+03-10 14:56:20.931 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 10
+03-10 14:56:20.931 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 10
+03-10 14:56:20.931 16890 16890 I GH.CAR.ProxyEP.LITE: Proxy created for channel 1
+03-10 14:56:20.931 16890 16890 I CAR.GAL.GAL.LITE: Creating PerChannelQueue for channel 1
+03-10 14:56:20.932 16890  1759 I CAR.GAL.GAL.LITE: onChannelOpened: 7
+03-10 14:56:20.932 16890 16890 I CAR.AUDIO: Call state change: IDLE(0)
+03-10 14:56:20.935 16890  1762 I CAR.GAL.GAL.LITE: onChannelOpened: 2
+03-10 14:56:20.935 16890  1744 I CAR.SENSOR: Requested sensor 10 not supported
+03-10 14:56:20.935 16890  1751 I CAR.GAL.GAL.LITE: onChannelOpened: 2
+03-10 14:56:20.936 16890 16890 I CAR.LITE.LITE: Car services started
+03-10 14:56:20.942 16890  1672 I CAR.GAL.GAL.LITE: onChannelOpened: 9
+03-10 14:56:20.942 16890  1763 I CAR.GAL.GAL.LITE: onChannelOpened: 3
+03-10 14:56:20.944 16890  1672 I CAR.GAL.GAL.LITE: onChannelOpened: 10
+03-10 14:56:20.944 16890  1763 I CAR.GAL.GAL.LITE: onChannelOpened: 1
+03-10 14:56:20.946 16890  1763 I CAR.GAL.VIDEO.LITE: Initialize video source flow controller with max unacked allowed: 1
+03-10 14:56:20.947 16890  1763 I CAR.GAL.VIDEO.LITE: configMessage, MAX_UNACK: 1
+03-10 14:56:20.947 16890  1763 I CAR.VIDEO: AVC Level 0x10000 fps 60 pixel 8294400
+03-10 14:56:20.947 16890  1763 I CAR.VIDEO: Choosing codec c2.exynos.h264.encoder
+03-10 14:56:20.948 16890  1763 I CAR.GAL.VIDEO.LITE: VideoFocus gained unsolicited=false
+03-10 14:56:20.948 16890  1763 I CAR.VIDEO: Video focus gained for display type: 0.
+03-10 14:56:20.948 16890  1763 I CAR.GAL.VIDEO.LITE: Input Focus Gained
+03-10 14:56:20.948 16890  1756 I CAR.VIDEO: AVC Level 0x10000 fps 60 pixel 8294400
+03-10 14:56:20.948 16890  1756 I CAR.VIDEO: Choosing codec c2.exynos.h264.encoder
+03-10 14:56:20.949 16890  1744 I CAR.SENSOR: Requested sensor 2 not supported
+03-10 14:56:20.949 16890  1762 I CAR.SENSOR: getDayNightModeUserSetting DisplaySourceService available
+03-10 14:56:20.949 16890  1762 I CAR.SENSOR: getDayNightModeUserSetting getting day night mode from CarServiceSettings: car
+03-10 14:56:20.949 16890  1762 I CAR.SENSOR: isNightModeEnabled DAY_NIGHT_MODE_VAL_CAR returning car day night sensor night=true
+03-10 14:56:20.949 16890  1762 I CAR.SENSOR: getDayNightModeUserSetting DisplaySourceService available
+03-10 14:56:20.949 16890  1756 I CAR.MEDIA.VIDEO: wait for encoder init [Video EncodingThread.]
+03-10 14:56:20.949 16890  1762 I CAR.SENSOR: getDayNightModeUserSetting getting day night mode from CarServiceSettings: car
+03-10 14:56:20.949 16890  1762 I CAR.SENSOR: updateDayNightMode(source=SENSOR): userSetting=car, isNightMode=true
+03-10 14:56:20.949 16890  1762 I CAR.SYS : setting night mode true
+03-10 14:56:20.950 16890 16890 I CAR.SERVICE: Delaying day/night mode update because projection has not started.
+03-10 14:56:20.950 16890  1744 I CAR.SENSOR: Requested sensor 7 not supported
+03-10 14:56:20.950 16890  1744 I CAR.SENSOR: Requested sensor 6 not supported
+03-10 14:56:20.951 16890  1751 W CAR.SENSOR.LITE: sensor event while no listener, sensor:11 [CONTEXT ratelimit_period="1 MINUTES" skipped=1 ]
+03-10 14:56:21.017 16890  1756 I CAR.MEDIA.VIDEO: encoder init done [Video EncodingThread.]
+03-10 14:56:21.021 16890  1761 I CAR.GAL.GAL.LITE: onChannelOpened: 4
+03-10 14:56:21.022 16890  1761 I CAR.GAL.AUDIO.LITE: Creating MediaSourceFlowController for AUDIO_STREAM_MEDIA stream type with throttling disabled: false, maxHuAudioBufferFrames: 2147483647, maxUnackedFramesAllowed: 1
+03-10 14:56:21.022 16890  1761 I CAR.AUDIO.MEDIA.LITE: configMessage, MAX_UNACK: 1
+03-10 14:56:21.022 16890  1761 I CAR.AUDIO.MEDIA: Flag that enables save audio developer setting: false
+03-10 14:56:21.023 16890  1761 I CAR.AUDIO.CHANNEL: Mark stream ready: MEDIA
+03-10 14:56:21.023 16890  1761 I CAR.AUDIO.MEDIA: AudioSourceService is ready with stream type: MEDIA
+03-10 14:56:21.023 16890  1761 I CAR.AUDIO.MEDIA: startSystemSoundStreaming MEDIA
+03-10 14:56:21.023 16890  1754 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=null, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=true, pendingRequest=NONE
+03-10 14:56:21.023 16890  1754 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:56:21.023 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:56:21.023 16890  1784 I CAR.AUDIO.MEDIA: Start capturing system audio with sampling rate: 48000, buffer size: 65536, expected frame duration: 42.666667 ms
+03-10 14:56:21.023 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:56:21.024 16890  1784 I CAR.AUDIO.MEDIA: Creating audio record
+03-10 14:56:21.024 16890  1754 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:56:21.024 16890  1784 I CAR.AUDIO.Policy: Registering audio policy
+03-10 14:56:21.024 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:56:21.024 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:56:21.026 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for TEMPLATE not defined [com.google.android.googlequicksearchbox]
+03-10 14:56:21.028 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:56:21.029 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:56:21.062 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.google.android.bluetooth]
+03-10 14:56:21.066 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.google.android.youtube]
+03-10 14:56:21.067 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.alphainventor.filemanager]
+03-10 14:56:21.068 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.amazon.avod.thirdpartyclient]
+03-10 14:56:21.069 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.brave.browser]
+03-10 14:56:21.070 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.microsoft.emmx]
+03-10 14:56:21.071 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.microsoft.skydrive]
+03-10 14:56:21.073 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [com.technogym.tgapp]
+03-10 14:56:21.075 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [it.atm.appmobile]
+03-10 14:56:21.079 16890  1764 W CAR.VALIDATOR: Package DENIED; Uses for MEDIA not defined [it.telecomitalia.centodiciannove]
+03-10 14:56:21.108 16890  1761 I CAR.GAL.GAL.LITE: onChannelOpened: 5
+03-10 14:56:21.110 16890  1761 I CAR.GAL.AUDIO.LITE: Creating MediaSourceFlowController for AUDIO_STREAM_GUIDANCE stream type with throttling disabled: false, maxHuAudioBufferFrames: 2147483647, maxUnackedFramesAllowed: 1
+03-10 14:56:21.110 16890  1761 I CAR.AUDIO.TTS.LITE: configMessage, MAX_UNACK: 1
+03-10 14:56:21.110 16890  1761 I CAR.AUDIO.TTS: Flag that enables save audio developer setting: false
+03-10 14:56:21.111 16890  1761 I CAR.AUDIO.CHANNEL: Mark stream ready: TTS
+03-10 14:56:21.111 16890  1761 I CAR.AUDIO.TTS: AudioSourceService is ready with stream type: TTS
+03-10 14:56:21.111 16890  1761 I CAR.AUDIO.TTS: startSystemSoundStreaming TTS
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=null, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=true, pendingRequest=NONE
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:56:21.112 16890  1803 I CAR.AUDIO.TTS: Start capturing system audio with sampling rate: 16000, buffer size: 16384, expected frame duration: 64.000000 ms
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:56:21.112 16890  1803 I CAR.AUDIO.TTS: Creating audio record
+03-10 14:56:21.112 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:56:21.114 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:56:21.114 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:56:21.150 16890  1784 I CAR.BT.SVC.LITE: Routing media audio via device type 0
+03-10 14:56:21.213 16890  1761 I CAR.GAL.GAL.LITE: onChannelOpened: 6
+03-10 14:56:21.214 16890 16890 I CAR.CONMAN.LITE: onStartRequiredServicesComplete: success=true
+03-10 14:56:21.220 16890  1761 I CAR.GAL.AUDIO.LITE: Creating MediaSourceFlowController for AUDIO_STREAM_SYSTEM_AUDIO stream type with throttling disabled: false, maxHuAudioBufferFrames: 2147483647, maxUnackedFramesAllowed: 1
+03-10 14:56:21.220 16890  1761 I CAR.AUDIO.TTS.LITE: configMessage, MAX_UNACK: 1
+03-10 14:56:21.220 16890  1761 I CAR.AUDIO.SYSTEM: Flag that enables save audio developer setting: false
+03-10 14:56:21.224 16890 16890 I CAR.SYS : Successfully set automotive projection.
+03-10 14:56:21.227 16890  1761 I CAR.AUDIO.CHANNEL: Mark stream ready: SYSTEM
+03-10 14:56:21.227 16890  1761 I CAR.AUDIO.SYSTEM: AudioSourceService is ready with stream type: SYSTEM
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.FOCUS: Handling CarAudioFocusEvent from HU: packageName=null, audioFocusRequestType=null, audioFocusStateType=AUDIO_FOCUS_STATE_LOSS, unsolicitedResponse=false, gearheadForcedResponse=true, pendingRequest=NONE
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.FOCUS: changeAndroidFocus: true
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: MEDIA, had focus: false
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.CHANNEL: disabling stream: TTS, had focus: false
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.CHANNEL: handleStreamFocusChange old state media: false tts: false, new state media: false tts: false
+03-10 14:56:21.228 16890 16890 I CAR.WM.FrameRateLimit: Frame rate change. 0 fps -> 60 fps
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 1 did not request bottom half
+03-10 14:56:21.228 16890  1754 I CAR.AUDIO.CHANNEL: Audio stream 0 did not request bottom half
+03-10 14:56:21.237 16890  1803 I CAR.BT.SVC.LITE: Routing media audio via device type 0
+03-10 14:56:21.341 16890 16890 I CAR.CAM : Using IME component ComponentInfo{com.google.android.projection.gearhead/com.google.android.projection.gearhead.input.TouchInputMethodService}
+03-10 14:56:21.351 16890 16890 I CAR.WM.FrameRateLimit: Frame rate change. 60 fps -> 30 fps
+03-10 14:56:21.351 16890 16890 I CAR.WM  : Setting display configuration id for CarDisplayId{displayId=0} to d489664f-ab80-4aaa-9527-1a193312494f
+03-10 14:56:21.351 16890 16890 I CAR.SERVICE: Car connection state changed: CONNECTING->PREFLIGHT
+03-10 14:56:21.356 16890 16890 I CAR.LITE.LITE: Startup complete:true
+03-10 14:56:21.356 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:56:21.356 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:56:21.356 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusLoss. lossReceived: LOSS_TR_CAN_DUCK, wasNotified: false, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:56:21.356 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:56:21.356 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN_TR_MAY_DUCK, requestResult: GRANTED, clientId: android.media.AudioManager@571f4b0, packageName: com.android.systemui, clientUid: 10217
+03-10 14:56:21.356 16890 16890 I CAR.AUDIO.AFM: Not handling focus event for notifications.
+03-10 14:56:21.357 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:shared:imp(0), reason(0), reason_pid(0), lru(0), uid(0)->imp(300), reason(0), reason_pid(0), lru(0), uid(10143)
+03-10 14:56:21.358 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:car:imp(0), reason(0), reason_pid(0), lru(0), uid(0)->imp(125), reason(0), reason_pid(0), lru(0), uid(10143)
+03-10 14:56:21.358 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:projection:imp(0), reason(0), reason_pid(0), lru(0), uid(0)->imp(125), reason(2), reason_pid(16890), lru(0), uid(10143)
+03-10 14:56:21.359 28588   938 D CAR.CLIENT.PLS: onProjectionStart on binder thread
+03-10 14:56:21.360 28588 28588 D CAR.CLIENT.PLS: Projection start
+03-10 14:56:21.361 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.361 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarWindowManager for: CarDisplayId{displayId=0}
+03-10 14:56:21.363 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.363 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplayManager
+03-10 14:56:21.363 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.365 16890 16890 I CAR.SERVICE.LITE: Car connection state changed: CONNECTING->CONNECTED
+03-10 14:56:21.366 31567  1855 D CAR.CLIENT.PLS: onProjectionStart on binder thread
+03-10 14:56:21.366 31567 31567 D CAR.CLIENT.PLS: Projection start
+03-10 14:56:21.366 31567 31567 D CAR.CLIENT: onClientConnected() qng@1e77933, registering localCarConnectionListener qmz@6ee54f0 with multiplex listener qns@2fb7a69
+03-10 14:56:21.367 31567  1855 D CAR.CLIENT.PLS: onPreflightStart on binder thread
+03-10 14:56:21.367 31567 31567 D CAR.CLIENT: Registering multiplex listener qns@2fb7a69 with car service
+03-10 14:56:21.367 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.367 31567 31567 D CAR.CLIENT.PLS: Preflight start
+03-10 14:56:21.367 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.368 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.368 31567  1855 D CAR.CLIENT.PLS: onProjectionReady on binder thread
+03-10 14:56:21.368 31567 31567 D CAR.CLIENT.PLS: Projection ready
+03-10 14:56:21.368 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.372 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 71, detail OptionalInt.empty, CAR_SERVICE_ENDPOINTS_STARTED, at 158342147 
+03-10 14:56:21.401 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.408 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.409 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.409 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.423 16890 16890 I CAR.SERVICE: Updated region groups: {CarRegionGroup{groupId=3, carDisplayId=CarDisplayId{displayId=0}, primaryRegionOfGroup=CarRegionId{regionId=8 carDisplayId=CarDisplayId{displayId=0}}}=[CarRegionId{regionId=8 carDisplayId=CarDisplayId{displayId=0}}, CarRegionId{regionId=7 carDisplayId=CarDisplayId{displayId=0}}], CarRegionGroup{groupId=1, carDisplayId=CarDisplayId{displayId=0}, primaryRegionOfGroup=CarRegionId{regionId=0 carDisplayId=CarDisplayId{displayId=0}}}=[CarRegionId{regionId=0 carDisplayId=CarDisplayId{displayId=0}}, CarRegionId{regionId=2131428411 carDisplayId=CarDisplayId{displayId=0}}, CarRegionId{regionId=2131428817 carDisplayId=CarDisplayId{displayId=0}}, CarRegionId{regionId=2131428815 carDisplayId=CarDisplayId{displayId=0}}]}
+03-10 14:56:21.429 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.430 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.433 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.433 28588 28588 D CAR.CLIENT: Multi-region client enabled. RegisterCarDisplayLayoutUpdateCompleteListener
+03-10 14:56:21.434 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.434 28588 28588 D CAR.CLIENT: onClientConnected() qng@9a6ce15, registering localCarConnectionListener qmz@80e552a with multiplex listener qns@4893f1b
+03-10 14:56:21.434 28588 28588 D CAR.CLIENT: Registering multiplex listener qns@4893f1b with car service
+03-10 14:56:21.435 16890 16890 I CAR.GAL.VIDEO.LITE: Sending video focus request mode=1 reason=0
+03-10 14:56:21.435 16890 16890 I CAR.SERVICE: Starting preflight, legacyFrxRan: false
+03-10 14:56:21.436 28588   938 D CAR.CLIENT.PLS: onPreflightStart on binder thread
+03-10 14:56:21.436 28588 28588 D CAR.CLIENT.PLS: Preflight start
+03-10 14:56:21.442 14566 14617 I GH.ConnLoggerV2: Session cd9d9111-0cf2-4d2b-830a-af51db2a1147, event 74, detail OptionalInt.empty, CAR_SERVICE_VIDEO_FOCUS_GAINED, at 158342220 
+03-10 14:56:21.442 14566 14617 I GH.StartupMeasure: logEvent GEARHEAD_CAR_SERVICE_VIDEO_FOCUS_GAINED=PT43H59M2.22S
+03-10 14:56:21.442 14566 14617 I GH.StartupMeasure: logEvent GEARHEAD_CAR_SERVICE_VIDEO_FOCUS_GAINED=PT43H59M2.22S
+03-10 14:56:21.445 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.479 16890 16890 I CAR.WM.WATERMARK: Using cert serial number (0x1b) to determine watermark visibility. showWatermark: false
+03-10 14:56:21.480 16890 16890 I CAR.WM  : Maybe showing loading screen
+03-10 14:56:21.480 16890 16890 I CAR.WM.LOADING.MAN: Show for STARTUP, screen dimens DisplayParams(selectedIndex=0, codecWidth=800, codecHeight=480, fps=30, dispWidth=800, dispHeight=480, dispLeft=0, dispTop=0, dpi=140, pixelAspectRatio=1.0, decoderAdditionalDepth=4, scaledPixelAspectRatio=1.0, scaledDimensions=800x480, stableInsets=Rect(0, 0 - 0, 0), contentInsets=Rect(0, 0 - 0, 0), cutouts=[], carDisplayUiFeatures=CarDisplayUiFeatures{resizeType=0, hasClock=false, hasBatteryLevel=false, hasPhoneSignal=false, hasNativeUiAffordance=false, hasClusterTurnCard=false}), trigger duration PT0S
+03-10 14:56:21.484 16890 16890 I CAR.CAM : New task CarActivityTask{#1: mRoot=com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService, activity count=0}
+03-10 14:56:21.485 16890 16890 I CAR.CAM : CarActivityManager enabled for: PreflightCarActivityService, lifetime-aware: false
+03-10 14:56:21.486 16890 16890 W CAR.CAM.TASK: Package name cannot be null.
+03-10 14:56:21.486 16890 16890 I CAR.CAM : component: PreflightCarActivityService; Callback not connected yet, ignoring l_setup
+03-10 14:56:21.486 16890 16890 I CAR.CAM : component: PreflightCarActivityService; bindToClient() hya@3bedcc1
+03-10 14:56:21.486 16890 16890 I CAR.CAM : makeForeground for component ComponentInfo{com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService}
+03-10 14:56:21.488 16890 16890 I CAR.CAM : Using bind flags 33 for ComponentInfo{com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService}
+03-10 14:56:21.495 28588 28588 I CAR.ApiFactory: Initialized ApiFactory to load from local APK
+03-10 14:56:21.498 28588 28588 D CAR.PROJECTION.CAHI: lqa.onCreate()
+03-10 14:56:21.498 28588 28588 D CAR.CLIENT: Registering CarConnectionListener qxa@e323bea with multiplex listener qns@aa0fedb
+03-10 14:56:21.498 28588 28588 D CAR.PROJECTION.CAHI: lqa.onBind()
+03-10 14:56:21.499 16890 16890 I CAR.CAM : component: PreflightCarActivityService; Connected
+03-10 14:56:21.499 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onSetup()
+03-10 14:56:21.499 28588   938 D CAR.CLIENT: onClientConnected() qnz@5ca5c51, registering localCarConnectionListener qmz@6f02cb6 with multiplex listener qns@aa0fedb
+03-10 14:56:21.499 28588   938 D CAR.CLIENT: Registering multiplex listener qns@aa0fedb with car service
+03-10 14:56:21.500 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onSystemWindowInsetsChanged(Rect(0, 0 - 0, 0))
+03-10 14:56:21.500 16890 16890 I CAR.CAM : Successfully sending non-drawable insets of Rect(0, 0 - 0, 0) to PreflightCarActivityService
+03-10 14:56:21.500 16890 16890 I CAR.CAM : makeForeground for component ComponentInfo{com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService}
+03-10 14:56:21.500 16890 16890 I CAR.CAM : Already bound, not making foreground
+03-10 14:56:21.500 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onNonDrawableInsetsChanged(Rect(0, 0 - 0, 0))
+03-10 14:56:21.501 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onProjectionStart(displayId:0, regionId:4, spec:DrawingSpec{width=782, height=462, dpi=140, surface=Surface(name=android.graphics.SurfaceTexture@212bba7 mNativeObject=-5476376670194188032)/@0xca6adb7, systemWindowInsets=Rect(0, 0 - 0, 0)}, currentIntent:Intent { cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService (has extras) }, config:{1.0 222mcc1mnc [it_IT] ldltr sw596dp w596dp h1324dp 290dpi lrg long compactNeeded hdr widecg port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.2057 fontWeightAdjustment=0})
+03-10 14:56:21.501 28588 28588 D CAR.PROJECTION.CAHI: projectionConfigBundle: Bundle[{MULTI_REGION_ELIGIBLE=false, MULTI_REGION_ENABLED=true, CANCEL_PENDING_LIFECYCLE_EVENTS_FOR_FINISH_ENABLED=true, IGNORE_ON_ANDROID_AUTO_START_WHEN_FLUSHING=true, COOLWALK_UI_ENABLED=true, MULTI_REGION_EXPERIMENT_ID=-1, REDUCED_STATUS_BAR_NOTIFICATION_RATE_EXPERIMENT_ID=22168596}]
+03-10 14:56:21.501 28588 28588 D CAR.PROJECTION.CAHI: lqa.createVirtualDisplay(width:782, height:462, dpi:140)
+03-10 14:56:21.504 28588 28588 D CAR.PROJECTION.CAHI: lqa.moveActivityToState() from: INITIALIZING to: STARTED
+03-10 14:56:21.504 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.504 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.505 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.505 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.505 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.505 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.528 28588 28588 I CAR.PROJECTION.PRES: Not waiting for correct configuration
+03-10 14:56:21.528 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.529 28588 28588 D CAR.PROJECTION.PRES: lqa updateConfiguration(Config{hasTouchScreen=true, hasRotaryController=false, hasTouchpadForNavigation=false, touchpadMoveThresholdPx=48, touchpadMultimoveThresholdPx=64})
+03-10 14:56:21.529 28588 28588 D CAR.PROJECTION.PRES: lqa updateSettings(isFocusFinderEnabledInRotary=false, touchpadFocusNavigationHistoryMaxSize=0, touchpadFocusNavigationHistoryMaxAgeMs=0)
+03-10 14:56:21.529 28588 28588 D CAR.CLIENT: Multi-display client enabled. Get ICarDisplay for: CarDisplayId{displayId=0}
+03-10 14:56:21.530 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.530 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.567 28588 28588 I CAR.CLIENT: carModuleFeaturesCache empty, retrieving from car service.
+03-10 14:56:21.567 28588 28588 D CAR.PROJECTION.PRES: lqa updateSystemWindowInsets: Rect(0, 0 - 0, 0)
+03-10 14:56:21.568 16890 16890 I CAR.CAM : makeForeground for component ComponentInfo{com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService}
+03-10 14:56:21.568 16890 16890 I CAR.CAM : Already bound, not making foreground
+03-10 14:56:21.569 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onProjectionResume(displayId:0)
+03-10 14:56:21.570 28588 28588 D CAR.PROJECTION.CAHI: lqa.moveActivityToState() from: STARTED to: RESUMED
+03-10 14:56:21.583 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onSystemWindowInsetsChanged(Rect(0, 0 - 0, 0))
+03-10 14:56:21.584 28588   938 D CAR.PROJECTION.CAHI: Binder:lqa.onInputFocusChange(event: InputFocusChangedEvent{focused=true, inTouchMode=true, direction=-1, focusedRect=null})
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES: Sending insets to lqa: WindowInsets{
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     statusBars=Insets{left=0, top=0, right=0, bottom=0} max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     navigationBars=Insets{left=0, top=0, right=0, bottom=0} max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     captionBar=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     ime=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     systemGestures=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     mandatorySystemGestures=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     tappableElement=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     displayCutout=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     systemOverlays=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     roundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=0, center=Point(0, 0)}, RoundedCorner{position=TopRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomLeft, radius=0, center=Point(0, 0)}]}
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     privacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=null rotation=0}
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     displayShape=DisplayShape{ spec=1460867579 displayWidth=782 displayHeight=462 physicalPixelDisplaySizeRatio=1.0 rotation=0 offsetX=0 offsetY=0 scale=1.0}
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     forceConsumingTypes=
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     forceConsumingOpaqueCaptionBar=false
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     suppressScrimTypes=
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     compatInsetsTypes=statusBars navigationBars
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     compatIgnoreVisibility=false
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     systemWindowInsetsConsumed=false
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     stableInsetsConsumed=false
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     displayCutoutConsumed=true
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     frameWidth=782
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES:     frameHeight=462}
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES: lqa onTouchModeChanged(isInTouchMode:true) [attachedToWindow:true, hasInputFocus:false, inTouchMode:true]
+03-10 14:56:21.590 28588 28588 D CAR.PROJECTION.PRES: lqa executePendingWindowFocusReachedTasks aborting state not synced focus(expected=false, actual=false) touchMode(expected=false actual=true)
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES: Sending insets to lqa: WindowInsets{
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     statusBars=Insets{left=0, top=0, right=0, bottom=0} max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     navigationBars=Insets{left=0, top=0, right=0, bottom=0} max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     captionBar=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     ime=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     systemGestures=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     mandatorySystemGestures=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     tappableElement=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     displayCutout=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     systemOverlays=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     roundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=0, center=Point(0, 0)}, RoundedCorner{position=TopRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomLeft, radius=0, center=Point(0, 0)}]}
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     privacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=null rotation=0}
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     displayShape=DisplayShape{ spec=1460867579 displayWidth=782 displayHeight=462 physicalPixelDisplaySizeRatio=1.0 rotation=0 offsetX=0 offsetY=0 scale=1.0}
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     forceConsumingTypes=
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     forceConsumingOpaqueCaptionBar=false
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     suppressScrimTypes=
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     compatInsetsTypes=statusBars navigationBars
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     compatIgnoreVisibility=false
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     systemWindowInsetsConsumed=false
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     stableInsetsConsumed=false
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     displayCutoutConsumed=true
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     frameWidth=782
+03-10 14:56:21.602 28588 28588 D CAR.PROJECTION.PRES:     frameHeight=462}
+03-10 14:56:21.621 28588 28588 D CAR.PROJECTION.PRES: lqa updateSystemWindowInsets: Rect(0, 0 - 0, 0)
+03-10 14:56:21.621 28588 28588 D CAR.PROJECTION.PRES: lqa Deferring onInputFocusChange(hasFocus:true, direction:-1, focusedRect:null)
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES: Sending insets to lqa: WindowInsets{
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     statusBars=Insets{left=0, top=0, right=0, bottom=0} max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     navigationBars=Insets{left=0, top=0, right=0, bottom=0} max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     captionBar=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     ime=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     systemGestures=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     mandatorySystemGestures=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     tappableElement=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     displayCutout=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     systemOverlays=null max=null vis=false boundingRects=null maxBoundingRects=null
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     roundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=0, center=Point(0, 0)}, RoundedCorner{position=TopRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomRight, radius=0, center=Point(0, 0)}, RoundedCorner{position=BottomLeft, radius=0, center=Point(0, 0)}]}
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     privacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=null rotation=0}
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     displayShape=DisplayShape{ spec=1460867579 displayWidth=782 displayHeight=462 physicalPixelDisplaySizeRatio=1.0 rotation=0 offsetX=0 offsetY=0 scale=1.0}
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     forceConsumingTypes=
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     forceConsumingOpaqueCaptionBar=false
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     suppressScrimTypes=
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     compatInsetsTypes=statusBars navigationBars
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     compatIgnoreVisibility=false
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     systemWindowInsetsConsumed=false
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     stableInsetsConsumed=false
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     displayCutoutConsumed=true
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     frameWidth=782
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES:     frameHeight=462}
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES: lqa onWindowFocusChangeReached(hasWindowFocus:true) [windowHasFocus:false]
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES: lqa onWindowFocusChangeReached() [pendingOnWindowFocusReachedTasks.size():0]
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES: lqa executeOnWindowFocusReached(hasFocus:true, direction-1, focusedRect:null)
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.PRES: lqa handleGainFocus requestFocus() on com.android.internal.policy.DecorView{c7224ac V.ED..... R.....I. 0,0-782,462}[lqa]
+03-10 14:56:21.631 28588 28588 W CAR.PROJECTION.PRES: lqa requestFocus() on com.android.internal.policy.DecorView{c7224ac V.ED..... R.....I. 0,0-782,462}[lqa] returned false
+03-10 14:56:21.631 28588 28588 D CAR.PROJECTION.CAHI: {com.google.android.projection.gearhead/com.google.android.apps.auto.components.preflight.PreflightCarActivityService} lqa.onWindowFocusChanged, focus=true, touch mode=true
+03-10 14:56:23.129 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusGrant. gainRequest: GAIN, requestResult: GRANTED, clientId: android.media.AudioManager@ce89a1aibm@819b94b, packageName: com.google.android.projection.gearhead, clientUid: 10143
+03-10 14:56:23.130 16890 16890 I CAR.AUDIO.AFM: Not handling focus event from Gearhead AFM client.
+03-10 14:56:23.130 16890 16890 I CAR.AUDIO.AFM: Received onAudioFocusLoss. lossReceived: NONE, wasNotified: false, clientId: android.media.AudioManager@571f4b0, packageName: com.android.systemui, clientUid: 10217
+03-10 14:56:23.130 16890 16890 I CAR.AUDIO.AFM: Not handling focus event for notifications.
+03-10 14:56:23.482 16890 16890 I CAR.WM.LOADING.MAN: Minimum time reached
+03-10 14:56:26.378 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:projection:imp(125), reason(2), reason_pid(16890), lru(0), uid(10143)->imp(100), reason(0), reason_pid(0), lru(0), uid(10143)
+03-10 14:56:26.380 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:shared:imp(300), reason(0), reason_pid(0), lru(0), uid(10143)->imp(100), reason(2), reason_pid(28588), lru(0), uid(10143)
+03-10 14:56:30.938 16890  1669 I CAR.SETUP.SERVICE.LITE: quit handler thread
+03-10 14:56:31.388 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:projection:imp(100), reason(0), reason_pid(0), lru(0), uid(10143)->imp(125), reason(2), reason_pid(16890), lru(0), uid(10143)
+03-10 14:56:31.389 16890 16890 I CAR.SERVICE: Process info changed com.google.android.projection.gearhead:shared:imp(100), reason(2), reason_pid(28588), lru(0), uid(10143)->imp(125), reason(2), reason_pid(28588), lru(0), uid(10143)
