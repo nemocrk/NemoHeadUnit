@@ -1,0 +1,164 @@
+cd ~/NemoHeadUnit/ && DISPLAY=:0 POC_CORE_LOG=TRACE python -u ~/NemoHeadUnit/POC/app/main.py 2>&1 | grep --line-buffered -Ev "(MESSENGER|GENERAL|TRANSPORT)"
+2026-03-12 18:13:06,220 [INFO] poc.orchestrator: Core loaded. Set POC_CORE_LOG=trace|debug|info|warn|error to configure logging.
+[POC] Avvio Boost.Asio event loop (Worker Thread C++)...
+2026-03-12 18:13:06,232 [INFO] poc.usb: USB hub initialized
+2026-03-12 18:13:06,232 [INFO] poc.usb: USB discovery starting (USBHub.start)
+2026-03-12 18:13:06,232 [INFO] poc.orchestrator: USB discovery started (aasdk_usb).
+2026-03-12 18:13:12,186 [INFO] poc.orchestrator: USB AOAP device discovered.
+2026-03-12 18:13:12,187 [INFO] poc.usb: USB creating AOAPDevice
+2026-03-12 18:13:12,187 [INFO] poc.orchestrator: USB AOAP device created. Handoff to transport layer.
+2026-03-12 18:13:12,207 [INFO] poc.orchestrator: Transport/Messenger ready.
+2026-03-12 18:13:12,209 [DEBUG] poc.control.handshake: Cryptor inizializzato dal C++
+2026-03-12 18:13:12.209 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-12 18:13:12.212 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendVersionRequest] (ControlServiceChannel.cpp:39) - [AASDK] sendVersionRequest()
+2026-03-12 18:13:12.213 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.215 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.216 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.216 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.217 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-12 18:13:12.218 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::receive] (InputSourceService.cpp:35) - [AASDK] receive()
+2026-03-12 18:13:12.219 [DEBUG] [CHANNEL_NAVIGATION] [AASDK:Pointer)::receive] (NavigationStatusService.cpp:38) - [AASDK] receive()
+2026-03-12 18:13:12,220 [INFO] poc.orchestrator: Channels started (Control + Optional).
+2026-03-12 18:13:12.474 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-12 18:13:12.475 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleVersionResponse] (ControlServiceChannel.cpp:241) - [AASDK] handleVersionResponse()
+2026-03-12 18:13:12,476 [DEBUG] poc.control: Control: VersionResponse ricevuta
+2026-03-12 18:13:12,477 [DEBUG] poc.control.handshake: VersionResponse ricevuta: 256.1792 (status=0)
+2026-03-12 18:13:12,480 [TRACE] poc.control: Action=Invia TLS Flight 1 (drain) size=293 bytes hex=16030101200100011c0303a22e2660c2bf198bb2a717f1c3ab7513a26cdfc5aa
+2026-03-12 18:13:12.481 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendHandshake] (ControlServiceChannel.cpp:55) - [AASDK] sendHandshake()
+2026-03-12 18:13:12.483 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-12 18:13:12.518 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-12 18:13:12,519 [DEBUG] poc.control: Control: Handshake ricevuto
+2026-03-12 18:13:12,520 [DEBUG] poc.control.handshake: Handshake payload ricevuto (2347 bytes)
+2026-03-12 18:13:12,538 [TRACE] poc.control: Action=Invia TLS chunk (drain) size=1191 bytes hex=16030303380b00033400033100032e3082032a3082021202011b300d06092a86
+2026-03-12 18:13:12.539 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendHandshake] (ControlServiceChannel.cpp:55) - [AASDK] sendHandshake()
+2026-03-12 18:13:12.539 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-12 18:13:12.553 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-12 18:13:12,553 [DEBUG] poc.control: Control: Handshake ricevuto
+2026-03-12 18:13:12,554 [DEBUG] poc.control.handshake: Handshake payload ricevuto (51 bytes)
+2026-03-12 18:13:12,554 [INFO] poc.control.handshake: Handshake TLS completato
+2026-03-12 18:13:12,554 [DEBUG] poc.control.handshake: Costruzione AuthResponse
+2026-03-12 18:13:12,555 [TRACE] poc.control: Action=Invia AuthCompleteResponse size=2 bytes hex=0800
+2026-03-12 18:13:12.557 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendAuthComplete] (ControlServiceChannel.cpp:68) - [AASDK] sendAuthComplete()
+2026-03-12 18:13:12.558 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-12 18:13:12.588 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-12 18:13:12.589 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleServiceDiscoveryRequest] (ControlServiceChannel.cpp:256) - [AASDK] handleServiceDiscoveryRequest()
+2026-03-12 18:13:12,589 [INFO] poc.control: Control: ServiceDiscoveryRequest ricevuta
+2026-03-12 18:13:12,590 [INFO] poc.control.discovery: ServiceDiscoveryRequest ricevuta -> ServiceDiscoveryResponse inviata
+2026-03-12 18:13:12,590 [INFO] poc.control.discovery: ServiceDiscovery config: screen=800x480 bt_available=False enabled_channels=[1, 3, 4, 5, 6, 8, 9, 12] keycodes=61
+2026-03-12 18:13:12,591 [INFO] poc.control.discovery: ServiceDiscovery video: id=3 codec=H264_BP res=VIDEO_800x480 fps=VIDEO_FPS_30 density=140 margins=0x0
+2026-03-12 18:13:12,592 [INFO] poc.control.discovery: ServiceDiscovery audio(media): id=4 pcm=48k/16bit/2ch
+2026-03-12 18:13:12,592 [INFO] poc.control.discovery: ServiceDiscovery audio(guidance): id=5 pcm=16k/16bit/1ch
+2026-03-12 18:13:12,593 [INFO] poc.control.discovery: ServiceDiscovery audio(system): id=6 pcm=16k/16bit/1ch
+2026-03-12 18:13:12,593 [INFO] poc.control.discovery: ServiceDiscovery mic: id=9 pcm=16k/16bit/1ch
+2026-03-12 18:13:12,594 [INFO] poc.control.discovery: ServiceDiscovery input: id=8 touchscreen=800x480 keycodes=61
+2026-03-12 18:13:12,595 [TRACE] poc.control: Action=Invia ServiceDiscoveryResponse (8 canali) size=329 bytes hex=0a100801120c0a02080d0a0208010a02080a0a1508031a110803220b08011002
+2026-03-12 18:13:12.597 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendServiceDiscoveryResponse] (ControlServiceChannel.cpp:81) - [AASDK] sendServiceDiscoveryResponse()
+2026-03-12 18:13:12.597 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-12 18:13:12.664 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-12 18:13:12.664 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleChannelOpenRequest] (SensorSourceService.cpp:118) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,664 [DEBUG] poc.sensor: Sensor: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.665 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendChannelOpenResponse] (SensorSourceService.cpp:45) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,666 [INFO] poc.sensor: Sensor: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.666 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-12 18:13:12.676 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::messageHandler] (ControlServiceChannel.cpp:191) - [AASDK] messageHandler()
+2026-03-12 18:13:12.676 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::handleAudioFocusRequest] (ControlServiceChannel.cpp:267) - [AASDK] handleAudioFocusRequest()
+2026-03-12 18:13:12,677 [DEBUG] poc.control: Control: AudioFocusRequest ricevuta
+2026-03-12 18:13:12,677 [DEBUG] poc.control.focus: AudioFocusRequest ricevuta -> AudioFocusNotification inviata
+2026-03-12 18:13:12,678 [TRACE] poc.control: Action=Invia AudioFocusNotification size=2 bytes hex=0803
+2026-03-12 18:13:12.678 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::sendAudioFocusResponse] (ControlServiceChannel.cpp:95) - [AASDK] sendAudioFocusResponse()
+2026-03-12 18:13:12.679 [DEBUG] [CHANNEL_CONTROL] [AASDK:Pointer)::receive] (ControlServiceChannel.cpp:179) - [AASDK] receive()
+2026-03-12 18:13:12.684 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
+2026-03-12 18:13:12.684 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (VideoMediaSinkService.cpp:173) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,685 [DEBUG] poc.video: Video CH3: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.686 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (VideoMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,686 [INFO] poc.video: Video CH3: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.687 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.696 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-12 18:13:12.696 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,697 [DEBUG] poc.audio: Audio CH4: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.697 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,698 [INFO] poc.audio: Audio CH4: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.698 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.706 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-12 18:13:12.706 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,706 [DEBUG] poc.audio: Audio CH5: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.707 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,708 [INFO] poc.audio: Audio CH5: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.708 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.716 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-12 18:13:12.716 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelOpenRequest] (AudioMediaSinkService.cpp:127) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,716 [DEBUG] poc.audio: Audio CH6: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.717 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelOpenResponse] (AudioMediaSinkService.cpp:53) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,718 [INFO] poc.audio: Audio CH6: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.718 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.738 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::messageHandler] (InputSourceService.cpp:86) - [AASDK] messageHandler()
+2026-03-12 18:13:12.738 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::handleChannelOpenRequest] (InputSourceService.cpp:118) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,738 [DEBUG] poc.input: Input: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.739 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::sendChannelOpenResponse] (InputSourceService.cpp:73) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,740 [INFO] poc.input: Input: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.740 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::receive] (InputSourceService.cpp:35) - [AASDK] receive()
+2026-03-12 18:13:12.747 [DEBUG] [CHANNEL_NAVIGATION] [AASDK:Pointer)::messageHandler] (NavigationStatusService.cpp:66) - [AASDK] messageHandler()
+2026-03-12 18:13:12.747 [DEBUG] [CHANNEL_NAVIGATION] [AASDK:Pointer)::handleChannelOpenRequest] (NavigationStatusService.cpp:94) - [AASDK] handleChannelOpenRequest()
+2026-03-12 18:13:12,747 [DEBUG] poc.navigation: Navigation: ChannelOpenRequest ricevuta
+2026-03-12 18:13:12.748 [DEBUG] [CHANNEL_NAVIGATION] [AASDK:Pointer)::sendChannelOpenResponse] (NavigationStatusService.cpp:51) - [AASDK] sendChannelOpenResponse()
+2026-03-12 18:13:12,749 [INFO] poc.navigation: Navigation: ChannelOpenResponse inviata (canale aperto)
+2026-03-12 18:13:12.749 [DEBUG] [CHANNEL_NAVIGATION] [AASDK:Pointer)::receive] (NavigationStatusService.cpp:38) - [AASDK] receive()
+2026-03-12 18:13:12.758 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-12 18:13:12.758 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
+2026-03-12 18:13:12,759 [DEBUG] poc.sensor: Sensor: SensorStartRequest ricevuta
+2026-03-12 18:13:12.760 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
+2026-03-12 18:13:12,760 [DEBUG] poc.sensor: Sensor: SensorStartResponse inviata
+2026-03-12 18:13:12.760 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-12 18:13:12.769 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-12 18:13:12.770 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
+2026-03-12 18:13:12,770 [DEBUG] poc.audio: Audio CH4: AVChannelSetupRequest ricevuta
+2026-03-12 18:13:12.771 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-12 18:13:12,772 [DEBUG] poc.audio: Audio CH4: AVChannelSetupResponse inviata
+2026-03-12 18:13:12.772 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.779 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-12 18:13:12.779 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
+2026-03-12 18:13:12,779 [DEBUG] poc.audio: Audio CH5: AVChannelSetupRequest ricevuta
+2026-03-12 18:13:12.780 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-12 18:13:12,781 [DEBUG] poc.audio: Audio CH5: AVChannelSetupResponse inviata
+2026-03-12 18:13:12.781 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.790 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (AudioMediaSinkService.cpp:93) - [AASDK] messageHandler()
+2026-03-12 18:13:12.790 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (AudioMediaSinkService.cpp:138) - [AASDK] handleChannelSetupRequest()
+2026-03-12 18:13:12,790 [DEBUG] poc.audio: Audio CH6: AVChannelSetupRequest ricevuta
+2026-03-12 18:13:12.791 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (AudioMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-12 18:13:12,792 [DEBUG] poc.audio: Audio CH6: AVChannelSetupResponse inviata
+2026-03-12 18:13:12.792 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (AudioMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.799 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
+2026-03-12 18:13:12.799 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleChannelSetupRequest] (VideoMediaSinkService.cpp:140) - [AASDK] handleChannelSetupRequest()
+2026-03-12 18:13:12,799 [DEBUG] poc.video: Video CH3: AVChannelSetupRequest ricevuta
+2026-03-12 18:13:12.800 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendChannelSetupResponse] (VideoMediaSinkService.cpp:66) - [AASDK] sendChannelSetupResponse()
+2026-03-12 18:13:12,801 [DEBUG] poc.video: Video CH3: AVChannelSetupResponse inviata
+2026-03-12 18:13:12.801 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.809 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::sendVideoFocusIndication] (VideoMediaSinkService.cpp:94) - [AASDK] sendVideoFocusIndication()
+2026-03-12 18:13:12,810 [DEBUG] poc.video: Video CH3: VideoFocusIndication inviata (post-setup)
+2026-03-12 18:13:12.813 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::messageHandler] (InputSourceService.cpp:86) - [AASDK] messageHandler()
+2026-03-12 18:13:12.813 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::handleKeyBindingRequest] (InputSourceService.cpp:107) - [AASDK] handleKeyBindingRequest()
+2026-03-12 18:13:12,814 [DEBUG] poc.input: Input: KeyBindingRequest ricevuta
+2026-03-12 18:13:12.815 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::sendKeyBindingResponse] (InputSourceService.cpp:61) - [AASDK] sendKeyBindingResponse()
+2026-03-12 18:13:12,815 [DEBUG] poc.input: Input: KeyBindingResponse inviata
+2026-03-12 18:13:12.815 [DEBUG] [CHANNEL_INPUT_SOURCE] [AASDK:Pointer)::receive] (InputSourceService.cpp:35) - [AASDK] receive()
+2026-03-12 18:13:12.823 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-12 18:13:12.823 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
+2026-03-12 18:13:12,823 [DEBUG] poc.sensor: Sensor: SensorStartRequest ricevuta
+2026-03-12 18:13:12.824 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
+2026-03-12 18:13:12,824 [DEBUG] poc.sensor: Sensor: SensorStartResponse inviata
+2026-03-12 18:13:12.826 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorEventIndication] (SensorSourceService.cpp:81) - [AASDK] sendSensorEventIndication()
+2026-03-12 18:13:12,826 [DEBUG] poc.sensor: Sensor: SensorEventIndication inviata
+2026-03-12 18:13:12.826 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()
+2026-03-12 18:13:12.831 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::messageHandler] (VideoMediaSinkService.cpp:105) - [AASDK] messageHandler()
+2026-03-12 18:13:12.831 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::handleStartIndication] (VideoMediaSinkService.cpp:151) - [AASDK] handleStartIndication()
+2026-03-12 18:13:12,831 [DEBUG] poc.video: Video CH3: MediaChannelStart indication
+2026-03-12 18:13:12,832 [TRACE] poc.video: Video CH3: MediaChannelStart session_id=0 payload=4 bytes
+2026-03-12 18:13:12.832 [DEBUG] [CHANNEL_MEDIA_SINK] [AASDK:Pointer)::receive] (VideoMediaSinkService.cpp:41) - [AASDK] receive()
+2026-03-12 18:13:12.843 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::messageHandler] (SensorSourceService.cpp:59) - [AASDK] messageHandler()
+2026-03-12 18:13:12.843 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::handleSensorStartRequest] (SensorSourceService.cpp:107) - [AASDK] handleSensorStartRequest()
+2026-03-12 18:13:12,843 [DEBUG] poc.sensor: Sensor: SensorStartRequest ricevuta
+2026-03-12 18:13:12.844 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorStartResponse] (SensorSourceService.cpp:95) - [AASDK] sendSensorStartResponse()
+2026-03-12 18:13:12,844 [DEBUG] poc.sensor: Sensor: SensorStartResponse inviata
+2026-03-12 18:13:12.845 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::sendSensorEventIndication] (SensorSourceService.cpp:81) - [AASDK] sendSensorEventIndication()
+2026-03-12 18:13:12,845 [DEBUG] poc.sensor: Sensor: SensorEventIndication inviata
+2026-03-12 18:13:12.845 [DEBUG] [CHANNEL_SENSOR_SOURCE] [AASDK:Pointer)::receive] (SensorSourceService.cpp:34) - [AASDK] receive()

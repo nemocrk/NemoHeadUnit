@@ -1,0 +1,206 @@
+cd ~/NemoHeadUnit/ && DISPLAY=:0 python ./python/ui/main_window.py
+
+============================================================
+ NemoHeadUnit — Fase 5 — Video Rendering E2E
+ Collega il telefono via USB dopo l'avvio della finestra.
+============================================================
+
+[UI] Window ID nativo: 37748746
+[GstVideoSink] window_id impostato: 37748746
+[UI] GstVideoSink configurato (800x480)
+[UI] PipelineBridge connesso (thread-safe cross-thread signal).
+[NemoHeadUnit] Avvio Boost.Asio event loop (Worker Thread C++)...
+[UI] IoContextRunner avviato. In attesa del telefono via USB...
+[UsbHubManager] Avvio scansione USB (attendere device Google/AOAP)...
+[UsbHubManager] Device compatibile rilevato (MODO AOAP ATTIVO). Costruzione Transport...
+[UsbHubManager] cert/headunit.crt scritto.
+[UsbHubManager] cert/headunit.key scritto.
+2026-03-12 18:06:25.818 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /etc/openauto/headunit.crt
+2026-03-12 18:06:25.818 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /usr/share/aasdk/cert/headunit.crt
+2026-03-12 18:06:25.819 [INFO] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Loaded certificate from: ./cert/headunit.crt
+2026-03-12 18:06:25.824 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /etc/openauto/headunit.key
+2026-03-12 18:06:25.824 [ERROR] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Failed to open file: /usr/share/aasdk/cert/headunit.key
+2026-03-12 18:06:25.824 [INFO] [GENERAL] [AASDK:] - [AASDK] [Cryptor] Loaded private key from: ./cert/headunit.key
+[Orchestrator] Cryptor inizializzato dal C++.
+[SessionManager] Starting channels...
+[Session] video_handler_ costruito.
+[UsbHubManager] Transport, Messenger e SessionManager operativi.
+[UI] ✓ Connessione AOAP stabilita: Connessione AOAP stabilita e Sessione AA avviata
+2026-03-12 18:06:26.115 [INFO] [GENERAL] [AASDK:] - [AASDK] [ControlServiceChannel] Handling Version - Major: 256 Minor: 1792Status: 0
+[Control] VersionResponse: 256.1792 Status: 0
+
+[Orchestrator] on_version_status: 256.1792 (status=0)
+
+==================================================
+[Azione: Invia TLS Flight 1 (drain)]
+Dimensione: 293 bytes
+Preview Hex: 16030101200100011c03031f2a695c8ea4933e3abaff1759839a9f0f17d5bc0d...
+==================================================
+[Control/SendHandshake1] send OK.
+[Control] Handshake chunk ricevuto, size: 2347
+
+[Orchestrator] Ricevuto Handshake payload (2347 bytes)
+
+==================================================
+[Azione: Invia TLS chunk (drain)]
+Dimensione: 1191 bytes
+Preview Hex: 16030303380b00033400033100032e3082032a3082021202011b300d06092a86...
+==================================================
+[Control/SendHandshakeX] send OK.
+[Control] Handshake chunk ricevuto, size: 51
+
+[Orchestrator] Ricevuto Handshake payload (51 bytes)
+
+[Orchestrator] *** HANDSHAKE TLS COMPLETATO ***
+
+[Orchestrator] Costruzione AuthResponse...
+
+==================================================
+[Azione: Invia AuthCompleteResponse]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+[Control/AuthComplete] send OK.
+[Control] ServiceDiscoveryRequest received.
+
+[Orchestrator] Service Discovery Request ricevuta!
+
+==================================================
+[Azione: Invia ServiceDiscoveryResponse (8 canali)]
+Dimensione: 251 bytes
+Preview Hex: 0a100801120c0a02080d0a0208010a02080a0a1508031a110803220b08011002...
+==================================================
+[Control/ServiceDiscoveryResponse] send OK.
+[Control] AudioFocusRequest received.
+
+[Orchestrator] AudioFocusRequest ricevuta.
+
+==================================================
+[Azione: Invia AudioFocusNotification]
+Dimensione: 2 bytes
+Preview Hex: 0803...
+==================================================
+[Control/AudioFocusResponse] send OK.
+[Sensor] ChannelOpenRequest received.
+[Video] ChannelOpenRequest received.
+
+[Orchestrator] ChannelOpenRequest su CH 3
+
+==================================================
+[Azione: Invia ChannelOpenResponse CH 3]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+[UI] Video channel aperto → emit pipeline_start_requested
+[UI] _start_pipeline() — thread Qt — avvio GStreamer...
+[Audio CH4] ChannelOpenRequest received.
+
+[Orchestrator] ChannelOpenRequest su CH 4
+
+==================================================
+[Azione: Invia ChannelOpenResponse CH 4]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+[Audio CH5] ChannelOpenRequest received.
+
+[Orchestrator] ChannelOpenRequest su CH 5
+
+==================================================
+[Azione: Invia ChannelOpenResponse CH 5]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+[Audio CH6] ChannelOpenRequest received.
+
+[Orchestrator] ChannelOpenRequest su CH 6
+
+==================================================
+[Azione: Invia ChannelOpenResponse CH 6]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+[Input] ChannelOpenRequest received.
+[Audio CH9] ChannelOpenRequest received.
+
+[Orchestrator] ChannelOpenRequest su CH 9
+
+==================================================
+[Azione: Invia ChannelOpenResponse CH 9]
+Dimensione: 2 bytes
+Preview Hex: 0800...
+==================================================
+[Navigation] ChannelOpenRequest received.
+[Sensor] SensorStartRequest type=1
+[Audio CH4] AVChannelSetupRequest received.
+
+[Orchestrator] AVChannelSetupRequest su CH 4
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
+
+==================================================
+[Azione: Invia AVChannelSetupResponse CH 4]
+Dimensione: 6 bytes
+Preview Hex: 080210011800...
+==================================================
+[Audio CH5] AVChannelSetupRequest received.
+
+[Orchestrator] AVChannelSetupRequest su CH 5
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
+
+==================================================
+[Azione: Invia AVChannelSetupResponse CH 5]
+Dimensione: 6 bytes
+Preview Hex: 080210011800...
+==================================================
+[Audio CH6] AVChannelSetupRequest received.
+
+[Orchestrator] AVChannelSetupRequest su CH 6
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
+
+==================================================
+[Azione: Invia AVChannelSetupResponse CH 6]
+Dimensione: 6 bytes
+Preview Hex: 080210011800...
+==================================================
+[Input] KeyBindingRequest received, keycodes_size=18
+[GstPipeline] Pipeline: appsrc name=src format=time is-live=true   caps=video/x-h264,stream-format=byte-stream,alignment=au,framerate=30/1,width=800,height=480 ! queue name=q max-size-buffers=8 leaky=downstream ! h264parse config-interval=-1 ! avdec_h264 max-threads=2 ! videoconvert ! xvimagesink name=sink sync=false
+[Video] AVChannelSetupRequest received.
+
+[Orchestrator] AVChannelSetupRequest su CH 3
+  [DEBUG] resp.status         = 2 (STATUS_READY)
+  [DEBUG] resp.max_unacked    = 1
+  [DEBUG] resp.config_indices = [0]
+  [DEBUG] SerializeToString   = 080210011800
+
+==================================================
+[Azione: Invia AVChannelSetupResponse CH 3]
+Dimensione: 6 bytes
+Preview Hex: 080210011800...
+==================================================
+[Video] sendVideoFocusIndication() -> PROJECTED
+[Sensor] SensorStartRequest type=13
+[Video] MediaChannelStart session=0
+[Sensor] sendDrivingStatusUnrestricted() -> UNRESTRICTED
+[Sensor] SensorStartRequest type=10
+[Sensor] sendNightData() night_mode=0
+[GstPipeline] WId impostato: 37748746
+[GstPipeline] Avviata (800x480) decoder=avdec_h264 max-threads=2 sink=xvimagesink
+[UI] GStreamer running: True
+[Video] NAL #0 type=7 (7=SPS,8=PPS,5=IDR,1=slice) ts=0 size=28 dump_open=0
+[Video] NAL #1 type=5 (7=SPS,8=PPS,5=IDR,1=slice) ts=180794453837 size=1516 dump_open=0
+[Sensor] SensorStartRequest type=1
+[Video] NAL #2 type=1 (7=SPS,8=PPS,5=IDR,1=slice) ts=180794487876 size=1261 dump_open=0
+[Video] NAL #3 type=1 (7=SPS,8=PPS,5=IDR,1=slice) ts=180794520514 size=40 dump_open=0
+[Video] NAL #4 type=1 (7=SPS,8=PPS,5=IDR,1=slice) ts=180794553811 size=254 dump_open=0
+[Video] NAL unit ts=180794820475 size=13 bytes
+[Video] NAL unit ts=180795120523 size=11 bytes
+[Video] NAL unit ts=180795420548 size=11 bytes

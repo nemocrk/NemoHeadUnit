@@ -6,7 +6,7 @@ if [ ! -f "CMakeLists.txt" ]; then
 fi
 
 AASDK_SRC_DIR="build/_deps/aasdk-src"
-OUT_DIR="python"
+OUT_DIR="."
 PROTO_PKG="aasdk_proto"
 PROTO_OUT_DIR="$OUT_DIR/$PROTO_PKG"
 
