@@ -429,8 +429,13 @@ target_link_libraries(wifi_projection_event PRIVATE
     Threads::Threads
 )
 
+# av_core: modulo pybind11 che espone AvCore a Python.
+# Il HEADER punta a av_core_binding.hpp (post-refactor), che:
+#   - NON include GStreamer direttamente
+#   - include av_core.hpp (orchestratore) -> include i 5 sub-header GStreamer
+# In questo modo il GIL Python non e' mai sul path critico del media data.
 create_pybind_module(av_core init_av_core_binding
-    HEADER app/media/av_core.hpp
+    HEADER app/media/av_core_binding.hpp
 )
 
 target_include_directories(av_core PRIVATE
