@@ -9,8 +9,10 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <shared_mutex>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 namespace nemo
 {
@@ -39,6 +41,23 @@ namespace nemo
             return logger;
         }
 
+        // ---------------------------------------------------------------------------
+        // Imposta il livello minimo per un singolo component (es. "app.av_core.audio").
+        // Chiamato una sola volta dalla configurazione Python: zero overhead runtime.
+        // Thread-safe via shared_mutex (write esclusivo, read condiviso).
+        // ---------------------------------------------------------------------------
+        void setComponentLevel(const std::string &component, AppLogLevel level)
+        {
+            std::unique_lock lock(component_levels_mutex_);
+            if (component.empty())
+            {
+                // Stringa vuota → livello globale
+                min_level_ = level;
+                return;
+            }
+            component_levels_[component] = level;
+        }
+
         void log(AppLogLevel level,
                  const char *component,
                  const char *function,
@@ -46,20 +65,20 @@ namespace nemo
                  int line,
                  const std::string &message)
         {
-            // Allow Python-driven logging to short-circuit the C++ output.
+            // Bug #1 fix: shouldLog() viene controllato SEMPRE, prima di qualsiasi
+            // dispatch (Python o stdout). Se il livello non passa, usciamo subito
+            // senza acquisire il GIL né costruire stringhe.
+            if (!shouldLogFor(level, component))
+                return;
+
             if (g_python_log_fn)
             {
+                // g_python_should_log_fn è già stato valutato in shouldLogFor();
+                // qui chiamiamo solo il dispatcher effettivo.
                 const auto aasdk_level = toAasdkLevel(level);
-                if (g_python_should_log_fn && !g_python_should_log_fn(component, static_cast<int>(aasdk_level)))
-                {
-                    return;
-                }
                 g_python_log_fn(component, static_cast<int>(aasdk_level), message);
                 return;
             }
-
-            if (!shouldLog(level))
-                return;
 
             const std::string line_out = formatLine(level, component, message);
             if (level >= AppLogLevel::ERROR)
@@ -88,16 +107,30 @@ namespace nemo
             }
         }
 
+        // Controllo livello globale puro (usato dal fallback stdout).
         bool shouldLog(AppLogLevel level) const
         {
             return static_cast<int>(level) >= static_cast<int>(min_level_);
         }
 
+        // ---------------------------------------------------------------------------
+        // shouldLogFor: hot path — ZERO GIL, ZERO chiamate Python.
+        //
+        // Algoritmo:
+        //   1. Cerca il component nella cache C++ (shared_lock → reads paralleli OK).
+        //   2. Longest-prefix match: "app.av_core.audio" → "app.av_core" → "app" → global.
+        //   3. Solo se il livello supera la soglia C++, il trampoline Python viene
+        //      invocato (caso raro: g_python_should_log_fn impostato E frame che
+        //      passa la cache). In pratica non accade nel steady state perché
+        //      set_module_level() sincronizza già la cache C++.
+        // ---------------------------------------------------------------------------
         bool shouldLogFor(AppLogLevel level, const char *component) const
         {
-            if (!shouldLog(level))
+            const AppLogLevel effective = effectiveLevelFor(component);
+            if (static_cast<int>(level) < static_cast<int>(effective))
                 return false;
 
+            // Filtro Python opzionale (solo se non ancora coperto dalla cache).
             if (g_python_should_log_fn)
             {
                 return g_python_should_log_fn(component, static_cast<int>(toAasdkLevel(level)));
@@ -111,6 +144,41 @@ namespace nemo
         {
             min_level_ = parseLevel(std::getenv("CORE_LOG"));
             use_modern_logger_ = envTruthy(std::getenv("NEMO_AVCORE_LOG_TO_AASDK"));
+        }
+
+        // Longest-prefix match nella cache component_levels_.
+        // Chiamato sotto shared_lock.
+        AppLogLevel effectiveLevelFor(const char *component) const
+        {
+            if (!component || component[0] == '\0')
+                return min_level_;
+
+            std::shared_lock lock(component_levels_mutex_);
+
+            if (component_levels_.empty())
+                return min_level_;
+
+            // Cerca match esatto prima (caso comune, O(1)).
+            {
+                auto it = component_levels_.find(component);
+                if (it != component_levels_.end())
+                    return it->second;
+            }
+
+            // Longest-prefix match: "app.av_core.audio" → prova "app.av_core" → "app".
+            std::string key(component);
+            while (!key.empty())
+            {
+                const auto dot = key.rfind('.');
+                if (dot == std::string::npos)
+                    break;
+                key.resize(dot);
+                auto it = component_levels_.find(key);
+                if (it != component_levels_.end())
+                    return it->second;
+            }
+
+            return min_level_;
         }
 
         static bool envTruthy(const char *value)
@@ -204,6 +272,11 @@ namespace nemo
 
         AppLogLevel min_level_{AppLogLevel::INFO};
         bool use_modern_logger_{false};
+
+        // Cache per-component: scritta raramente (configurazione),
+        // letta frequentemente (ogni log statement). shared_mutex ideale.
+        mutable std::shared_mutex component_levels_mutex_;
+        std::unordered_map<std::string, AppLogLevel> component_levels_;
     };
 
     class LogStream

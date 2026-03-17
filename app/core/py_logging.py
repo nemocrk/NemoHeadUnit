@@ -100,6 +100,23 @@ def _level_name(level: int) -> str:
     return "ERROR"
 
 
+# ---------------------------------------------------------------------------
+# Mappa livello Python → stringa aasdk compatibile con set_cpp_component_level.
+# Python: TRACE=5, DEBUG=10, INFO=20, WARNING=30, ERROR=40
+# aasdk:  TRACE=0, DEBUG=1,  INFO=2,  WARN=3,    ERROR=4
+# ---------------------------------------------------------------------------
+def _python_level_to_aasdk_str(level: int) -> str:
+    if level <= TRACE_LEVEL:
+        return "TRACE"
+    if level <= py_logging.DEBUG:
+        return "DEBUG"
+    if level <= py_logging.INFO:
+        return "INFO"
+    if level <= py_logging.WARNING:
+        return "WARN"
+    return "ERROR"
+
+
 _CONFIGURED = False
 _LEVEL_NAME = "INFO"
 _MODULE_LEVELS: dict[str, int] = {}
@@ -118,9 +135,14 @@ def _ensure_configured():
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    # If the C++ bindings are available, bridge the C++ logger to this one.
-    # This allows Python-side configuration (e.g. module levels) to apply
-    # to logs that originate in C++ land.
+    # Se i binding C++ sono disponibili, sincronizza subito la cache C++
+    # con il livello globale derivato da CORE_LOG.
+    # Questo garantisce che il filtro C++ sia attivo PRIMA che qualsiasi
+    # thread C++ parta, eliminando la GIL contention dal day-one.
+    if aasdk_logging and hasattr(aasdk_logging, "set_cpp_component_level"):
+        aasdk_logging.set_cpp_component_level("", _python_level_to_aasdk_str(level))
+
+    # Registra i bridge C++→Python.
     if aasdk_logging:
         aasdk_logging.set_cpp_should_log_handler(should_log)
         aasdk_logging.set_cpp_log_handler(log_from_cpp)
@@ -158,11 +180,31 @@ def _apply_module_level(name: str) -> None:
     logger.setLevel(level)
 
 
+def _sync_cpp_component_level(name: str, level_int: int) -> None:
+    """Sincronizza la cache C++ per un component.
+
+    Chiamata ogni volta che set_module_level() modifica _MODULE_LEVELS,
+    in modo che il filtro C++ rifletta sempre la configurazione Python
+    senza dover passare per il GIL a runtime.
+    """
+    if not aasdk_logging:
+        return
+    if not hasattr(aasdk_logging, "set_cpp_component_level"):
+        return
+    try:
+        aasdk_logging.set_cpp_component_level(name, _python_level_to_aasdk_str(level_int))
+    except Exception:
+        pass
+
+
 def set_module_level(name: str, level: str | int) -> None:
     """Set the log level for a specific module name.
 
     The module name should follow the hierarchical pattern used by Python's
     logging (e.g. "app", "app.ui", "app.ui.android_auto").
+
+    Sincronizza automaticamente la cache C++ via set_cpp_component_level,
+    eliminando la necessità di GIL nel hot path dei thread C++.
     """
 
     _ensure_configured()
@@ -170,13 +212,16 @@ def set_module_level(name: str, level: str | int) -> None:
     level_int = _normalize_level(level)
 
     if not name:
-        # Root logger canonical configuration.
         py_logging.getLogger().setLevel(level_int)
         _MODULE_LEVELS[""] = level_int
+        # Aggiorna anche il livello globale nella cache C++.
+        _sync_cpp_component_level("", level_int)
         return
 
     _MODULE_LEVELS[name] = level_int
     _apply_module_level(name)
+    # Bug #3 fix: propaga il livello nella cache C++ AppLogger.
+    _sync_cpp_component_level(name, level_int)
 
 
 def set_module_levels(levels: dict[str, str | int]) -> None:
@@ -271,6 +316,10 @@ def log_from_cpp(name: str, level: int, message: str) -> None:
 
     This is intended to be called from C++ bindings. It uses the same module
     level configuration as regular Python loggers.
+
+    Nota: questo viene chiamato solo DOPO che il filtro C++ ha già approvato
+    il messaggio (grazie a shouldLogFor() con cache). La chiamata a
+    should_log() qui è un double-check difensivo a bassissimo costo.
     """
 
     python_level = _normalize_level(level)

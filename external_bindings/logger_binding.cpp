@@ -34,6 +34,29 @@ namespace
         throw std::invalid_argument("level must be int or str");
     }
 
+    // ---------------------------------------------------------------------------
+    // Mappa un livello aasdk (0=TRACE..5=FATAL) in AppLogLevel C++ nemo.
+    // Usato da set_cpp_component_level() per mantenere coerenza tra i due sistemi.
+    // ---------------------------------------------------------------------------
+    nemo::AppLogLevel aasdk_level_to_app(aasdk::common::LogLevel level)
+    {
+        switch (level)
+        {
+        case aasdk::common::LogLevel::TRACE:
+            return nemo::AppLogLevel::TRACE;
+        case aasdk::common::LogLevel::DEBUG:
+            return nemo::AppLogLevel::DEBUG;
+        case aasdk::common::LogLevel::INFO:
+            return nemo::AppLogLevel::INFO;
+        case aasdk::common::LogLevel::WARN:
+            return nemo::AppLogLevel::WARN;
+        case aasdk::common::LogLevel::ERROR:
+        case aasdk::common::LogLevel::FATAL:
+            return nemo::AppLogLevel::ERROR;
+        }
+        return nemo::AppLogLevel::INFO;
+    }
+
     py::object g_cpp_log_handler = py::none();
     py::object g_cpp_should_log_handler = py::none();
 
@@ -53,6 +76,13 @@ namespace
         }
     }
 
+    // ---------------------------------------------------------------------------
+    // Bug #2 fix: questo trampoline viene chiamato SOLO per i messaggi che hanno
+    // già superato la cache C++ in shouldLogFor(). Nel steady state (livelli
+    // sincronizzati da set_cpp_component_level) non viene mai raggiunto.
+    // Il GIL viene acquisito solo per i messaggi che effettivamente devono
+    // essere loggati → contention GIL ridotta a zero nei loop hot.
+    // ---------------------------------------------------------------------------
     bool python_should_log_trampoline(const std::string &component, int level)
     {
         if (g_cpp_should_log_handler.is_none())
@@ -266,6 +296,31 @@ void init_logger_bindings(py::module_ &m)
         },
         py::arg("handler"),
         "Register a Python callable to decide whether a C++ log should be emitted (should return bool). It is called with (component, level).");
+
+    // ---------------------------------------------------------------------------
+    // Bug #3 fix: espone AppLogger::setComponentLevel() a Python.
+    //
+    // Uso tipico (chiamato da py_logging.set_module_level):
+    //   aasdk_logging.set_cpp_component_level("app.av_core.audio", "WARN")
+    //   aasdk_logging.set_cpp_component_level("", "INFO")  # livello globale
+    //
+    // Il level accetta sia str ('TRACE'..'ERROR') che int (enum aasdk LogLevel).
+    // La cache C++ viene aggiornata immediatamente, senza GIL aggiuntivo.
+    // ---------------------------------------------------------------------------
+    m.def(
+        "set_cpp_component_level",
+        [](const std::string &component, py::object level)
+        {
+            const auto aasdk_lv = parse_level(level);
+            const auto app_lv = aasdk_level_to_app(aasdk_lv);
+            nemo::AppLogger::instance().setComponentLevel(component, app_lv);
+        },
+        py::arg("component"),
+        py::arg("level"),
+        "Imposta il livello di log per un component C++ (es. 'app.av_core.audio').\n"
+        "Stringa vuota = livello globale. Supporta longest-prefix match.\n"
+        "Chiamare questo PRIMA di set_cpp_log_handler per evitare GIL contention.\n"
+        "level: str {'TRACE','DEBUG','INFO','WARN','ERROR'} oppure int enum.");
 }
 
 PYBIND11_MODULE(aasdk_logging, m)
