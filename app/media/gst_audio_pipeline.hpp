@@ -177,6 +177,9 @@ namespace nemo
             if (pipeline_)
             {
                 gst_element_set_state(pipeline_, GST_STATE_NULL);
+                // Fix #9: attendiamo il completamento della transizione a NULL
+                // prima di fare unref, per evitare audio residuo e crash su re-init.
+                gst_element_get_state(pipeline_, nullptr, nullptr, 3 * GST_SECOND);
                 gst_object_unref(pipeline_);
                 pipeline_ = nullptr;
             }
