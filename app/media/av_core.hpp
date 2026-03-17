@@ -1,568 +1,45 @@
 #pragma once
 
-#include <gst/gst.h>
-#include <gst/app/gstappsrc.h>
-#include <gst/app/gstappsink.h>
-#include <gst/video/videooverlay.h>
+// av_core.hpp - Orchestratore A/V.
+// Questo header include le cinque classi specializzate e coordina:
+//   - GstVideoPipeline  (ciclo vita video H.264)
+//   - GstAudioPipeline  (playback audio PCM / AAC-LC / OPUS, Fix #4 lock-free)
+//   - GstMicCapture     (cattura microfono con splitter opzionale)
+//   - audio routing (priority list, AudioGroup mix, codec negotiation)
+//   - A/V sync gate PTS-based (Fix #3 + Fix #10 Master Audio Clock)
+//
+// Regole architetturali rispettate:
+//   - Media data (PCM / H.264) NON attraversa mai il GIL Python.
+//   - I counter di log sono std::atomic<int> (Bug A fix).
+//   - nextAudioTimestampLocked() chiamato SOLO con audio_mutex_ gia' acquisito (Bug B fix).
 
-#include <atomic>
+#include "av_types.hpp"
+#include "av_utils.hpp"
+#include "gst_video_pipeline.hpp"
+#include "gst_audio_pipeline.hpp"
+#include "gst_mic_capture.hpp"
+#include "app/core/logging.hpp"
+
 #include <algorithm>
-#include <cctype>
-#include <condition_variable>
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <cstring>
-#include <cstdint>
-#include <cstdlib>
 #include <deque>
 #include <filesystem>
 #include <fstream>
 #include <memory>
 #include <mutex>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include "app/core/logging.hpp"
 
 namespace nemo
 {
-
-    enum class OverrunPolicy
-    {
-        DROP_OLD,
-        DROP_NEW,
-        PROGRESSIVE_DISCARD
-    };
-
-    enum class UnderrunPolicy
-    {
-        WAIT,
-        SILENCE
-    };
-
-    struct AvCoreConfig
-    {
-        int jitter_buffer_ms = 120;
-        int max_queue_frames = 64;
-        int audio_frame_ms = 20;
-        int max_av_lead_ms = 80;
-        int mic_frame_ms = 20;
-        int mic_batch_ms = 100;
-        int audio_prebuffer_ms = 100;
-        OverrunPolicy overrun_policy = OverrunPolicy::DROP_OLD;
-        UnderrunPolicy underrun_policy = UnderrunPolicy::SILENCE;
-    };
-
-    struct AvFrame
-    {
-        uint64_t ts_us = 0;
-        std::vector<uint8_t> data;
-    };
-
-    struct AudioGroup
-    {
-        std::vector<int> channels;
-        int priority = 0;
-        int ducking = 100;
-        int hold_ms = 100;
-        std::vector<float> channel_gains;
-    };
-
-    struct AudioStreamFormat
-    {
-        int sample_rate = 16000;
-        int channels = 1;
-        int bits = 16;
-        std::string codec = "PCM";
-    };
-
-    inline std::string normalizeCodecName(const std::string &codec)
-    {
-        std::string out;
-        out.reserve(codec.size());
-        for (char c : codec)
-            out.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(c))));
-        if (out == "AAC" || out == "AACLC" || out == "AAC_LC")
-            return "AAC_LC";
-        if (out == "OPUS")
-            return "OPUS";
-        if (out == "PCM" || out == "PCM16" || out == "PCM_S16LE")
-            return "PCM";
-        return out;
-    }
-
-    inline bool isPcmCodec(const std::string &codec)
-    {
-        return normalizeCodecName(codec) == "PCM";
-    }
-
-    class GstVideoPipeline
-    {
-    public:
-        void init(uintptr_t window_id, int width, int height)
-        {
-            init_gst_once();
-
-            const char *env_dec = std::getenv("NEMO_VIDEO_DECODER");
-            std::string decoder = (env_dec && *env_dec) ? std::string(env_dec) : "avdec_h264 max-threads=2";
-
-            const char *env_sink = std::getenv("NEMO_VIDEO_SINK");
-            std::string sink_elem = (env_sink && *env_sink)
-                                        ? std::string(env_sink)
-                                        : (window_id ? "xvimagesink" : "autovideosink");
-
-            std::string pipe_desc =
-                "appsrc name=src format=time is-live=true "
-                "caps=video/x-h264,stream-format=byte-stream,alignment=au,framerate=30/1,"
-                "width=" +
-                std::to_string(width) + ",height=" + std::to_string(height) +
-                " ! queue name=q max-size-buffers=8 leaky=downstream "
-                "! h264parse config-interval=-1 "
-                "! " + decoder +
-                " ! videoconvert "
-                "! " + sink_elem + " name=sink sync=false";
-
-            GError *err = nullptr;
-            pipeline_ = gst_parse_launch(pipe_desc.c_str(), &err);
-            if (!pipeline_ || err)
-            {
-                std::string msg = err ? err->message : "unknown";
-                if (err) g_error_free(err);
-                throw std::runtime_error("[AvCore] gst_parse_launch video failed: " + msg);
-            }
-
-            appsrc_ = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(pipeline_), "src"));
-            if (!appsrc_)
-                throw std::runtime_error("[AvCore] video appsrc not found");
-
-            if (window_id)
-            {
-                GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline_), "sink");
-                if (sink)
-                {
-                    if (GST_IS_VIDEO_OVERLAY(sink))
-                        gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(sink), window_id);
-                    gst_object_unref(sink);
-                }
-            }
-
-            GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
-            if (ret == GST_STATE_CHANGE_FAILURE)
-            {
-                stop();
-                throw std::runtime_error("[AvCore] video pipeline start failed");
-            }
-            running_.store(true);
-        }
-
-        void push(uint64_t ts_us, const uint8_t *data, std::size_t size)
-        {
-            if (!running_.load() || !appsrc_)
-                return;
-            GstBuffer *buf = gst_buffer_new_memdup(data, static_cast<gsize>(size));
-            GST_BUFFER_PTS(buf) = static_cast<GstClockTime>(ts_us) * GST_USECOND;
-            GST_BUFFER_DTS(buf) = GST_BUFFER_PTS(buf);
-            GstFlowReturn ret = gst_app_src_push_buffer(appsrc_, buf);
-            if (ret != GST_FLOW_OK)
-            {
-                // Bug C fix: component corretto a 'app.av_core.video' (era 'audio' per errore)
-                APP_LOG_WARN("app.av_core.video")
-                    << "appsrc push returned " << static_cast<int>(ret);
-            }
-        }
-
-        void stop()
-        {
-            running_.store(false);
-            if (appsrc_)
-            {
-                gst_app_src_end_of_stream(appsrc_);
-                gst_object_unref(GST_OBJECT(appsrc_));
-                appsrc_ = nullptr;
-            }
-            if (pipeline_)
-            {
-                gst_element_set_state(pipeline_, GST_STATE_NULL);
-                gst_object_unref(pipeline_);
-                pipeline_ = nullptr;
-            }
-        }
-
-        bool isRunning() const { return running_.load(); }
-
-    private:
-        static void init_gst_once()
-        {
-            static std::once_flag flag;
-            std::call_once(flag, [](){ gst_init(nullptr, nullptr); });
-        }
-
-        GstElement *pipeline_ = nullptr;
-        GstAppSrc *appsrc_ = nullptr;
-        std::atomic<bool> running_{false};
-    };
-
-    // Fix #4: GstAudioPipeline::push() e' ora lock-free sul path critico.
-    // caps_mutex_ e' usato SOLO per applyCaps (path raro, solo quando caps_dirty_=true)
-    // e per stop(). La push GStreamer avviene senza alcun lock.
-    class GstAudioPipeline
-    {
-    public:
-        void init(int sample_rate, int channels, int bits, const std::string &codec)
-        {
-            init_gst_once();
-
-            const char *env_sink = std::getenv("NEMO_AUDIO_SINK");
-            std::string sink_elem = (env_sink && *env_sink) ? std::string(env_sink) : "autoaudiosink";
-            int buffer_ms = 100;
-            if (const char *env_buf = std::getenv("NEMO_AUDIO_BUFFER_MS"))
-            {
-                try { buffer_ms = std::max(0, std::stoi(env_buf)); }
-                catch (...) { buffer_ms = 100; }
-            }
-
-            const std::string codec_norm = normalizeCodecName(codec);
-            const bool pcm = (codec_norm == "PCM");
-            sample_rate_ = sample_rate;
-            channels_ = channels;
-            bits_ = bits;
-            codec_norm_ = codec_norm;
-
-            if (bits != 16)
-                APP_LOG_WARN("app.av_core.audio") << "only 16-bit PCM supported in mixer; forcing S16LE";
-
-            std::string format = "S16LE";
-            std::string caps;
-            std::string decoder;
-
-            if (pcm)
-                caps = "audio/x-raw,format=" + format + ",channels=" + std::to_string(channels) + ",rate=" + std::to_string(sample_rate);
-            else if (codec_norm == "AAC_LC")
-            {
-                caps = "audio/mpeg,mpegversion=4,stream-format=raw,framed=true,channels=" + std::to_string(channels) + ",rate=" + std::to_string(sample_rate);
-                decoder = "avdec_aac";
-            }
-            else if (codec_norm == "OPUS")
-            {
-                caps = "audio/x-opus,channels=" + std::to_string(channels) + ",rate=" + std::to_string(sample_rate);
-                decoder = "opusparse ! opusdec";
-            }
-            else
-            {
-                caps = "audio/x-raw,format=" + format + ",channels=" + std::to_string(channels) + ",rate=" + std::to_string(sample_rate);
-                decoder = "decodebin";
-            }
-            caps_base_ = caps;
-
-            const char *env_dec = std::getenv("NEMO_AUDIO_DECODER");
-            if (env_dec && *env_dec)
-                decoder = std::string(env_dec);
-
-            std::string caps_full = buildCapsString();
-            std::string queue_desc = "queue name=q max-size-buffers=32 leaky=downstream";
-            if (buffer_ms > 0)
-            {
-                const int64_t max_time_ns = static_cast<int64_t>(buffer_ms) * 1000 * 1000;
-                queue_desc += " max-size-time=" + std::to_string(max_time_ns) + " max-size-bytes=0";
-            }
-
-            std::string pipe_desc = "appsrc name=src format=time is-live=true caps=" + caps_full + " ! " + queue_desc + " ";
-            if (!decoder.empty() && !pcm)
-                pipe_desc += "! " + decoder + " ";
-            pipe_desc += "! audioconvert ! audioresample ! " + sink_elem + " sync=false";
-
-            APP_LOG_INFO("app.av_core.audio") << "Gst pipeline: " << pipe_desc;
-            APP_LOG_INFO("app.av_core.audio")
-                << "codec=" << codec_norm << " pcm=" << (pcm ? "yes" : "no")
-                << " caps=" << caps_full << " decoder=" << (decoder.empty() ? "<none>" : decoder)
-                << " sink=" << sink_elem;
-
-            GError *err = nullptr;
-            pipeline_ = gst_parse_launch(pipe_desc.c_str(), &err);
-            if (!pipeline_ || err)
-            {
-                std::string msg = err ? err->message : "unknown";
-                if (err) g_error_free(err);
-                throw std::runtime_error("[AvCore] gst_parse_launch audio failed: " + msg);
-            }
-
-            appsrc_ = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(pipeline_), "src"));
-            if (!appsrc_)
-                throw std::runtime_error("[AvCore] audio appsrc not found");
-            {
-                std::lock_guard<std::mutex> lock(caps_mutex_);
-                applyCapsLocked();
-            }
-            g_object_set(G_OBJECT(appsrc_), "block", FALSE, "max-bytes", 0, NULL);
-
-            GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
-            if (ret == GST_STATE_CHANGE_FAILURE)
-            {
-                stop();
-                throw std::runtime_error("[AvCore] audio pipeline start failed");
-            }
-            logPipelineState();
-            logNegotiatedCaps();
-            running_.store(true);
-        }
-
-        // Fix #4: push() lock-free sul path critico.
-        // caps_dirty_ e' controllato con exchange; solo se dirty acquisisce caps_mutex_
-        // (evento raro: cambio codec_data AAC). La gst_app_src_push_buffer e' sempre
-        // senza lock — GStreamer garantisce thread-safety su appsrc push concorrente.
-        void push(uint64_t ts_us, const uint8_t *data, std::size_t size)
-        {
-            if (!running_.load() || !appsrc_)
-                return;
-            if (size == 0)
-            {
-                APP_LOG_WARN("app.av_core.audio") << "push called with size=0";
-                return;
-            }
-            if (caps_dirty_.exchange(false))
-            {
-                std::lock_guard<std::mutex> lock(caps_mutex_);
-                applyCapsLocked();
-                APP_LOG_INFO("app.av_core.audio") << "updated appsrc caps=" << buildCapsString();
-            }
-            GstBuffer *buf = gst_buffer_new_memdup(data, static_cast<gsize>(size));
-            GST_BUFFER_PTS(buf) = static_cast<GstClockTime>(ts_us) * GST_USECOND;
-            GST_BUFFER_DTS(buf) = GST_BUFFER_PTS(buf);
-            gst_app_src_push_buffer(appsrc_, buf);
-        }
-
-        void stop()
-        {
-            running_.store(false);
-            std::lock_guard<std::mutex> lock(caps_mutex_);
-            if (appsrc_)
-            {
-                gst_app_src_end_of_stream(appsrc_);
-                gst_object_unref(GST_OBJECT(appsrc_));
-                appsrc_ = nullptr;
-            }
-            if (pipeline_)
-            {
-                gst_element_set_state(pipeline_, GST_STATE_NULL);
-                gst_object_unref(pipeline_);
-                pipeline_ = nullptr;
-            }
-        }
-
-        bool isRunning() const { return running_.load(); }
-
-        void setCodecData(const std::vector<uint8_t> &codec_data)
-        {
-            std::lock_guard<std::mutex> lock(caps_mutex_);
-            codec_data_ = codec_data;
-            caps_dirty_.store(true);
-        }
-
-    private:
-        std::string buildCapsString() const
-        {
-            std::string caps = caps_base_;
-            if (!codec_data_.empty())
-                caps += ",codec_data=(buffer)" + bytesToHex(codec_data_);
-            return caps;
-        }
-
-        void applyCapsLocked()
-        {
-            if (!appsrc_ || caps_base_.empty()) return;
-            GstCaps *caps = gst_caps_from_string(buildCapsString().c_str());
-            if (caps) { gst_app_src_set_caps(appsrc_, caps); gst_caps_unref(caps); }
-        }
-
-        static std::string bytesToHex(const std::vector<uint8_t> &data)
-        {
-            std::ostringstream oss;
-            oss << std::hex << std::setfill('0');
-            for (uint8_t byte : data)
-                oss << std::setw(2) << static_cast<int>(byte);
-            return oss.str();
-        }
-
-        void logPipelineState()
-        {
-            if (!pipeline_) return;
-            GstState current = GST_STATE_NULL, pending = GST_STATE_NULL;
-            GstStateChangeReturn ret = gst_element_get_state(pipeline_, &current, &pending, 2 * GST_SECOND);
-            APP_LOG_INFO("app.av_core.audio")
-                << "pipeline state ret=" << static_cast<int>(ret)
-                << " current=" << gst_element_state_get_name(current)
-                << " pending=" << gst_element_state_get_name(pending);
-        }
-
-        static std::string capsToString(GstCaps *caps)
-        {
-            if (!caps) return "<null>";
-            gchar *caps_str = gst_caps_to_string(caps);
-            std::string out = caps_str ? caps_str : "<null>";
-            if (caps_str) g_free(caps_str);
-            return out;
-        }
-
-        void logNegotiatedCaps()
-        {
-            if (!pipeline_) return;
-            GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline_), "sink");
-            if (appsrc_)
-            {
-                GstCaps *caps = gst_app_src_get_caps(appsrc_);
-                APP_LOG_INFO("app.av_core.audio") << "appsrc caps=" << capsToString(caps);
-                if (caps) gst_caps_unref(caps);
-            }
-            if (sink)
-            {
-                GstPad *pad = gst_element_get_static_pad(sink, "sink");
-                if (pad)
-                {
-                    GstCaps *caps = gst_pad_get_current_caps(pad);
-                    APP_LOG_INFO("app.av_core.audio") << "sink caps=" << capsToString(caps);
-                    if (caps) gst_caps_unref(caps);
-                    gst_object_unref(pad);
-                }
-                gst_object_unref(sink);
-            }
-        }
-
-        static void init_gst_once()
-        {
-            static std::once_flag flag;
-            std::call_once(flag, [](){ gst_init(nullptr, nullptr); });
-        }
-
-        GstElement *pipeline_ = nullptr;
-        GstAppSrc *appsrc_ = nullptr;
-        std::atomic<bool> running_{false};
-        // Fix #4: caps_mutex_ protegge SOLO le operazioni sui caps (raro).
-        // Il path di push() non acquisisce alcun lock.
-        std::mutex caps_mutex_;
-        int sample_rate_{0}, channels_{0}, bits_{0};
-        std::string codec_norm_;
-        std::string caps_base_;
-        std::vector<uint8_t> codec_data_;
-        std::atomic<bool> caps_dirty_{false};
-    };
-
-    class GstMicCapture
-    {
-    public:
-        void init(int sample_rate, int channels, int bits, int frame_ms)
-        {
-            init_gst_once();
-
-            const char *env_src = std::getenv("NEMO_MIC_SRC");
-            std::string src_elem = (env_src && *env_src) ? std::string(env_src) : "autoaudiosrc";
-            std::string format = (bits == 16) ? "S16LE" : "S16LE";
-            std::string base_desc =
-                src_elem + " ! audioconvert ! audioresample "
-                "! audio/x-raw,format=" + format +
-                ",channels=" + std::to_string(channels) +
-                ",rate=" + std::to_string(sample_rate) + " ";
-
-            auto build_desc = [&](bool with_split) -> std::string
-            {
-                std::string desc = base_desc;
-                if (with_split && frame_ms > 0)
-                {
-                    desc += "! identity do-timestamp=true ";
-                    desc += "! audiobuffersplit output-buffer-duration=" + std::to_string(frame_ms * 1000000LL) + " ";
-                    desc += "! queue max-size-buffers=8 leaky=downstream ";
-                }
-                desc += "! appsink name=sink sync=false max-buffers=4 drop=true";
-                return desc;
-            };
-
-            std::string pipe_desc = build_desc(true);
-            APP_LOG_INFO("app.av_core.audio") << "Mic pipeline: " << pipe_desc;
-
-            GError *err = nullptr;
-            pipeline_ = gst_parse_launch(pipe_desc.c_str(), &err);
-            if (!pipeline_ || err)
-            {
-                std::string msg = err ? err->message : "unknown";
-                if (err) g_error_free(err);
-                if (pipeline_) { gst_object_unref(pipeline_); pipeline_ = nullptr; }
-                if (frame_ms > 0)
-                {
-                    std::string fallback = build_desc(false);
-                    APP_LOG_WARN("app.av_core.audio") << "Mic pipeline failed with splitter, retrying without: " << msg;
-                    APP_LOG_INFO("app.av_core.audio") << "Mic pipeline (fallback): " << fallback;
-                    err = nullptr;
-                    pipeline_ = gst_parse_launch(fallback.c_str(), &err);
-                    if (!pipeline_ || err)
-                    {
-                        std::string msg2 = err ? err->message : "unknown";
-                        if (err) g_error_free(err);
-                        if (pipeline_) { gst_object_unref(pipeline_); pipeline_ = nullptr; }
-                        throw std::runtime_error("[AvCore] gst_parse_launch mic failed: " + msg2);
-                    }
-                }
-                else
-                    throw std::runtime_error("[AvCore] gst_parse_launch mic failed: " + msg);
-            }
-
-            appsink_ = GST_APP_SINK(gst_bin_get_by_name(GST_BIN(pipeline_), "sink"));
-            if (!appsink_)
-                throw std::runtime_error("[AvCore] mic appsink not found");
-
-            gst_app_sink_set_emit_signals(appsink_, FALSE);
-            gst_app_sink_set_drop(appsink_, TRUE);
-            gst_app_sink_set_max_buffers(appsink_, 4);
-
-            GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
-            if (ret == GST_STATE_CHANGE_FAILURE)
-            {
-                stop();
-                throw std::runtime_error("[AvCore] mic pipeline start failed");
-            }
-            running_.store(true);
-        }
-
-        bool isRunning() const { return running_.load(); }
-
-        bool pull(AvFrame &out, int timeout_ms)
-        {
-            if (!running_.load() || !appsink_) return false;
-            GstSample *sample = gst_app_sink_try_pull_sample(appsink_, timeout_ms * GST_MSECOND);
-            if (!sample) return false;
-            GstBuffer *buffer = gst_sample_get_buffer(sample);
-            GstMapInfo map;
-            if (!buffer || !gst_buffer_map(buffer, &map, GST_MAP_READ))
-            {
-                gst_sample_unref(sample);
-                return false;
-            }
-            out.data.assign(map.data, map.data + map.size);
-            if (GST_BUFFER_PTS_IS_VALID(buffer))
-                out.ts_us = static_cast<uint64_t>(GST_BUFFER_PTS(buffer) / GST_USECOND);
-            gst_buffer_unmap(buffer, &map);
-            gst_sample_unref(sample);
-            return true;
-        }
-
-        void stop()
-        {
-            running_.store(false);
-            if (appsink_) { gst_object_unref(GST_OBJECT(appsink_)); appsink_ = nullptr; }
-            if (pipeline_) { gst_element_set_state(pipeline_, GST_STATE_NULL); gst_object_unref(pipeline_); pipeline_ = nullptr; }
-        }
-
-    private:
-        static void init_gst_once()
-        {
-            static std::once_flag flag;
-            std::call_once(flag, [](){ gst_init(nullptr, nullptr); });
-        }
-
-        GstElement *pipeline_ = nullptr;
-        GstAppSink *appsink_ = nullptr;
-        std::atomic<bool> running_{false};
-    };
 
     class AvCore
     {
@@ -573,8 +50,9 @@ namespace nemo
 
         ~AvCore() { stop(); }
 
+        // ---------------------------------------------------------------- video
         void configureVideo(int width, int height) { video_width_ = width; video_height_ = height; }
-        void setWindowId(uintptr_t wid) { window_id_ = wid; }
+        void setWindowId(uintptr_t wid)             { window_id_ = wid; }
 
         void startVideo()
         {
@@ -593,22 +71,25 @@ namespace nemo
             clearQueue(video_queue_, video_mutex_);
         }
 
-        void configureAudio(int sample_rate, int channels, int bits, const std::string &codec = "PCM")
+        // ---------------------------------------------------------------- audio
+        void configureAudio(int sample_rate, int channels, int bits,
+                            const std::string &codec = "PCM")
         {
             audio_sample_rate_ = sample_rate;
-            audio_channels_ = channels;
-            audio_bits_ = bits;
-            audio_codec_ = normalizeCodecName(codec);
+            audio_channels_    = channels;
+            audio_bits_        = bits;
+            audio_codec_       = normalizeCodecName(codec);
             APP_LOG_INFO("app.av_core.audio")
-                << "configureAudio: " << sample_rate << "Hz " << channels << "ch "
-                << bits << "bit codec=" << audio_codec_;
+                << "configureAudio: " << sample_rate << "Hz "
+                << channels << "ch " << bits << "bit codec=" << audio_codec_;
         }
 
-        void configureAudioStream(int stream_id, int sample_rate, int channels, int bits, const std::string &codec = "PCM")
+        void configureAudioStream(int stream_id, int sample_rate, int channels,
+                                   int bits, const std::string &codec = "PCM")
         {
             AudioStreamFormat fmt;
             fmt.sample_rate = sample_rate; fmt.channels = channels;
-            fmt.bits = bits; fmt.codec = normalizeCodecName(codec);
+            fmt.bits        = bits;        fmt.codec    = normalizeCodecName(codec);
             {
                 std::lock_guard<std::mutex> lock(audio_mutex_);
                 audio_stream_formats_[stream_id] = fmt;
@@ -652,15 +133,15 @@ namespace nemo
                         }
                     }
                     APP_LOG_INFO("app.av_core.audio")
-                        << "dumping incoming audio stream to "
-                        << audio_dump_path_
+                        << "dumping incoming audio stream to " << audio_dump_path_
                         << (audio_dump_single_ ? " (single file)" : " (per stream)");
                 }
             }
 
             APP_LOG_INFO("app.av_core.audio")
                 << "startAudio: sample_rate=" << audio_sample_rate_
-                << " channels=" << audio_channels_ << " bits=" << audio_bits_
+                << " channels=" << audio_channels_
+                << " bits=" << audio_bits_
                 << " codec=" << audio_codec_;
             audio_pipeline_.init(audio_sample_rate_, audio_channels_, audio_bits_, audio_codec_);
             if (!audio_codec_data_.empty())
@@ -692,6 +173,14 @@ namespace nemo
             }
         }
 
+        // ------------------------------------------------------------------ mic
+        void configureMic(int sample_rate, int channels, int bits)
+        {
+            mic_sample_rate_ = sample_rate;
+            mic_channels_    = channels;
+            mic_bits_        = bits;
+        }
+
         void startMicCapture()
         {
             if (mic_running_.load()) return;
@@ -714,21 +203,16 @@ namespace nemo
             clearQueue(mic_queue_, mic_mutex_);
         }
 
-        void configureMic(int sample_rate, int channels, int bits)
-        {
-            mic_sample_rate_ = sample_rate;
-            mic_channels_ = channels;
-            mic_bits_ = bits;
-        }
-
         void setMicActive(bool active) { mic_active_.store(active); }
-        bool isMicActive() const { return mic_active_.load(); }
+        bool isMicActive()       const { return mic_active_.load(); }
+
         void stop() { stopVideo(); stopAudio(); stopMicCapture(); }
 
-        // Fix #10: restituisce il timestamp audio (us) dell'ultimo chunk
-        // effettivamente inviato alla pipeline GStreamer. -1 se non ancora avviato.
+        /// Fix #10: Master Audio Clock - PTS (us) dell'ultimo chunk inviato alla pipeline.
+        /// -1 se la pipeline non e' ancora avviata. Lock-free, safe da qualsiasi thread.
         int64_t getAudioClockUs() const { return audio_clock_us_.load(); }
 
+        // ---------------------------------------------------- push / pop pubblici
         void pushVideo(uint64_t ts_us, const uint8_t *data, std::size_t size)
         {
             if (!video_running_.load()) return;
@@ -747,7 +231,7 @@ namespace nemo
         {
             if (!audio_running_.load()) return;
 
-            // Bug A fix: counter atomico, thread-safe (chiamato da thread AA-SDK e audioLoop).
+            // Bug A fix: counter atomico, thread-safe.
             const int in_cnt = ++in_log_count_;
             if (ts_us == 0 || in_cnt % 200 == 0)
             {
@@ -763,10 +247,13 @@ namespace nemo
             f.ts_us = ts_us;
             f.data.assign(data, data + size);
 
-            AudioStreamFormat fmt = getStreamFormat(stream_id);
-            const bool stream_pcm = isPcmCodec(fmt.codec);
-            const bool output_pcm = isPcmCodec(audio_codec_);
-            if (!output_pcm && !stream_pcm && size == 2 && normalizeCodecName(fmt.codec) == "AAC_LC")
+            AudioStreamFormat fmt     = getStreamFormat(stream_id);
+            const bool stream_pcm     = isPcmCodec(fmt.codec);
+            const bool output_pcm     = isPcmCodec(audio_codec_);
+
+            // Intercetta AAC codec_data (2-byte packet prima dei frame reali).
+            if (!output_pcm && !stream_pcm && size == 2 &&
+                normalizeCodecName(fmt.codec) == "AAC_LC")
             {
                 std::vector<uint8_t> codec_data(data, data + size);
                 if (codec_data != audio_codec_data_)
@@ -774,11 +261,13 @@ namespace nemo
                     audio_codec_data_ = codec_data;
                     audio_pipeline_.setCodecData(audio_codec_data_);
                     APP_LOG_INFO("app.av_core.audio")
-                        << "captured AAC codec_data=" << bytesToHex(data, size, size)
+                        << "captured AAC codec_data="
+                        << bytesToHex(data, size, size)
                         << " stream=" << stream_id;
                 }
                 return;
             }
+
             if (output_pcm)
             {
                 if (!stream_pcm)
@@ -802,7 +291,8 @@ namespace nemo
                 if (qlc % 500 == 0)
                     APP_LOG_DEBUG("app.av_core.audio")
                         << "queue status: stream=" << stream_id
-                        << " size=" << q.size() << " total_streams=" << audio_queues_.size();
+                        << " size=" << q.size()
+                        << " total_streams=" << audio_queues_.size();
             }
             audio_cv_.notify_one();
         }
@@ -810,8 +300,8 @@ namespace nemo
         bool popMicFrame(AvFrame &out, int timeout_ms)
         {
             std::unique_lock<std::mutex> lock(mic_mutex_);
-            if (!mic_cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this]()
-                                  { return !mic_queue_.empty() || !mic_running_.load(); }))
+            if (!mic_cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms),
+                    [this](){ return !mic_queue_.empty() || !mic_running_.load(); }))
                 return false;
             if (mic_queue_.empty()) return false;
             out = std::move(mic_queue_.front());
@@ -821,6 +311,7 @@ namespace nemo
 
         uintptr_t ptr() const { return reinterpret_cast<uintptr_t>(this); }
 
+        // ----------------------------------------------------- audio routing API
         void setAudioPriority(const std::vector<int> &priority)
         {
             std::lock_guard<std::mutex> lock(audio_mutex_);
@@ -837,34 +328,21 @@ namespace nemo
 
         void setPolicies(OverrunPolicy overrun, UnderrunPolicy underrun)
         {
-            cfg_.overrun_policy = overrun;
+            cfg_.overrun_policy  = overrun;
             cfg_.underrun_policy = underrun;
         }
 
-        void setJitterBufferMs(int ms)  { cfg_.jitter_buffer_ms = ms; }
-        void setMaxQueueFrames(int f)   { cfg_.max_queue_frames = f; }
-        void setAudioFrameMs(int ms)    { cfg_.audio_frame_ms = ms; }
-        void setMaxAvLeadMs(int ms)     { cfg_.max_av_lead_ms = ms; }
+        void setJitterBufferMs(int ms) { cfg_.jitter_buffer_ms = ms; }
+        void setMaxQueueFrames(int f)  { cfg_.max_queue_frames = f; }
+        void setAudioFrameMs(int ms)   { cfg_.audio_frame_ms   = ms; }
+        void setMaxAvLeadMs(int ms)    { cfg_.max_av_lead_ms   = ms; }
 
     private:
-        static bool envTruthy(const char *value)
-        {
-            if (!value || !*value) return false;
-            std::string s(value);
-            std::transform(s.begin(), s.end(), s.begin(),
-                           [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
-            return (s == "1" || s == "true" || s == "yes" || s == "on");
-        }
-
+        // --------------------------------------------------- stream format helpers
         AudioStreamFormat getStreamFormat(int stream_id)
         {
             std::lock_guard<std::mutex> lock(audio_mutex_);
-            auto it = audio_stream_formats_.find(stream_id);
-            if (it != audio_stream_formats_.end()) return it->second;
-            AudioStreamFormat fmt;
-            fmt.sample_rate = audio_sample_rate_; fmt.channels = audio_channels_;
-            fmt.bits = audio_bits_; fmt.codec = audio_codec_;
-            return fmt;
+            return getStreamFormatLocked(stream_id);
         }
 
         AudioStreamFormat getStreamFormatLocked(int stream_id) const
@@ -873,10 +351,11 @@ namespace nemo
             if (it != audio_stream_formats_.end()) return it->second;
             AudioStreamFormat fmt;
             fmt.sample_rate = audio_sample_rate_; fmt.channels = audio_channels_;
-            fmt.bits = audio_bits_; fmt.codec = audio_codec_;
+            fmt.bits        = audio_bits_;        fmt.codec    = audio_codec_;
             return fmt;
         }
 
+        // --------------------------------------------- PCM normalization (SRC+CH)
         bool normalizePcmFrame(AvFrame &frame, const AudioStreamFormat &fmt)
         {
             if (frame.data.empty()) return false;
@@ -884,8 +363,8 @@ namespace nemo
             if (audio_sample_rate_ <= 0 || audio_channels_ <= 0 || fmt.sample_rate <= 0) return true;
             if (fmt.sample_rate == audio_sample_rate_ && fmt.channels == audio_channels_) return true;
 
-            const int16_t *src = reinterpret_cast<const int16_t *>(frame.data.data());
-            std::size_t total_samples = frame.data.size() / sizeof(int16_t);
+            const int16_t  *src           = reinterpret_cast<const int16_t *>(frame.data.data());
+            std::size_t     total_samples = frame.data.size() / sizeof(int16_t);
             if (total_samples == 0 || fmt.channels <= 0) return false;
             std::size_t in_frames = total_samples / static_cast<std::size_t>(fmt.channels);
             if (in_frames == 0) return false;
@@ -903,14 +382,17 @@ namespace nemo
             {
                 ch_conv.resize(in_frames);
                 for (std::size_t i = 0; i < in_frames; ++i)
-                    ch_conv[i] = static_cast<int16_t>((static_cast<int32_t>(src[i*2]) + static_cast<int32_t>(src[i*2+1])) / 2);
+                    ch_conv[i] = static_cast<int16_t>(
+                        (static_cast<int32_t>(src[i*2]) +
+                         static_cast<int32_t>(src[i*2+1])) / 2);
             }
             else
             {
                 const int cw = ++channel_warn_count_;
                 if (cw % 200 == 0)
                     APP_LOG_ERROR("app.av_core.audio")
-                        << "unsupported channel conversion: " << fmt.channels << " -> " << audio_channels_;
+                        << "unsupported channel conversion: "
+                        << fmt.channels << " -> " << audio_channels_;
                 return false;
             }
 
@@ -918,22 +400,25 @@ namespace nemo
             std::vector<int16_t> resampled;
             if (fmt.sample_rate != audio_sample_rate_ && conv_frames > 0)
             {
-                const double ratio = static_cast<double>(fmt.sample_rate) / static_cast<double>(audio_sample_rate_);
-                std::size_t out_frames = std::max<std::size_t>(1, static_cast<std::size_t>(static_cast<double>(conv_frames) / ratio));
+                const double   ratio      = static_cast<double>(fmt.sample_rate) /
+                                            static_cast<double>(audio_sample_rate_);
+                std::size_t    out_frames = std::max<std::size_t>(
+                    1, static_cast<std::size_t>(static_cast<double>(conv_frames) / ratio));
                 resampled.resize(out_frames * static_cast<std::size_t>(audio_channels_));
                 for (std::size_t of = 0; of < out_frames; ++of)
                 {
-                    double src_pos = static_cast<double>(of) * ratio;
-                    std::size_t idx = static_cast<std::size_t>(src_pos);
-                    double frac = src_pos - static_cast<double>(idx);
+                    double      src_pos = static_cast<double>(of) * ratio;
+                    std::size_t idx     = static_cast<std::size_t>(src_pos);
+                    double      frac    = src_pos - static_cast<double>(idx);
                     if (idx >= conv_frames) idx = conv_frames - 1;
                     std::size_t idx2 = std::min(idx + 1, conv_frames - 1);
                     for (int ch = 0; ch < audio_channels_; ++ch)
                     {
-                        int16_t s0 = ch_conv[idx * audio_channels_ + ch];
+                        int16_t s0 = ch_conv[idx  * audio_channels_ + ch];
                         int16_t s1 = ch_conv[idx2 * audio_channels_ + ch];
-                        resampled[of * audio_channels_ + ch] =
-                            static_cast<int16_t>(static_cast<double>(s0) + (static_cast<double>(s1 - s0) * frac));
+                        resampled[of * audio_channels_ + ch] = static_cast<int16_t>(
+                            static_cast<double>(s0) +
+                            static_cast<double>(s1 - s0) * frac);
                     }
                 }
             }
@@ -943,22 +428,23 @@ namespace nemo
             const int frame_bytes = audioBytesPerFrame();
             if (frame_bytes > 0)
             {
-                std::size_t expected_samples = frame_bytes / sizeof(int16_t);
-                if (resampled.size() < expected_samples) resampled.resize(expected_samples, 0);
-                else if (resampled.size() > expected_samples) resampled.resize(expected_samples);
+                std::size_t expected = frame_bytes / sizeof(int16_t);
+                if (resampled.size() < expected) resampled.resize(expected, 0);
+                else if (resampled.size() > expected) resampled.resize(expected);
             }
             frame.data.resize(resampled.size() * sizeof(int16_t));
             std::memcpy(frame.data.data(), resampled.data(), frame.data.size());
             return true;
         }
 
+        // -------------------------------------------------- audio dump helpers
         void writeAudioDump(int stream_id, const uint8_t *data, std::size_t size)
         {
             if (!data || size == 0) return;
             std::lock_guard<std::mutex> lock(audio_dump_mutex_);
             if (audio_dump_path_.empty()) return;
             int file_id = audio_dump_single_ ? 0 : stream_id;
-            auto &file = audio_dump_files_[file_id];
+            auto &file  = audio_dump_files_[file_id];
             if (!file.is_open())
             {
                 const std::string path = resolveDumpPathLocked(stream_id);
@@ -966,13 +452,16 @@ namespace nemo
                 {
                     file.open(path, std::ios::binary | std::ios::app);
                     if (file.is_open())
-                        APP_LOG_INFO("app.av_core.audio") << "dump stream=" << stream_id << " -> " << path;
+                        APP_LOG_INFO("app.av_core.audio")
+                            << "dump stream=" << stream_id << " -> " << path;
                     else
-                        APP_LOG_ERROR("app.av_core.audio") << "failed to open dump file: " << path;
+                        APP_LOG_ERROR("app.av_core.audio")
+                            << "failed to open dump file: " << path;
                 }
             }
             if (file.is_open())
-                file.write(reinterpret_cast<const char *>(data), static_cast<std::streamsize>(size));
+                file.write(reinterpret_cast<const char *>(data),
+                           static_cast<std::streamsize>(size));
         }
 
         std::string resolveDumpPathLocked(int stream_id) const
@@ -982,7 +471,11 @@ namespace nemo
             std::string path = audio_dump_path_;
             const std::string token = "{stream}";
             auto pos = path.find(token);
-            if (pos != std::string::npos) { path.replace(pos, token.size(), std::to_string(stream_id)); return path; }
+            if (pos != std::string::npos)
+            {
+                path.replace(pos, token.size(), std::to_string(stream_id));
+                return path;
+            }
             std::error_code ec;
             if (std::filesystem::is_directory(path, ec))
                 return path + "/audio_stream_" + std::to_string(stream_id) + ".dump";
@@ -998,24 +491,26 @@ namespace nemo
             audio_dump_files_.clear();
         }
 
+        // --------------------------------------------------- overrun / queue
         bool applyOverrunPolicy(std::deque<AvFrame> &q)
         {
             if (static_cast<int>(q.size()) < cfg_.max_queue_frames) return true;
             if (cfg_.overrun_policy == OverrunPolicy::DROP_NEW)
             {
-                const int dn = ++drop_new_count_;
-                if (dn % 500 == 0)
-                    APP_LOG_WARN("app.av_core.audio") << "overrun: dropping new frame (queue=" << q.size() << ")";
+                if (++drop_new_count_ % 500 == 0)
+                    APP_LOG_WARN("app.av_core.audio")
+                        << "overrun: dropping new frame (queue=" << q.size() << ")";
                 return false;
             }
             if (cfg_.overrun_policy == OverrunPolicy::DROP_OLD)
             {
-                const int doo = ++drop_old_count_;
-                if (doo % 500 == 0)
-                    APP_LOG_WARN("app.av_core.audio") << "overrun: dropping old frame (queue=" << q.size() << ")";
+                if (++drop_old_count_ % 500 == 0)
+                    APP_LOG_WARN("app.av_core.audio")
+                        << "overrun: dropping old frame (queue=" << q.size() << ")";
                 q.pop_front();
                 return true;
             }
+            // PROGRESSIVE_DISCARD
             while (static_cast<int>(q.size()) >= cfg_.max_queue_frames / 2 && !q.empty())
                 q.pop_front();
             return true;
@@ -1035,9 +530,7 @@ namespace nemo
 
         void clearAudioQueuesLocked() { audio_queues_.clear(); }
 
-        // Fix #3: videoLoop() usa audio_clock_us_ (PTS reale inviato alla pipeline)
-        // invece del contatore frame-count come gate di sincronizzazione A/V.
-        // Se audio non e' ancora avviato (audio_clock_us_==-1) passa senza throttle.
+        // --------------------------------------------------- video loop (Fix #3)
         void videoLoop()
         {
             while (video_running_.load())
@@ -1045,8 +538,8 @@ namespace nemo
                 AvFrame frame;
                 {
                     std::unique_lock<std::mutex> lock(video_mutex_);
-                    video_cv_.wait(lock, [this]()
-                                   { return !video_queue_.empty() || !video_running_.load(); });
+                    video_cv_.wait(lock, [this](){
+                        return !video_queue_.empty() || !video_running_.load(); });
                     if (!video_running_.load()) break;
                     frame = std::move(video_queue_.front());
                     video_queue_.pop_front();
@@ -1056,12 +549,10 @@ namespace nemo
                     const int64_t audio_clock = audio_clock_us_.load();
                     if (audio_clock >= 0)
                     {
-                        const int64_t lead_us = static_cast<int64_t>(frame.ts_us)
-                                                - audio_clock;
+                        const int64_t lead_us    = static_cast<int64_t>(frame.ts_us) - audio_clock;
                         const int64_t max_lead_us = static_cast<int64_t>(cfg_.max_av_lead_ms) * 1000;
                         if (lead_us > max_lead_us)
                         {
-                            // Video in anticipo sull'audio: throttle proporzionale, max 8ms.
                             const int sleep_ms = static_cast<int>(
                                 std::min<int64_t>((lead_us - max_lead_us) / 1000, 8));
                             if (sleep_ms > 0)
@@ -1073,6 +564,7 @@ namespace nemo
             }
         }
 
+        // --------------------------------------------------- audio stream select
         int pickAudioStream()
         {
             if (!audio_priority_.empty())
@@ -1080,70 +572,65 @@ namespace nemo
                 for (int id : audio_priority_)
                 {
                     auto it = audio_queues_.find(id);
-                    if (it != audio_queues_.end() && !it->second.empty())
-                    {
-                        if (normalizeCodecName(getStreamFormatLocked(id).codec) != normalizeCodecName(audio_codec_))
-                            continue;
-                        return id;
-                    }
+                    if (it == audio_queues_.end() || it->second.empty()) continue;
+                    if (normalizeCodecName(getStreamFormatLocked(id).codec) !=
+                        normalizeCodecName(audio_codec_)) continue;
+                    return id;
                 }
             }
             for (auto &kv : audio_queues_)
             {
-                if (normalizeCodecName(getStreamFormatLocked(kv.first).codec) != normalizeCodecName(audio_codec_))
-                    continue;
+                if (normalizeCodecName(getStreamFormatLocked(kv.first).codec) !=
+                    normalizeCodecName(audio_codec_)) continue;
                 if (!kv.second.empty()) return kv.first;
             }
             return -1;
         }
 
-        // Aggiorna audio_clock_us_ con il ts appena inviato alla pipeline.
-        // Fix #10: chiamato da audioLoop() dopo ogni push alla pipeline.
+        // Fix #10: aggiorna il Master Audio Clock dopo ogni push alla pipeline.
         void updateAudioClock(uint64_t ts_us)
         {
             audio_clock_us_.store(static_cast<int64_t>(ts_us));
         }
 
+        // ------------------------------------------------------- audio main loop
         void audioLoop()
         {
-            const bool pcm_output = isPcmCodec(audio_codec_);
-            const int frame_bytes = pcm_output ? audioBytesPerFrame() : 0;
+            const bool pcm_output  = isPcmCodec(audio_codec_);
+            const int  frame_bytes = pcm_output ? audioBytesPerFrame() : 0;
 
             while (audio_running_.load())
             {
-                int stream_id = -1;
+                int    stream_id  = -1;
                 AvFrame frame;
-                bool has_frame = false;
-                // Fix #2: mix e frames_to_mix estratti dentro il lock, mix PCM calcolato fuori.
+                bool   has_frame  = false;
+                // Fix #2: frames_to_mix estratti dentro il lock; mix PCM calcolato fuori.
                 std::vector<std::pair<std::vector<int16_t>, float>> frames_to_mix;
-                bool mixed = false;
-                uint64_t now_ms = nowMs();
+                bool   mixed      = false;
+                uint64_t now_ms   = nowMs();
 
-                // Bug D fix: info_streams e prebuffer_info costruite FUORI dal lock.
-                bool do_info_log = false;
+                // Bug D fix: flag calcolato fuori dal lock.
+                bool do_info_log  = false;
                 {
                     uint64_t expected = last_info_ms_.load();
                     if (now_ms >= expected + 1000)
-                    {
                         if (last_info_ms_.compare_exchange_strong(expected, now_ms))
                             do_info_log = true;
-                    }
                 }
-
-                bool mic_blocked = false;
 
                 struct StreamSnapshot { int id; std::size_t size; };
                 std::vector<StreamSnapshot> stream_snapshot;
                 int snap_prebuf_stream_id = -1;
-                int snap_queued_frames = 0, snap_prebuffer_frames = 0, snap_max_frames = 0;
-                int snap_queued_ms = 0, snap_target_ms = 0;
+                int snap_queued_frames = 0, snap_prebuffer_frames = 0;
+                int snap_max_frames = 0, snap_queued_ms = 0, snap_target_ms = 0;
 
                 {
                     std::unique_lock<std::mutex> lock(audio_mutex_);
                     audio_cv_.wait_for(lock, std::chrono::milliseconds(cfg_.audio_frame_ms),
-                                       [this](){ return hasAudioDataLocked() || !audio_running_.load(); });
+                        [this](){ return hasAudioDataLocked() || !audio_running_.load(); });
                     if (!audio_running_.load()) break;
 
+                    bool mic_blocked = false;
                     if (mic_active_.load())
                     {
                         clearAudioQueuesLocked();
@@ -1151,28 +638,28 @@ namespace nemo
                     }
 
                     if (do_info_log)
-                    {
                         for (auto &kv : audio_queues_)
                             stream_snapshot.push_back({kv.first, kv.second.size()});
-                    }
 
                     if (!pcm_output)
                     {
                         stream_id = pickAudioStream();
                         if (stream_id >= 0)
                         {
-                            auto &q = audio_queues_[stream_id];
-                            int frame_ms = encodedFrameDurationMsLocked(stream_id);
-                            snap_queued_frames = static_cast<int>(q.size());
-                            snap_max_frames = std::max(1, cfg_.max_queue_frames);
-                            snap_prebuffer_frames = std::max(1, (cfg_.audio_prebuffer_ms + frame_ms - 1) / frame_ms);
+                            auto &q          = audio_queues_[stream_id];
+                            int   frame_ms   = encodedFrameDurationMsLocked(stream_id);
+                            snap_queued_frames    = static_cast<int>(q.size());
+                            snap_max_frames       = std::max(1, cfg_.max_queue_frames);
+                            snap_prebuffer_frames = std::max(1,
+                                (cfg_.audio_prebuffer_ms + frame_ms - 1) / frame_ms);
                             if (snap_prebuffer_frames >= snap_max_frames)
                                 snap_prebuffer_frames = std::max(1, snap_max_frames - 1);
-                            snap_queued_ms = frame_ms * snap_queued_frames;
-                            snap_target_ms = cfg_.audio_prebuffer_ms;
+                            snap_queued_ms    = frame_ms * snap_queued_frames;
+                            snap_target_ms    = cfg_.audio_prebuffer_ms;
                             snap_prebuf_stream_id = stream_id;
 
-                            if (cfg_.audio_prebuffer_ms <= 0 || snap_queued_frames >= snap_prebuffer_frames)
+                            if (cfg_.audio_prebuffer_ms <= 0 ||
+                                snap_queued_frames >= snap_prebuffer_frames)
                             {
                                 frame = std::move(q.front());
                                 q.pop_front();
@@ -1192,9 +679,8 @@ namespace nemo
                             int top_idx = pickTopGroupLocked(now_ms);
                             if (top_idx >= 0)
                             {
-                                // Fix #2: drainGroupFrames() estrae i buffer dai queue dentro
-                                // il lock. Il mix PCM e' calcolato fuori dal lock (sotto).
-                                frames_to_mix = drainGroupFrames(top_idx, audio_groups_[top_idx].priority);
+                                frames_to_mix = drainGroupFrames(
+                                    top_idx, audio_groups_[top_idx].priority);
                                 has_frame = !frames_to_mix.empty();
                             }
                         }
@@ -1204,33 +690,45 @@ namespace nemo
                             if (stream_id >= 0)
                             {
                                 auto &q = audio_queues_[stream_id];
-                                frame = std::move(q.front());
+                                frame   = std::move(q.front());
                                 q.pop_front();
                                 has_frame = true;
-                                const int plc = ++pop_log_count_;
-                                if (plc % 500 == 0)
+                                if (++pop_log_count_ % 500 == 0)
                                     APP_LOG_TRACE("app.av_core.audio")
-                                        << "pop stream=" << stream_id << " remaining=" << q.size();
+                                        << "pop stream=" << stream_id
+                                        << " remaining=" << q.size();
                             }
                         }
                     }
+
+                    if (mic_blocked)
+                    {
+                        if (pcm_output && frame_bytes > 0)
+                        {
+                            uint64_t ts = nextAudioTimestampLocked(stream_id, 0);
+                            AvFrame silence;
+                            silence.ts_us = ts;
+                            silence.data.assign(frame_bytes, 0);
+                            audio_pipeline_.push(silence.ts_us,
+                                                  silence.data.data(), silence.data.size());
+                            updateAudioClock(silence.ts_us);
+                        }
+                        continue;
+                    }
                 } // fine lock audio_mutex_
 
-                // Bug D fix: costruiamo le stringhe di log FUORI dal lock.
+                // Bug D fix: log costruito FUORI dal lock.
                 if (do_info_log)
                 {
                     std::ostringstream oss;
-                    size_t info_total = 0;
-                    bool first = true;
+                    std::size_t total = 0; bool first = true;
                     for (auto &s : stream_snapshot)
                     {
                         if (!first) oss << " ";
                         first = false;
                         oss << s.id << "=" << s.size;
-                        info_total += s.size;
+                        total += s.size;
                     }
-                    std::string info_streams = oss.str();
-
                     std::string prebuffer_info;
                     if (snap_prebuf_stream_id >= 0)
                     {
@@ -1243,45 +741,26 @@ namespace nemo
                              << " target_ms=" << snap_target_ms;
                         prebuffer_info = poss.str();
                     }
-
-                    size_t mic_q = 0;
+                    std::size_t mic_q = 0;
                     {
                         std::lock_guard<std::mutex> mic_lock(mic_mutex_);
                         mic_q = mic_queue_.size();
                     }
                     APP_LOG_INFO("app.av_core.audio")
-                        << "buffers: audio_total=" << info_total
-                        << " streams=[" << info_streams << "]"
+                        << "buffers: audio_total=" << total
+                        << " streams=[" << oss.str() << "]"
                         << " mic_q=" << mic_q
-                        << (prebuffer_info.empty() ? "" : (std::string(" ") + prebuffer_info));
-                }
-
-                if (mic_blocked)
-                {
-                    if (pcm_output && frame_bytes > 0)
-                    {
-                        uint64_t ts;
-                        {
-                            std::lock_guard<std::mutex> lock(audio_mutex_);
-                            ts = nextAudioTimestampLocked(stream_id, 0);
-                        }
-                        AvFrame silence;
-                        silence.ts_us = ts;
-                        silence.data.assign(frame_bytes, 0);
-                        audio_pipeline_.push(silence.ts_us, silence.data.data(), silence.data.size());
-                        updateAudioClock(silence.ts_us);
-                    }
-                    continue;
+                        << (prebuffer_info.empty() ? "" : (" " + prebuffer_info));
                 }
 
                 if (!has_frame)
                 {
-                    if (pcm_output && cfg_.underrun_policy == UnderrunPolicy::SILENCE && frame_bytes > 0)
+                    if (pcm_output && cfg_.underrun_policy == UnderrunPolicy::SILENCE
+                        && frame_bytes > 0)
                     {
-                        const int uc = ++underrun_count_;
-                        if (uc % 100 == 0)
+                        if (++underrun_count_ % 100 == 0)
                         {
-                            size_t total_items = 0;
+                            std::size_t total_items = 0;
                             {
                                 std::lock_guard<std::mutex> lock(audio_mutex_);
                                 for (auto &kv : audio_queues_) total_items += kv.second.size();
@@ -1299,13 +778,13 @@ namespace nemo
                         AvFrame silence;
                         silence.ts_us = ts;
                         silence.data.assign(frame_bytes, 0);
-                        audio_pipeline_.push(silence.ts_us, silence.data.data(), silence.data.size());
+                        audio_pipeline_.push(silence.ts_us,
+                                              silence.data.data(), silence.data.size());
                         updateAudioClock(silence.ts_us);
                     }
-                    const int nfc = ++no_frame_count_;
-                    if (nfc % 200 == 0)
+                    if (++no_frame_count_ % 200 == 0)
                     {
-                        size_t total_items = 0;
+                        std::size_t total_items = 0;
                         {
                             std::lock_guard<std::mutex> lock(audio_mutex_);
                             for (auto &kv : audio_queues_) total_items += kv.second.size();
@@ -1323,16 +802,16 @@ namespace nemo
                     uint64_t ts;
                     {
                         std::lock_guard<std::mutex> lock(audio_mutex_);
-                        ts = frame.ts_us ? frame.ts_us : nextAudioTimestampLocked(stream_id, 0);
+                        ts = frame.ts_us ? frame.ts_us
+                                         : nextAudioTimestampLocked(stream_id, 0);
                         if (frame.ts_us)
                         {
-                            uint64_t prev_global = last_audio_ts_.load();
-                            if (ts > prev_global) last_audio_ts_.store(ts);
+                            uint64_t prev = last_audio_ts_.load();
+                            if (ts > prev) last_audio_ts_.store(ts);
                             if (stream_id >= 0) last_audio_ts_per_stream_[stream_id] = ts;
                         }
                     }
-                    const int eoc = ++encoded_out_count_;
-                    if (eoc % 200 == 0)
+                    if (++encoded_out_count_ % 200 == 0)
                         APP_LOG_DEBUG("app.av_core.audio")
                             << "push encoded stream=" << stream_id
                             << " ts=" << ts << " size=" << frame.data.size();
@@ -1341,7 +820,7 @@ namespace nemo
                     continue;
                 }
 
-                // Fix #2: se ci sono gruppi, esegui il mix PCM FUORI dal lock.
+                // Fix #2: mix PCM FUORI dal lock.
                 if (!frames_to_mix.empty())
                 {
                     std::vector<int16_t> mix(frame_bytes / 2, 0);
@@ -1356,7 +835,6 @@ namespace nemo
                         }
                     }
                     mixed = true;
-
                     uint64_t ts;
                     {
                         std::lock_guard<std::mutex> lock(audio_mutex_);
@@ -1366,8 +844,7 @@ namespace nemo
                     out.ts_us = ts;
                     out.data.resize(mix.size() * sizeof(int16_t));
                     std::memcpy(out.data.data(), mix.data(), out.data.size());
-                    const int moc = ++mixed_out_count_;
-                    if (moc % 200 == 0)
+                    if (++mixed_out_count_ % 200 == 0)
                         APP_LOG_DEBUG("app.av_core.audio")
                             << "push mixed ts=" << out.ts_us << " size=" << out.data.size();
                     audio_pipeline_.push(out.ts_us, out.data.data(), out.data.size());
@@ -1380,8 +857,7 @@ namespace nemo
                         std::lock_guard<std::mutex> lock(audio_mutex_);
                         ts = nextAudioTimestampLocked(stream_id, frame.ts_us);
                     }
-                    const int poc = ++pcm_out_count_;
-                    if (poc % 200 == 0)
+                    if (++pcm_out_count_ % 200 == 0)
                         APP_LOG_DEBUG("app.av_core.audio")
                             << "push pcm stream=" << stream_id
                             << " ts=" << ts << " size=" << frame.data.size();
@@ -1391,25 +867,11 @@ namespace nemo
             }
         }
 
-        static std::string bytesToHex(const uint8_t *data, std::size_t size, std::size_t max_bytes)
-        {
-            if (!data || size == 0 || max_bytes == 0) return "<empty>";
-            const std::size_t count = std::min(size, max_bytes);
-            std::ostringstream oss;
-            oss << std::hex << std::setfill('0');
-            for (std::size_t i = 0; i < count; ++i)
-            {
-                if (i) oss << ' ';
-                oss << std::setw(2) << static_cast<int>(data[i]);
-            }
-            if (size > count) oss << " ...";
-            return oss.str();
-        }
-
+        // ---------------------------------------------------------- mic loop
         void micLoop()
         {
             const int bytes_per_sample = std::max(1, mic_bits_ / 8);
-            const int bytes_per_ms = (mic_sample_rate_ * mic_channels_ * bytes_per_sample) / 1000;
+            const int bytes_per_ms     = (mic_sample_rate_ * mic_channels_ * bytes_per_sample) / 1000;
             const std::size_t target_bytes = static_cast<std::size_t>(
                 std::max(cfg_.mic_batch_ms, cfg_.mic_frame_ms) * std::max(1, bytes_per_ms));
             std::vector<uint8_t> batch;
@@ -1433,7 +895,7 @@ namespace nemo
                 {
                     AvFrame out;
                     out.ts_us = batch_ts;
-                    out.data = std::move(batch);
+                    out.data  = std::move(batch);
                     batch.clear(); batch_ts = 0;
                     std::lock_guard<std::mutex> lock(mic_mutex_);
                     if (!applyOverrunPolicy(mic_queue_)) continue;
@@ -1443,6 +905,7 @@ namespace nemo
             }
         }
 
+        // ----------------------------------------------- audio helpers (locked)
         bool hasAudioDataLocked() const
         {
             const std::string output_codec = normalizeCodecName(audio_codec_);
@@ -1465,7 +928,7 @@ namespace nemo
         {
             auto it = audio_stream_formats_.find(stream_id);
             if (it == audio_stream_formats_.end()) return 20;
-            const auto &fmt = it->second;
+            const auto  &fmt   = it->second;
             const std::string codec = normalizeCodecName(fmt.codec);
             if (codec == "AAC_LC" && fmt.sample_rate > 0)
                 return static_cast<int>((1024 * 1000 + fmt.sample_rate - 1) / fmt.sample_rate);
@@ -1493,39 +956,40 @@ namespace nemo
                 if (audio_groups_[i].priority > top_priority)
                 {
                     top_priority = audio_groups_[i].priority;
-                    top_idx = static_cast<int>(i);
+                    top_idx      = static_cast<int>(i);
                 }
             }
-            active_group_ = top_idx;
-            active_until_ms_ = (top_idx >= 0) ? now_ms + static_cast<uint64_t>(audio_groups_[top_idx].hold_ms) : 0;
+            active_group_    = top_idx;
+            active_until_ms_ = (top_idx >= 0)
+                ? now_ms + static_cast<uint64_t>(audio_groups_[top_idx].hold_ms)
+                : 0;
             return top_idx;
         }
 
-        // Fix #2: drainGroupFrames() estrae i frame dai queue di tutti i gruppi
-        // DENTRO audio_mutex_ (gia' acquisito dal chiamante audioLoop),
-        // restituisce coppie (campioni PCM, gain) per il mix fuori lock.
+        // Fix #2: drain dentro audio_mutex_ (gia' acquisito), mix PCM fuori.
         std::vector<std::pair<std::vector<int16_t>, float>>
         drainGroupFrames(int top_idx, int top_priority)
         {
             std::vector<std::pair<std::vector<int16_t>, float>> result;
             for (std::size_t gi = 0; gi < audio_groups_.size(); ++gi)
             {
-                auto &g = audio_groups_[gi];
-                float gain = (static_cast<int>(gi) == top_idx)
+                auto &g     = audio_groups_[gi];
+                float gain  = (static_cast<int>(gi) == top_idx)
                     ? 1.0f
                     : ((g.priority < top_priority)
                         ? static_cast<float>(g.ducking) / 100.0f
                         : 1.0f);
                 for (std::size_t ci = 0; ci < g.channels.size(); ++ci)
                 {
-                    int ch = g.channels[ci];
+                    int ch  = g.channels[ci];
                     auto it = audio_queues_.find(ch);
                     if (it == audio_queues_.end() || it->second.empty()) continue;
                     AvFrame fm = std::move(it->second.front());
                     it->second.pop_front();
                     float ch_gain = gain;
                     if (!g.channel_gains.empty())
-                        ch_gain *= g.channel_gains[std::min(ci, g.channel_gains.size() - 1)];
+                        ch_gain *= g.channel_gains[
+                            std::min(ci, g.channel_gains.size() - 1)];
                     const std::size_t n_samples = fm.data.size() / sizeof(int16_t);
                     std::vector<int16_t> samples(n_samples);
                     std::memcpy(samples.data(), fm.data.data(), fm.data.size());
@@ -1535,57 +999,47 @@ namespace nemo
             return result;
         }
 
-        // Bug B fix: rinominato nextAudioTimestampLocked() per rendere esplicito
-        // che DEVE essere chiamato con audio_mutex_ gia' acquisito.
+        // Bug B fix: rinominato per segnalare che richiede audio_mutex_ acquisito.
         uint64_t nextAudioTimestampLocked(int stream_id, uint64_t preferred_ts)
         {
             uint64_t last = (stream_id >= 0)
                 ? last_audio_ts_per_stream_[stream_id]
                 : last_audio_ts_.load();
-
             uint64_t step = static_cast<uint64_t>(cfg_.audio_frame_ms) * 1000;
             uint64_t next = (last == 0)
                 ? (preferred_ts == 0 ? step : preferred_ts)
                 : std::max(last + step, preferred_ts > 0 ? preferred_ts : last + step);
-
-            const int tlc = ++ts_log_count_;
-            if (tlc % 1000 == 0)
+            if (++ts_log_count_ % 1000 == 0)
                 APP_LOG_DEBUG("app.av_core.audio")
                     << "nextAudioTimestamp stream=" << stream_id
-                    << " preferred=" << preferred_ts << " last=" << last
-                    << " next=" << next << " step=" << step;
-
+                    << " preferred=" << preferred_ts
+                    << " last=" << last << " next=" << next << " step=" << step;
             if (stream_id >= 0) last_audio_ts_per_stream_[stream_id] = next;
-            uint64_t prev_global = last_audio_ts_.load();
-            if (next > prev_global) last_audio_ts_.store(next);
+            uint64_t prev = last_audio_ts_.load();
+            if (next > prev) last_audio_ts_.store(next);
             return next;
-        }
-
-        static uint64_t nowMs()
-        {
-            return static_cast<uint64_t>(
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::steady_clock::now().time_since_epoch()).count());
         }
 
         int audioBytesPerFrame() const
         {
             if (audio_sample_rate_ <= 0 || audio_channels_ <= 0 || audio_bits_ <= 0) return 0;
-            return (audio_sample_rate_ * cfg_.audio_frame_ms / 1000) * audio_channels_ * (audio_bits_ / 8);
+            return (audio_sample_rate_ * cfg_.audio_frame_ms / 1000)
+                   * audio_channels_ * (audio_bits_ / 8);
         }
 
+        // ---------------------------------------------------------------- members
         AvCoreConfig cfg_;
 
-        int video_width_ = 800, video_height_ = 480;
-        uintptr_t window_id_ = 0;
+        int       video_width_ = 800, video_height_ = 480;
+        uintptr_t window_id_   = 0;
 
-        int audio_sample_rate_ = 16000, audio_channels_ = 1, audio_bits_ = 16;
-        std::string audio_codec_ = "PCM";
-        int mic_sample_rate_ = 16000, mic_channels_ = 1, mic_bits_ = 16;
+        int         audio_sample_rate_ = 16000, audio_channels_ = 1, audio_bits_ = 16;
+        std::string audio_codec_       = "PCM";
+        int         mic_sample_rate_   = 16000, mic_channels_   = 1, mic_bits_   = 16;
 
         GstVideoPipeline video_pipeline_;
         GstAudioPipeline audio_pipeline_;
-        GstMicCapture mic_capture_;
+        GstMicCapture    mic_capture_;
 
         std::atomic<bool> video_running_{false};
         std::atomic<bool> audio_running_{false};
@@ -1594,40 +1048,37 @@ namespace nemo
 
         std::thread video_thread_, audio_thread_, mic_thread_;
 
-        std::mutex audio_dump_mutex_;
-        std::string audio_dump_path_;
-        bool audio_dump_single_ = false;
+        std::mutex   audio_dump_mutex_;
+        std::string  audio_dump_path_;
+        bool         audio_dump_single_ = false;
         std::unordered_map<int, std::ofstream> audio_dump_files_;
 
         std::deque<AvFrame> video_queue_;
-        std::mutex video_mutex_;
+        std::mutex          video_mutex_;
         std::condition_variable video_cv_;
 
-        std::unordered_map<int, std::deque<AvFrame>> audio_queues_;
-        std::unordered_map<int, AudioStreamFormat> audio_stream_formats_;
-        std::vector<uint8_t> audio_codec_data_;
-        std::vector<int> audio_priority_;
+        std::unordered_map<int, std::deque<AvFrame>>     audio_queues_;
+        std::unordered_map<int, AudioStreamFormat>       audio_stream_formats_;
+        std::vector<uint8_t>   audio_codec_data_;
+        std::vector<int>       audio_priority_;
         std::vector<AudioGroup> audio_groups_;
-        int active_group_ = -1;
+        int      active_group_    = -1;
         uint64_t active_until_ms_ = 0;
-        std::mutex audio_mutex_;
+        std::mutex              audio_mutex_;
         std::condition_variable audio_cv_;
 
-        std::deque<AvFrame> mic_queue_;
-        std::mutex mic_mutex_;
+        std::deque<AvFrame>     mic_queue_;
+        std::mutex              mic_mutex_;
         std::condition_variable mic_cv_;
 
         std::atomic<uint64_t> last_audio_ts_{0};
         std::unordered_map<int, uint64_t> last_audio_ts_per_stream_;
 
-        // Fix #10: Master Audio Clock - PTS (us) dell'ultimo chunk inviato
-        // alla pipeline GStreamer. -1 = pipeline non ancora avviata.
-        // Usato da videoLoop() per il gate A/V sync PTS-based (Fix #3).
+        /// Fix #10: Master Audio Clock. -1 = pipeline non avviata.
+        /// Usato da videoLoop() per il gate A/V sync (Fix #3).
         std::atomic<int64_t> audio_clock_us_{-1};
 
-        // Bug A fix: tutti i counter 'static int' dentro i metodi sono stati promossi
-        // a membro std::atomic<int> per eliminare il data race tra push (thread AA-SDK)
-        // e audioLoop (thread dedicato).
+        // Bug A fix: counter promossi a std::atomic<int> per thread-safety.
         std::atomic<int> in_log_count_{0};
         std::atomic<int> codec_mismatch_count_{0};
         std::atomic<int> queue_log_count_{0};
@@ -1646,115 +1097,3 @@ namespace nemo
     };
 
 } // namespace nemo
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
-inline void init_av_core_binding(pybind11::module_ &m)
-{
-    namespace py = pybind11;
-
-    py::enum_<nemo::OverrunPolicy>(m, "OverrunPolicy")
-        .value("DROP_OLD", nemo::OverrunPolicy::DROP_OLD)
-        .value("DROP_NEW", nemo::OverrunPolicy::DROP_NEW)
-        .value("PROGRESSIVE_DISCARD", nemo::OverrunPolicy::PROGRESSIVE_DISCARD);
-
-    py::enum_<nemo::UnderrunPolicy>(m, "UnderrunPolicy")
-        .value("WAIT", nemo::UnderrunPolicy::WAIT)
-        .value("SILENCE", nemo::UnderrunPolicy::SILENCE);
-
-    py::class_<nemo::AvCoreConfig>(m, "AvCoreConfig")
-        .def(py::init<>())
-        .def_readwrite("jitter_buffer_ms", &nemo::AvCoreConfig::jitter_buffer_ms)
-        .def_readwrite("max_queue_frames", &nemo::AvCoreConfig::max_queue_frames)
-        .def_readwrite("audio_frame_ms", &nemo::AvCoreConfig::audio_frame_ms)
-        .def_readwrite("max_av_lead_ms", &nemo::AvCoreConfig::max_av_lead_ms)
-        .def_readwrite("mic_frame_ms", &nemo::AvCoreConfig::mic_frame_ms)
-        .def_readwrite("mic_batch_ms", &nemo::AvCoreConfig::mic_batch_ms)
-        .def_readwrite("audio_prebuffer_ms", &nemo::AvCoreConfig::audio_prebuffer_ms)
-        .def_readwrite("overrun_policy", &nemo::AvCoreConfig::overrun_policy)
-        .def_readwrite("underrun_policy", &nemo::AvCoreConfig::underrun_policy);
-
-    py::class_<nemo::AvCore, std::shared_ptr<nemo::AvCore>>(m, "AvCore")
-        .def(py::init<nemo::AvCoreConfig>(), py::arg("config") = nemo::AvCoreConfig())
-        .def("configure_video", &nemo::AvCore::configureVideo, py::arg("width"), py::arg("height"))
-        .def("set_window_id", &nemo::AvCore::setWindowId, py::arg("window_id"))
-        .def("is_mic_active", &nemo::AvCore::isMicActive)
-        .def("start_video", &nemo::AvCore::startVideo)
-        .def("stop_video", &nemo::AvCore::stopVideo)
-        .def("configure_audio", &nemo::AvCore::configureAudio,
-             py::arg("sample_rate"), py::arg("channels"), py::arg("bits"), py::arg("codec") = "PCM")
-        .def("configure_audio_stream", &nemo::AvCore::configureAudioStream,
-             py::arg("stream_id"), py::arg("sample_rate"), py::arg("channels"), py::arg("bits"), py::arg("codec") = "PCM")
-        .def("start_audio", &nemo::AvCore::startAudio)
-        .def("stop_audio", &nemo::AvCore::stopAudio)
-        .def("configure_mic", &nemo::AvCore::configureMic, py::arg("sample_rate"), py::arg("channels"), py::arg("bits"))
-        .def("start_mic", &nemo::AvCore::startMicCapture)
-        .def("stop_mic", &nemo::AvCore::stopMicCapture)
-        .def("stop", &nemo::AvCore::stop)
-        // Fix #10: espone il Master Audio Clock a Python (read-only, lock-free).
-        .def_property_readonly("audio_clock_us", &nemo::AvCore::getAudioClockUs)
-        .def("set_audio_priority",
-             [](nemo::AvCore &self, py::object obj)
-             {
-                 if (obj.is_none()) { self.setAudioPriority({}); return; }
-                 if (!py::isinstance<py::sequence>(obj) || py::isinstance<py::str>(obj))
-                     throw std::runtime_error("set_audio_priority expects a list/tuple");
-                 py::sequence seq = obj;
-                 if (seq.size() == 0) { self.setAudioPriority({}); return; }
-                 py::object first = seq[0];
-                 if (py::isinstance<py::int_>(first))
-                 {
-                     std::vector<int> order;
-                     order.reserve(seq.size());
-                     for (auto item : seq) order.push_back(py::cast<int>(item));
-                     self.setAudioPriority(order);
-                     return;
-                 }
-                 std::vector<nemo::AudioGroup> groups;
-                 groups.reserve(seq.size());
-                 for (auto item : seq)
-                 {
-                     if (!py::isinstance<py::sequence>(item) || py::isinstance<py::str>(item))
-                         throw std::runtime_error("group entries must be tuples/lists");
-                     py::sequence tup = item;
-                     if (tup.size() < 2)
-                         throw std::runtime_error("group entry must be (channels, priority[, ducking])");
-                     py::sequence chs = tup[0];
-                     std::vector<int> channels;
-                     channels.reserve(chs.size());
-                     for (auto ch : chs) channels.push_back(py::cast<int>(ch));
-                     int priority = py::cast<int>(tup[1]);
-                     int ducking = 100, hold_ms = 100;
-                     std::vector<float> gains;
-                     if (tup.size() >= 3) ducking  = py::cast<int>(tup[2]);
-                     if (tup.size() >= 4) hold_ms  = py::cast<int>(tup[3]);
-                     if (tup.size() >= 5)
-                     {
-                         py::object gains_obj = tup[4];
-                         if (py::isinstance<py::sequence>(gains_obj) && !py::isinstance<py::str>(gains_obj))
-                         {
-                             py::sequence gseq = gains_obj;
-                             gains.reserve(gseq.size());
-                             for (auto gval : gseq)
-                             {
-                                 float gv = py::cast<float>(gval);
-                                 if (gv > 2.0f) gv = gv / 100.0f;
-                                 gains.push_back(gv);
-                             }
-                         }
-                     }
-                     nemo::AudioGroup g;
-                     g.channels = std::move(channels); g.priority = priority;
-                     g.ducking = ducking; g.hold_ms = hold_ms; g.channel_gains = std::move(gains);
-                     groups.push_back(std::move(g));
-                 }
-                 self.setAudioGroups(groups);
-             })
-        .def("set_policies", &nemo::AvCore::setPolicies)
-        .def("set_jitter_buffer_ms", &nemo::AvCore::setJitterBufferMs)
-        .def("set_max_queue_frames", &nemo::AvCore::setMaxQueueFrames)
-        .def("set_audio_frame_ms", &nemo::AvCore::setAudioFrameMs)
-        .def("set_max_av_lead_ms", &nemo::AvCore::setMaxAvLeadMs)
-        .def("ptr", &nemo::AvCore::ptr);
-}
