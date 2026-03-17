@@ -1,6 +1,10 @@
 import sys
 from pathlib import Path
 
+from app.core.py_logging import get_logger
+
+_logger = get_logger("tests.smoke")
+
 
 def _add_build_dir():
     root = Path(__file__).resolve().parents[1]
@@ -30,4 +34,4 @@ if __name__ == "__main__":
     _add_build_dir()
     test_imports()
     test_protobuf()
-    print("Smoke test OK")
+    _logger.info("Smoke test OK")

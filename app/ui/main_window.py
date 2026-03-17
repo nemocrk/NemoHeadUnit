@@ -17,6 +17,10 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QFont
 
+from app.core.py_logging import get_logger
+
+_logger = get_logger("app.ui.main_window")
+
 from .modules.base import UIModule
 from .modules.header import HeaderModule
 from .modules.footer import FooterModule
@@ -362,7 +366,7 @@ class MainWindow(QMainWindow):
         if self._external_action_handler is not None:
             self._external_action_handler(action_id)
         else:
-            print(f"[UI] Action: {action_id}")
+            _logger.debug("Action: %s", action_id)
 
     def set_action_handler(self, handler):
         self._external_action_handler = handler

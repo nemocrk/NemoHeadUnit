@@ -5,6 +5,8 @@ Provides a tabbed UI for editing application configuration and persists it on di
 
 from __future__ import annotations
 from enum import Enum
+import json
+from pathlib import Path
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -71,6 +73,59 @@ KNOWN_CHANNELS = {
     17: "WiFi Projection",
     18: "Radio",
 }
+
+
+def _load_logging_modules() -> list[str]:
+    """Load the canonical list of logging modules to expose in the UI."""
+
+    try:
+        path = Path(__file__).resolve().parent.parent / "logging_modules.json"
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, list):
+            return [str(x) for x in data if isinstance(x, str)]
+    except Exception:
+        pass
+
+    # Fallback list if JSON is not available
+    return [
+        "app",
+        "app.orchestrator",
+        "app.av_core",
+        "app.config",
+        "app.channel_manager",
+        "app.audio",
+        "app.bluetooth",
+        "app.generic_notification",
+        "app.media_browser",
+        "app.media_playback",
+        "app.media_source",
+        "app.navigation",
+        "app.phone_status",
+        "app.radio",
+        "app.sensor",
+        "app.video",
+        "app.input",
+        "app.wifi_projection",
+        "app.ui",
+        "app.ui.android_auto",
+        "app.ui.touch",
+        "app.ui.main_window",
+        "aasdk.SYSTEM",
+        "aasdk.TRANSPORT",
+        "aasdk.CHANNEL",
+        "aasdk.USB",
+        "aasdk.TCP",
+        "aasdk.MESSENGER",
+        "aasdk.PROTOCOL",
+        "aasdk.AUDIO",
+        "aasdk.VIDEO",
+        "aasdk.INPUT",
+        "aasdk.SENSOR",
+        "aasdk.BLUETOOTH",
+        "aasdk.WIFI",
+        "aasdk.GENERAL",
+    ]
 
 def _styled_label(text: str) -> QLabel:
     lbl = QLabel(text)
@@ -542,6 +597,38 @@ class ConfigModule(UIModule):
         form.addRow(_styled_label("AASDK log level"), aasdk_level_input)
         self._widgets["logging"]["aasdk_level"] = aasdk_level_input
 
+        # Per-module log levels
+        module_list = _load_logging_modules()
+        python_modules = [m for m in module_list if not m.startswith("aasdk.")]
+        aasdk_categories = [m[len("aasdk.") :] for m in module_list if m.startswith("aasdk.")]
+
+        module_box = QGroupBox("Module log levels")
+        module_layout = QFormLayout(module_box)
+        module_layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self._widgets["logging_python_modules"] = {}
+        for m in python_modules:
+            combo = _create_enum_combobox(LogLevel)
+            combo.setCurrentText(config.logging.core_module_levels.get(m, LogLevel.INFO))
+            combo.setObjectName("ConfigInput")
+            module_layout.addRow(_styled_label(m), combo)
+            self._widgets["logging_python_modules"][m] = combo
+
+        aasdk_box = QGroupBox("AASDK category log levels")
+        aasdk_layout = QFormLayout(aasdk_box)
+        aasdk_layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self._widgets["logging_aasdk_categories"] = {}
+        for cat in aasdk_categories:
+            combo = _create_enum_combobox(LogLevel)
+            combo.setCurrentText(config.logging.aasdk_category_levels.get(cat, LogLevel.INFO))
+            combo.setObjectName("ConfigInput")
+            aasdk_layout.addRow(_styled_label(cat), combo)
+            self._widgets["logging_aasdk_categories"][cat] = combo
+
+        form.addRow(module_box)
+        form.addRow(aasdk_box)
+
         return widget
 
     def save(self):
@@ -600,8 +687,26 @@ class ConfigModule(UIModule):
         # Logging
         log_widgets = self._widgets.get("logging", {})
         if log_widgets:
-            cfg.logging.core_level = log_widgets["core_level"].currentText()
-            cfg.logging.aasdk_level = log_widgets["aasdk_level"].currentText()
+            try:
+                cfg.logging.core_level = LogLevel(log_widgets["core_level"].currentText())
+            except Exception:
+                pass
+            try:
+                cfg.logging.aasdk_level = LogLevel(log_widgets["aasdk_level"].currentText())
+            except Exception:
+                pass
+
+        module_widgets = self._widgets.get("logging_python_modules", {})
+        if module_widgets:
+            cfg.logging.core_module_levels = {
+                m: LogLevel(combo.currentText()) for m, combo in module_widgets.items()
+            }
+
+        aasdk_widgets = self._widgets.get("logging_aasdk_categories", {})
+        if aasdk_widgets:
+            cfg.logging.aasdk_category_levels = {
+                cat: LogLevel(combo.currentText()) for cat, combo in aasdk_widgets.items()
+            }
 
         save_config()
 
@@ -661,3 +766,11 @@ class ConfigModule(UIModule):
         if log_widgets:
             log_widgets["core_level"].setCurrentText(cfg.logging.core_level)
             log_widgets["aasdk_level"].setCurrentText(cfg.logging.aasdk_level)
+
+        module_widgets = self._widgets.get("logging_python_modules", {})
+        for m, combo in module_widgets.items():
+            combo.setCurrentText(cfg.logging.core_module_levels.get(m, cfg.logging.core_level))
+
+        aasdk_widgets = self._widgets.get("logging_aasdk_categories", {})
+        for cat, combo in aasdk_widgets.items():
+            combo.setCurrentText(cfg.logging.aasdk_category_levels.get(cat, cfg.logging.aasdk_level))

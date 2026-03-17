@@ -15,6 +15,12 @@
 namespace nemo
 {
 
+    using PythonLogFn = void (*)(const std::string &component, int level, const std::string &message);
+    using PythonShouldLogFn = bool (*)(const std::string &component, int level);
+
+    inline PythonLogFn g_python_log_fn = nullptr;
+    inline PythonShouldLogFn g_python_should_log_fn = nullptr;
+
     enum class AppLogLevel
     {
         TRACE = 0,
@@ -40,6 +46,18 @@ namespace nemo
                  int line,
                  const std::string &message)
         {
+            // Allow Python-driven logging to short-circuit the C++ output.
+            if (g_python_log_fn)
+            {
+                const auto aasdk_level = toAasdkLevel(level);
+                if (g_python_should_log_fn && !g_python_should_log_fn(component, static_cast<int>(aasdk_level)))
+                {
+                    return;
+                }
+                g_python_log_fn(component, static_cast<int>(aasdk_level), message);
+                return;
+            }
+
             if (!shouldLog(level))
                 return;
 
@@ -73,6 +91,19 @@ namespace nemo
         bool shouldLog(AppLogLevel level) const
         {
             return static_cast<int>(level) >= static_cast<int>(min_level_);
+        }
+
+        bool shouldLogFor(AppLogLevel level, const char *component) const
+        {
+            if (!shouldLog(level))
+                return false;
+
+            if (g_python_should_log_fn)
+            {
+                return g_python_should_log_fn(component, static_cast<int>(toAasdkLevel(level)));
+            }
+
+            return true;
         }
 
     private:
@@ -206,8 +237,22 @@ namespace nemo
 
 } // namespace nemo
 
-#define APP_LOG_TRACE(component) ::nemo::LogStream(::nemo::AppLogLevel::TRACE, component, __FUNCTION__, __FILE__, __LINE__)
-#define APP_LOG_DEBUG(component) ::nemo::LogStream(::nemo::AppLogLevel::DEBUG, component, __FUNCTION__, __FILE__, __LINE__)
-#define APP_LOG_INFO(component) ::nemo::LogStream(::nemo::AppLogLevel::INFO, component, __FUNCTION__, __FILE__, __LINE__)
-#define APP_LOG_WARN(component) ::nemo::LogStream(::nemo::AppLogLevel::WARN, component, __FUNCTION__, __FILE__, __LINE__)
-#define APP_LOG_ERROR(component) ::nemo::LogStream(::nemo::AppLogLevel::ERROR, component, __FUNCTION__, __FILE__, __LINE__)
+#define APP_LOG_TRACE(component)                                                                                               \
+    for (bool _once = ::nemo::AppLogger::instance().shouldLogFor(::nemo::AppLogLevel::TRACE, component); _once; _once = false) \
+    ::nemo::LogStream(::nemo::AppLogLevel::TRACE, component, __FUNCTION__, __FILE__, __LINE__)
+
+#define APP_LOG_DEBUG(component)                                                                                               \
+    for (bool _once = ::nemo::AppLogger::instance().shouldLogFor(::nemo::AppLogLevel::DEBUG, component); _once; _once = false) \
+    ::nemo::LogStream(::nemo::AppLogLevel::DEBUG, component, __FUNCTION__, __FILE__, __LINE__)
+
+#define APP_LOG_INFO(component)                                                                                               \
+    for (bool _once = ::nemo::AppLogger::instance().shouldLogFor(::nemo::AppLogLevel::INFO, component); _once; _once = false) \
+    ::nemo::LogStream(::nemo::AppLogLevel::INFO, component, __FUNCTION__, __FILE__, __LINE__)
+
+#define APP_LOG_WARN(component)                                                                                               \
+    for (bool _once = ::nemo::AppLogger::instance().shouldLogFor(::nemo::AppLogLevel::WARN, component); _once; _once = false) \
+    ::nemo::LogStream(::nemo::AppLogLevel::WARN, component, __FUNCTION__, __FILE__, __LINE__)
+
+#define APP_LOG_ERROR(component)                                                                                               \
+    for (bool _once = ::nemo::AppLogger::instance().shouldLogFor(::nemo::AppLogLevel::ERROR, component); _once; _once = false) \
+    ::nemo::LogStream(::nemo::AppLogLevel::ERROR, component, __FUNCTION__, __FILE__, __LINE__)

@@ -23,9 +23,10 @@ DEFAULT_CONFIG_DIR = Path.home() / ".nemoheadunit"
 DEFAULT_CONFIG_PATH = DEFAULT_CONFIG_DIR / "config.json"
 
 try:
-    from app.core.py_logging import get_logger
+    from app.core.py_logging import apply_config, get_logger
     _logger = get_logger("app.config")
 except Exception:
+    apply_config = None  # type: ignore[assignment]
     _logger = None
 
 
@@ -200,6 +201,8 @@ class ServiceDiscoveryConfig:
 class LoggingConfig:
     core_level: LogLevel = LogLevel.INFO
     aasdk_level: LogLevel = LogLevel.INFO
+    core_module_levels: Dict[str, LogLevel] = field(default_factory=dict)
+    aasdk_category_levels: Dict[str, LogLevel] = field(default_factory=dict)
 
 
 @dataclass
@@ -233,6 +236,14 @@ class ConfigStore:
     def __init__(self, path: Optional[Path] = None):
         self.path = Path(path or DEFAULT_CONFIG_PATH)
         self.config = AppConfig()
+
+        # Apply defaults to logging system immediately (even if config file doesn't exist).
+        if apply_config is not None:
+            try:
+                apply_config(self.config.logging)
+            except Exception:
+                pass
+
         if _logger:
             _logger.info("ConfigStore path: %s", self.path)
         self.load()
@@ -250,6 +261,14 @@ class ConfigStore:
             with self.path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
             self.config = self._from_dict(data)
+
+            # Apply logging config early so it affects all modules.
+            if apply_config is not None:
+                try:
+                    apply_config(self.config.logging)
+                except Exception:
+                    pass
+
             if _logger:
                 _logger.info(
                     "ConfigStore loaded: audio_output.buffer_ms=%s max_queue_frames=%s mic_frame_ms=%s mic_batch_ms=%s",
@@ -258,6 +277,33 @@ class ConfigStore:
                     getattr(self.config.audio_output, "mic_frame_ms", None),
                     getattr(self.config.audio_output, "mic_batch_ms", None),
                 )
+
+            # Apply AASDK logging level if available.
+            try:
+                import aasdk_logging
+                from app.core.py_logging import log_from_cpp, should_log
+
+                if hasattr(aasdk_logging, "set_aasdk_log_level"):
+                    aasdk_logging.set_aasdk_log_level(str(self.config.logging.aasdk_level))
+                elif hasattr(aasdk_logging, "configure_aasdk_logging"):
+                    lvl = str(self.config.logging.aasdk_level)
+                    aasdk_logging.configure_aasdk_logging(lvl, lvl, lvl)
+
+                # Apply AASDK category-specific log levels if configured.
+                if hasattr(aasdk_logging, "set_aasdk_category_log_level"):
+                    for cat, lvl in self.config.logging.aasdk_category_levels.items():
+                        try:
+                            aasdk_logging.set_aasdk_category_log_level(cat, str(lvl))
+                        except Exception:
+                            pass
+
+                # Register Python callbacks so C++ logging is routed through Python.
+                if hasattr(aasdk_logging, "set_cpp_log_handler"):
+                    aasdk_logging.set_cpp_log_handler(log_from_cpp)
+                if hasattr(aasdk_logging, "set_cpp_should_log_handler"):
+                    aasdk_logging.set_cpp_should_log_handler(should_log)
+            except Exception:
+                pass
         except Exception:
             # Ignore failures and keep defaults, but do not crash.
             if _logger:
@@ -360,6 +406,16 @@ class ConfigStore:
             cfg.logging = LoggingConfig(
                 core_level=_safe_enum(LogLevel, log.get("core_level"), cfg.logging.core_level),
                 aasdk_level=_safe_enum(LogLevel, log.get("aasdk_level"), cfg.logging.aasdk_level),
+                core_module_levels={
+                    k: _safe_enum(LogLevel, v, cfg.logging.core_level)
+                    for k, v in (log.get("core_module_levels") or {}).items()
+                    if isinstance(k, str)
+                },
+                aasdk_category_levels={
+                    k: _safe_enum(LogLevel, v, cfg.logging.aasdk_level)
+                    for k, v in (log.get("aasdk_category_levels") or {}).items()
+                    if isinstance(k, str)
+                },
             )
         except Exception:
             pass
@@ -433,6 +489,12 @@ def normalize_enum_value(candidate: str, valid_values: list[str], default: str) 
 
 def save_config() -> None:
     config_store.save()
+    # Re-apply logging settings immediately so UI changes take effect.
+    try:
+        if apply_config is not None:
+            apply_config(get_config().logging)
+    except Exception:
+        pass
 
 
 def apply_audio_env() -> None:

@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 
 #include <aasdk/Common/ModernLogger.hpp>
+#include <app/core/logging.hpp>
 
 namespace py = pybind11;
 
@@ -31,6 +32,41 @@ namespace
             throw std::invalid_argument("Unknown log level string: " + s);
         }
         throw std::invalid_argument("level must be int or str");
+    }
+
+    py::object g_cpp_log_handler = py::none();
+    py::object g_cpp_should_log_handler = py::none();
+
+    void python_log_trampoline(const std::string &component, int level, const std::string &message)
+    {
+        py::gil_scoped_acquire gil;
+        try
+        {
+            if (!g_cpp_log_handler.is_none())
+            {
+                g_cpp_log_handler(component, level, message);
+            }
+        }
+        catch (...)
+        {
+            // Swallow exceptions to avoid crashing C++.
+        }
+    }
+
+    bool python_should_log_trampoline(const std::string &component, int level)
+    {
+        if (g_cpp_should_log_handler.is_none())
+            return true;
+
+        py::gil_scoped_acquire gil;
+        try
+        {
+            return py::cast<bool>(g_cpp_should_log_handler(component, level));
+        }
+        catch (...)
+        {
+            return true;
+        }
     }
 
     aasdk::common::LogCategory parse_category(const py::handle &category)
@@ -190,6 +226,46 @@ void init_logger_bindings(py::module_ &m)
         py::arg("usb_level") = py::str("DEBUG"),
         py::arg("tcp_level") = py::str("DEBUG"),
         "Shortcut: configura global + USB + TCP (valori default come la vecchia enable_aasdk_logging()).");
+
+    m.def(
+        "set_cpp_log_handler",
+        [](py::object handler)
+        {
+            if (handler.is_none())
+            {
+                g_cpp_log_handler = py::none();
+                nemo::g_python_log_fn = nullptr;
+                return;
+            }
+            if (!py::isinstance<py::function>(handler))
+            {
+                throw std::invalid_argument("handler must be callable");
+            }
+            g_cpp_log_handler = handler;
+            nemo::g_python_log_fn = python_log_trampoline;
+        },
+        py::arg("handler"),
+        "Register a Python callable to receive log messages from C++.");
+
+    m.def(
+        "set_cpp_should_log_handler",
+        [](py::object handler)
+        {
+            if (handler.is_none())
+            {
+                g_cpp_should_log_handler = py::none();
+                nemo::g_python_should_log_fn = nullptr;
+                return;
+            }
+            if (!py::isinstance<py::function>(handler))
+            {
+                throw std::invalid_argument("handler must be callable");
+            }
+            g_cpp_should_log_handler = handler;
+            nemo::g_python_should_log_fn = python_should_log_trampoline;
+        },
+        py::arg("handler"),
+        "Register a Python callable to decide whether a C++ log should be emitted (should return bool). It is called with (component, level).");
 }
 
 PYBIND11_MODULE(aasdk_logging, m)
