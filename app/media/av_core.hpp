@@ -204,6 +204,9 @@ namespace nemo
         std::atomic<bool> running_{false};
     };
 
+    // Fix #4: GstAudioPipeline::push() e' ora lock-free sul path critico.
+    // caps_mutex_ e' usato SOLO per applyCaps (path raro, solo quando caps_dirty_=true)
+    // e per stop(). La push GStreamer avviene senza alcun lock.
     class GstAudioPipeline
     {
     public:
@@ -288,7 +291,10 @@ namespace nemo
             appsrc_ = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(pipeline_), "src"));
             if (!appsrc_)
                 throw std::runtime_error("[AvCore] audio appsrc not found");
-            applyCapsLocked();
+            {
+                std::lock_guard<std::mutex> lock(caps_mutex_);
+                applyCapsLocked();
+            }
             g_object_set(G_OBJECT(appsrc_), "block", FALSE, "max-bytes", 0, NULL);
 
             GstStateChangeReturn ret = gst_element_set_state(pipeline_, GST_STATE_PLAYING);
@@ -302,20 +308,24 @@ namespace nemo
             running_.store(true);
         }
 
+        // Fix #4: push() lock-free sul path critico.
+        // caps_dirty_ e' controllato con exchange; solo se dirty acquisisce caps_mutex_
+        // (evento raro: cambio codec_data AAC). La gst_app_src_push_buffer e' sempre
+        // senza lock — GStreamer garantisce thread-safety su appsrc push concorrente.
         void push(uint64_t ts_us, const uint8_t *data, std::size_t size)
         {
             if (!running_.load() || !appsrc_)
                 return;
-            std::lock_guard<std::mutex> lock(mutex_);
-            if (caps_dirty_.exchange(false))
-            {
-                applyCapsLocked();
-                APP_LOG_INFO("app.av_core.audio") << "updated appsrc caps=" << buildCapsString();
-            }
             if (size == 0)
             {
                 APP_LOG_WARN("app.av_core.audio") << "push called with size=0";
                 return;
+            }
+            if (caps_dirty_.exchange(false))
+            {
+                std::lock_guard<std::mutex> lock(caps_mutex_);
+                applyCapsLocked();
+                APP_LOG_INFO("app.av_core.audio") << "updated appsrc caps=" << buildCapsString();
             }
             GstBuffer *buf = gst_buffer_new_memdup(data, static_cast<gsize>(size));
             GST_BUFFER_PTS(buf) = static_cast<GstClockTime>(ts_us) * GST_USECOND;
@@ -326,7 +336,7 @@ namespace nemo
         void stop()
         {
             running_.store(false);
-            std::lock_guard<std::mutex> lock(mutex_);
+            std::lock_guard<std::mutex> lock(caps_mutex_);
             if (appsrc_)
             {
                 gst_app_src_end_of_stream(appsrc_);
@@ -345,7 +355,7 @@ namespace nemo
 
         void setCodecData(const std::vector<uint8_t> &codec_data)
         {
-            std::lock_guard<std::mutex> lock(mutex_);
+            std::lock_guard<std::mutex> lock(caps_mutex_);
             codec_data_ = codec_data;
             caps_dirty_.store(true);
         }
@@ -428,7 +438,9 @@ namespace nemo
         GstElement *pipeline_ = nullptr;
         GstAppSrc *appsrc_ = nullptr;
         std::atomic<bool> running_{false};
-        std::mutex mutex_;
+        // Fix #4: caps_mutex_ protegge SOLO le operazioni sui caps (raro).
+        // Il path di push() non acquisisce alcun lock.
+        std::mutex caps_mutex_;
         int sample_rate_{0}, channels_{0}, bits_{0};
         std::string codec_norm_;
         std::string caps_base_;
@@ -658,6 +670,7 @@ namespace nemo
                 last_audio_ts_.store(0);
                 last_audio_ts_per_stream_.clear();
             }
+            audio_clock_us_.store(-1);
             audio_running_.store(true);
             audio_thread_ = std::thread([this](){ audioLoop(); });
         }
@@ -670,6 +683,7 @@ namespace nemo
             audio_pipeline_.stop();
             clearAudioQueues();
             audio_codec_data_.clear();
+            audio_clock_us_.store(-1);
             {
                 std::lock_guard<std::mutex> lock(audio_dump_mutex_);
                 closeAudioDumpFilesLocked();
@@ -710,6 +724,10 @@ namespace nemo
         void setMicActive(bool active) { mic_active_.store(active); }
         bool isMicActive() const { return mic_active_.load(); }
         void stop() { stopVideo(); stopAudio(); stopMicCapture(); }
+
+        // Fix #10: restituisce il timestamp audio (us) dell'ultimo chunk
+        // effettivamente inviato alla pipeline GStreamer. -1 se non ancora avviato.
+        int64_t getAudioClockUs() const { return audio_clock_us_.load(); }
 
         void pushVideo(uint64_t ts_us, const uint8_t *data, std::size_t size)
         {
@@ -1017,9 +1035,11 @@ namespace nemo
 
         void clearAudioQueuesLocked() { audio_queues_.clear(); }
 
+        // Fix #3: videoLoop() usa audio_clock_us_ (PTS reale inviato alla pipeline)
+        // invece del contatore frame-count come gate di sincronizzazione A/V.
+        // Se audio non e' ancora avviato (audio_clock_us_==-1) passa senza throttle.
         void videoLoop()
         {
-            const int min_frames = std::max(1, cfg_.jitter_buffer_ms / 33);
             while (video_running_.load())
             {
                 AvFrame frame;
@@ -1028,15 +1048,26 @@ namespace nemo
                     video_cv_.wait(lock, [this]()
                                    { return !video_queue_.empty() || !video_running_.load(); });
                     if (!video_running_.load()) break;
-                    if (static_cast<int>(video_queue_.size()) < min_frames) continue;
                     frame = std::move(video_queue_.front());
                     video_queue_.pop_front();
                 }
                 if (audio_running_.load())
                 {
-                    uint64_t audio_ts = last_audio_ts_.load();
-                    if (audio_ts && frame.ts_us > audio_ts + static_cast<uint64_t>(cfg_.max_av_lead_ms) * 1000)
-                        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                    const int64_t audio_clock = audio_clock_us_.load();
+                    if (audio_clock >= 0)
+                    {
+                        const int64_t lead_us = static_cast<int64_t>(frame.ts_us)
+                                                - audio_clock;
+                        const int64_t max_lead_us = static_cast<int64_t>(cfg_.max_av_lead_ms) * 1000;
+                        if (lead_us > max_lead_us)
+                        {
+                            // Video in anticipo sull'audio: throttle proporzionale, max 8ms.
+                            const int sleep_ms = static_cast<int>(
+                                std::min<int64_t>((lead_us - max_lead_us) / 1000, 8));
+                            if (sleep_ms > 0)
+                                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms));
+                        }
+                    }
                 }
                 video_pipeline_.push(frame.ts_us, frame.data.data(), frame.data.size());
             }
@@ -1066,6 +1097,13 @@ namespace nemo
             return -1;
         }
 
+        // Aggiorna audio_clock_us_ con il ts appena inviato alla pipeline.
+        // Fix #10: chiamato da audioLoop() dopo ogni push alla pipeline.
+        void updateAudioClock(uint64_t ts_us)
+        {
+            audio_clock_us_.store(static_cast<int64_t>(ts_us));
+        }
+
         void audioLoop()
         {
             const bool pcm_output = isPcmCodec(audio_codec_);
@@ -1076,16 +1114,14 @@ namespace nemo
                 int stream_id = -1;
                 AvFrame frame;
                 bool has_frame = false;
-                std::vector<int16_t> mix;
+                // Fix #2: mix e frames_to_mix estratti dentro il lock, mix PCM calcolato fuori.
+                std::vector<std::pair<std::vector<int16_t>, float>> frames_to_mix;
                 bool mixed = false;
                 uint64_t now_ms = nowMs();
 
                 // Bug D fix: info_streams e prebuffer_info costruite FUORI dal lock.
-                // Le leggiamo come snapshot atomici (size dei queue) dentro il lock,
-                // poi costruiamo le stringhe dopo aver rilasciato il mutex.
                 bool do_info_log = false;
                 {
-                    // Sezione separata per decidere se loggare (accesso atomico a last_info_ms_)
                     uint64_t expected = last_info_ms_.load();
                     if (now_ms >= expected + 1000)
                     {
@@ -1096,7 +1132,6 @@ namespace nemo
 
                 bool mic_blocked = false;
 
-                // Snapshot degli stream sizes da costruire fuori dal lock critico.
                 struct StreamSnapshot { int id; std::size_t size; };
                 std::vector<StreamSnapshot> stream_snapshot;
                 int snap_prebuf_stream_id = -1;
@@ -1115,7 +1150,6 @@ namespace nemo
                         mic_blocked = true;
                     }
 
-                    // Snapshot leggero (solo size) per costruire le stringhe di log dopo il lock.
                     if (do_info_log)
                     {
                         for (auto &kv : audio_queues_)
@@ -1158,26 +1192,10 @@ namespace nemo
                             int top_idx = pickTopGroupLocked(now_ms);
                             if (top_idx >= 0)
                             {
-                                mix.resize(frame_bytes / 2, 0);
-                                bool top_mixed = mixGroupLocked(top_idx, mix, 1.0f);
-                                mixed = top_mixed;
-                                if (top_mixed)
-                                {
-                                    active_group_ = top_idx;
-                                    active_until_ms_ = now_ms + static_cast<uint64_t>(audio_groups_[top_idx].hold_ms);
-                                }
-                                int top_priority = audio_groups_[top_idx].priority;
-                                for (std::size_t i = 0; i < audio_groups_.size(); ++i)
-                                {
-                                    if (static_cast<int>(i) == top_idx) continue;
-                                    if (!groupHasDataLocked(audio_groups_[i])) continue;
-                                    float gain = (audio_groups_[i].priority < top_priority)
-                                        ? static_cast<float>(audio_groups_[i].ducking) / 100.0f
-                                        : 1.0f;
-                                    mixGroupLocked(static_cast<int>(i), mix, gain);
-                                    mixed = true;
-                                }
-                                has_frame = mixed;
+                                // Fix #2: drainGroupFrames() estrae i buffer dai queue dentro
+                                // il lock. Il mix PCM e' calcolato fuori dal lock (sotto).
+                                frames_to_mix = drainGroupFrames(top_idx, audio_groups_[top_idx].priority);
+                                has_frame = !frames_to_mix.empty();
                             }
                         }
                         else
@@ -1242,10 +1260,16 @@ namespace nemo
                 {
                     if (pcm_output && frame_bytes > 0)
                     {
+                        uint64_t ts;
+                        {
+                            std::lock_guard<std::mutex> lock(audio_mutex_);
+                            ts = nextAudioTimestampLocked(stream_id, 0);
+                        }
                         AvFrame silence;
-                        silence.ts_us = nextAudioTimestampLocked(stream_id, 0);
+                        silence.ts_us = ts;
                         silence.data.assign(frame_bytes, 0);
                         audio_pipeline_.push(silence.ts_us, silence.data.data(), silence.data.size());
+                        updateAudioClock(silence.ts_us);
                     }
                     continue;
                 }
@@ -1258,25 +1282,34 @@ namespace nemo
                         if (uc % 100 == 0)
                         {
                             size_t total_items = 0;
-                            for (auto &kv : audio_queues_) total_items += kv.second.size();
+                            {
+                                std::lock_guard<std::mutex> lock(audio_mutex_);
+                                for (auto &kv : audio_queues_) total_items += kv.second.size();
+                            }
                             APP_LOG_WARN("app.av_core.audio")
                                 << "underrun: injecting silence (frame_bytes=" << frame_bytes
                                 << ") total_queued=" << total_items
                                 << " stream_id=" << stream_id;
                         }
-                        AvFrame silence;
+                        uint64_t ts;
                         {
                             std::lock_guard<std::mutex> lock(audio_mutex_);
-                            silence.ts_us = nextAudioTimestampLocked(stream_id, 0);
+                            ts = nextAudioTimestampLocked(stream_id, 0);
                         }
+                        AvFrame silence;
+                        silence.ts_us = ts;
                         silence.data.assign(frame_bytes, 0);
                         audio_pipeline_.push(silence.ts_us, silence.data.data(), silence.data.size());
+                        updateAudioClock(silence.ts_us);
                     }
                     const int nfc = ++no_frame_count_;
                     if (nfc % 200 == 0)
                     {
                         size_t total_items = 0;
-                        for (auto &kv : audio_queues_) total_items += kv.second.size();
+                        {
+                            std::lock_guard<std::mutex> lock(audio_mutex_);
+                            for (auto &kv : audio_queues_) total_items += kv.second.size();
+                        }
                         APP_LOG_DEBUG("app.av_core.audio")
                             << "no frame available; total_queued=" << total_items
                             << " pcm_output=" << (pcm_output ? "yes" : "no");
@@ -1304,16 +1337,33 @@ namespace nemo
                             << "push encoded stream=" << stream_id
                             << " ts=" << ts << " size=" << frame.data.size();
                     audio_pipeline_.push(ts, frame.data.data(), frame.data.size());
+                    updateAudioClock(ts);
                     continue;
                 }
 
-                if (mixed)
+                // Fix #2: se ci sono gruppi, esegui il mix PCM FUORI dal lock.
+                if (!frames_to_mix.empty())
                 {
-                    AvFrame out;
+                    std::vector<int16_t> mix(frame_bytes / 2, 0);
+                    for (auto &[samples, gain] : frames_to_mix)
+                    {
+                        std::size_t n = std::min(mix.size(), samples.size());
+                        for (std::size_t s = 0; s < n; ++s)
+                        {
+                            int32_t v = mix[s] + static_cast<int32_t>(
+                                static_cast<float>(samples[s]) * gain);
+                            mix[s] = static_cast<int16_t>(std::clamp(v, -32768, 32767));
+                        }
+                    }
+                    mixed = true;
+
+                    uint64_t ts;
                     {
                         std::lock_guard<std::mutex> lock(audio_mutex_);
-                        out.ts_us = nextAudioTimestampLocked(-1, 0);
+                        ts = nextAudioTimestampLocked(-1, 0);
                     }
+                    AvFrame out;
+                    out.ts_us = ts;
                     out.data.resize(mix.size() * sizeof(int16_t));
                     std::memcpy(out.data.data(), mix.data(), out.data.size());
                     const int moc = ++mixed_out_count_;
@@ -1321,8 +1371,9 @@ namespace nemo
                         APP_LOG_DEBUG("app.av_core.audio")
                             << "push mixed ts=" << out.ts_us << " size=" << out.data.size();
                     audio_pipeline_.push(out.ts_us, out.data.data(), out.data.size());
+                    updateAudioClock(out.ts_us);
                 }
-                else
+                else if (!mixed)
                 {
                     uint64_t ts;
                     {
@@ -1335,6 +1386,7 @@ namespace nemo
                             << "push pcm stream=" << stream_id
                             << " ts=" << ts << " size=" << frame.data.size();
                     audio_pipeline_.push(ts, frame.data.data(), frame.data.size());
+                    updateAudioClock(ts);
                 }
             }
         }
@@ -1449,36 +1501,42 @@ namespace nemo
             return top_idx;
         }
 
-        bool mixGroupLocked(int idx, std::vector<int16_t> &mix, float gain)
+        // Fix #2: drainGroupFrames() estrae i frame dai queue di tutti i gruppi
+        // DENTRO audio_mutex_ (gia' acquisito dal chiamante audioLoop),
+        // restituisce coppie (campioni PCM, gain) per il mix fuori lock.
+        std::vector<std::pair<std::vector<int16_t>, float>>
+        drainGroupFrames(int top_idx, int top_priority)
         {
-            if (idx < 0 || idx >= static_cast<int>(audio_groups_.size())) return false;
-            auto &g = audio_groups_[idx];
-            bool got_any = false;
-            for (std::size_t i = 0; i < g.channels.size(); ++i)
+            std::vector<std::pair<std::vector<int16_t>, float>> result;
+            for (std::size_t gi = 0; gi < audio_groups_.size(); ++gi)
             {
-                int ch = g.channels[i];
-                auto it = audio_queues_.find(ch);
-                if (it == audio_queues_.end() || it->second.empty()) continue;
-                AvFrame frame_m = std::move(it->second.front());
-                it->second.pop_front();
-                got_any = true;
-                float ch_gain = gain;
-                if (!g.channel_gains.empty())
-                    ch_gain *= g.channel_gains[std::min(i, g.channel_gains.size() - 1)];
-                const int16_t *src = reinterpret_cast<const int16_t *>(frame_m.data.data());
-                std::size_t samples = std::min(mix.size(), frame_m.data.size() / sizeof(int16_t));
-                for (std::size_t s = 0; s < samples; ++s)
+                auto &g = audio_groups_[gi];
+                float gain = (static_cast<int>(gi) == top_idx)
+                    ? 1.0f
+                    : ((g.priority < top_priority)
+                        ? static_cast<float>(g.ducking) / 100.0f
+                        : 1.0f);
+                for (std::size_t ci = 0; ci < g.channels.size(); ++ci)
                 {
-                    int32_t v = mix[s] + static_cast<int32_t>(static_cast<float>(src[s]) * ch_gain);
-                    mix[s] = static_cast<int16_t>(std::clamp(v, -32768, 32767));
+                    int ch = g.channels[ci];
+                    auto it = audio_queues_.find(ch);
+                    if (it == audio_queues_.end() || it->second.empty()) continue;
+                    AvFrame fm = std::move(it->second.front());
+                    it->second.pop_front();
+                    float ch_gain = gain;
+                    if (!g.channel_gains.empty())
+                        ch_gain *= g.channel_gains[std::min(ci, g.channel_gains.size() - 1)];
+                    const std::size_t n_samples = fm.data.size() / sizeof(int16_t);
+                    std::vector<int16_t> samples(n_samples);
+                    std::memcpy(samples.data(), fm.data.data(), fm.data.size());
+                    result.emplace_back(std::move(samples), ch_gain);
                 }
             }
-            return got_any;
+            return result;
         }
 
         // Bug B fix: rinominato nextAudioTimestampLocked() per rendere esplicito
-        // che DEVE essere chiamato con audio_mutex_ già acquisito.
-        // Tutti i call-site in audioLoop() ora wrappano con lock_guard.
+        // che DEVE essere chiamato con audio_mutex_ gia' acquisito.
         uint64_t nextAudioTimestampLocked(int stream_id, uint64_t preferred_ts)
         {
             uint64_t last = (stream_id >= 0)
@@ -1562,6 +1620,11 @@ namespace nemo
         std::atomic<uint64_t> last_audio_ts_{0};
         std::unordered_map<int, uint64_t> last_audio_ts_per_stream_;
 
+        // Fix #10: Master Audio Clock - PTS (us) dell'ultimo chunk inviato
+        // alla pipeline GStreamer. -1 = pipeline non ancora avviata.
+        // Usato da videoLoop() per il gate A/V sync PTS-based (Fix #3).
+        std::atomic<int64_t> audio_clock_us_{-1};
+
         // Bug A fix: tutti i counter 'static int' dentro i metodi sono stati promossi
         // a membro std::atomic<int> per eliminare il data race tra push (thread AA-SDK)
         // e audioLoop (thread dedicato).
@@ -1629,6 +1692,8 @@ inline void init_av_core_binding(pybind11::module_ &m)
         .def("start_mic", &nemo::AvCore::startMicCapture)
         .def("stop_mic", &nemo::AvCore::stopMicCapture)
         .def("stop", &nemo::AvCore::stop)
+        // Fix #10: espone il Master Audio Clock a Python (read-only, lock-free).
+        .def_property_readonly("audio_clock_us", &nemo::AvCore::getAudioClockUs)
         .def("set_audio_priority",
              [](nemo::AvCore &self, py::object obj)
              {
