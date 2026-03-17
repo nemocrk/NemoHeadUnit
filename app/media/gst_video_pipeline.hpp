@@ -20,7 +20,7 @@ namespace nemo
     /**
      * @brief Pipeline GStreamer per la decodifica e la presentazione video H.264.
      *
-     * Ciclo di vita: init() → push() (N volte) → stop().
+     * Ciclo di vita: init() -> push() (N volte) -> stop().
      * Thread-safety: push() e' safe da un singolo producer thread.
      * Le variabili d'ambiente riconosciute sono:
      *   - NEMO_VIDEO_DECODER  es. "avdec_h264 max-threads=4"
@@ -117,6 +117,10 @@ namespace nemo
             if (pipeline_)
             {
                 gst_element_set_state(pipeline_, GST_STATE_NULL);
+                // Fix #9: attendiamo il completamento della transizione a NULL
+                // prima di fare unref, per evitare suono/video residuo e crash
+                // su re-init immediato (es. cambio risoluzione).
+                gst_element_get_state(pipeline_, nullptr, nullptr, 3 * GST_SECOND);
                 gst_object_unref(pipeline_);
                 pipeline_ = nullptr;
             }
