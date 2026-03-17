@@ -1,40 +1,13 @@
-# NemoHeadUnit
+# POC: strict Python-driven handler
 
-NemoHeadUnit è un emulatore open-source di HeadUnit per Android Auto, costruito da zero utilizzando la libreria `aasdk`. Questo progetto mira a fornire un'interfaccia moderna e reattiva per interfacciarsi con i dispositivi Android tramite Android Auto (cablato e wireless).
+This POC is an isolated sketch (not wired into build) showing the intended flow:
 
-## Scopo del Progetto
-L'obiettivo è creare una piattaforma flessibile ed estensibile per emulare l'infotainment di un'automobile. Potrà essere eseguito su vari hardware (es. Raspberry Pi, PC Linux/Windows) fornendo un supporto completo per la proiezione video, la gestione dell'audio e gli input touchscreen/rotary.
+1. `AudioEventHandler` is a thin C++ pass-through.
+2. Python receives `(payload_bytes, channel, strand)` and performs all logic.
+3. Python uses C++ protobuf objects (via `GetProtobuf`) and channel methods.
 
-## Stack Tecnologico
-- **Core Library:** `aasdk` (C++, Boost, Protocol Buffers, OpenSSL, libusb)
-- **Linguaggio (Core):** C++ per l'interazione diretta con aasdk.
-- **Interfaccia Grafica:** Python (tramite binding pybind11). *Nessun flusso media transita sul GIL di Python.*
-- **Comunicazione USB/TCP:** AOAP (Android Open Accessory Protocol), TCP/IP per la connessione wireless.
+Missing pieces to wire it in:
+1. Bindings for `AudioChannel` and `StrandDispatcher`.
+2. A pybind module that exposes `GetProtobuf` + channel methods.
+3. Hooking this POC handler into `SessionManager` instead of the current one.
 
-## Requisiti di Sistema e Compilazione (Fase 1)
-Per compilare la parte C++ e il binding Python, assicurati di avere installati:
-- CMake (>= 3.14) e un compilatore C++17
-- Python 3 e `pybind11`
-- `Boost` (Asio, System)
-- `protobuf-compiler` e `libprotobuf-dev`
-- `libssl-dev`
-- `libusb-1.0-0-dev`
-
-### Compilazione:
-```bash
-mkdir build && cd build
-cmake ..
-make -j$(nproc)
-```
-
-### Test Modulo:
-Dopo la compilazione, esegui lo script di test Python per verificare il modulo:
-```bash
-python3 python/test.py
-```
-
-## Qualità del Codice e Test
-Per garantire l'affidabilità del sistema:
-- **Unit Testing:** Copertura minima del 70% per i moduli core (es. parsing pacchetti, gestione stato connessione).
-- **Integrazione:** Test automatizzati per il flusso di handshake USB e TCP.
-- **Code Coverage:** Richiesto l'uso di tool di coverage nel CI/CD per assicurare che le nuove PR mantengano o aumentino il livello minimo di test.

@@ -46,7 +46,7 @@
   "git.useCommitInputAsStashMessage": true,
   "python-envs.pythonProjects": [
     {
-      "path": "python",
+      "path": "old_version/python",
       "envManager": "ms-python.python:conda",
       "packageManager": "ms-python.python:conda"
     }
